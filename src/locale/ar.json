@@ -49,6 +49,16 @@
   "about": {},
   "policy": {},
   "terms": {},
+  "validation": {
+    "email": {
+      "required": "البريد الإلكتروني مطلوب.",
+      "invalid": "يرجى إدخال بريد إلكتروني صالح."
+    },
+    "password": {
+      "required": "كلمة المرور مطلوبة."
+    },
+    "fill-all-fields": "يرجى ملء جميع الحقول المطلوبة."
+  },
   "register": {
     "username": "إسم المستخدم",
     "name": "الإسم",
@@ -65,9 +75,13 @@
     "login": "تسجيل الدخول",
     "platform-language": "لغة المنصة",
     "change-password": "تغيير كلمة المرور",
-    "save": "حفظ"
+    "save": "حفظ",
+    "logging_in": "جارٍ تسجيل الدخول...",
+    "login_success": "تم تسجيل الدخول بنجاح!",
+    "login_failed": "فشل تسجيل الدخول. حاول مرة أخرى."
   },
   "sidebar": {
+    "analytics": "الإحصائيات",
     "profile": "الملف الشخصي",
     "categories": "الأصناف",
     "contact-list": "جهات الإتصال",
@@ -79,13 +93,65 @@
     "settings": "الإعدادات",
     "customers": "العملاء",
     "admin-invitations": "سجل الدعوات",
-    "manage-invitations-permissions": "إدارة الأذونات"
+    "manage-invitations-permissions": "إدارة الأذونات",
+    "ads": "الإعلانات",
+    "transactions": "المعاملات",
+    "users": "المستخدمون",
+    "banners": "اللافتات"
   },
   "dashboard": {
+    "actions": {
+      "edit": "تعديل",
+      "delete": "حذف"
+    },
+    "analytics": {
+      "title": "الإحصائيات",
+      "totalUsers": "إجمالي المستخدمين",
+      "totalSessions": "إجمالي الجلسات",
+      "conversionRate": "معدل التحويل",
+      "chartPlaceholder": "سيتم عرض الرسم البياني هنا"
+    },
+    "banners": {
+      "title": "اللافتات"
+    },
+    "ads": {
+      "title": "الإعلانات"
+    },
+    "transactions": {
+      "title": "المعاملات"
+    },
+    "users": {
+      "title": "المستخدمون"
+    },
     "categories": {
       "main_category": "الصنف الرئيسي",
       "no-data": "لا توجد أصناف حاليا. إبدأ بإنشاء أول صنف.",
-      "create-category": "أنشأ صنف"
+      "create-category": "أنشأ صنف",
+      "edit-category": "تعديل الصنف",
+      "form": {
+        "add_category": "إضافة صنف",
+        "adding_category": "جاري الإضافة...",
+        "no_parent": "بدون صنف رئيسي",
+        "name": "الاسم",
+        "name_en": "الاسم (بالإنجليزية)",
+        "name_required": "الاسم مطلوب",
+        "name_en_required": "الاسم بالإنجليزية مطلوب",
+        "parent_category": "الصنف الرئيسي",
+        "select_parent": "اختر الصنف الرئيسي",
+        "image": "الصورة",
+        "choose_image": "اختر صورة",
+        "image_required": "الصورة مطلوبة",
+        "image_type_error": "يُسمح فقط بملفات الصور",
+        "category_added": "تمت إضافة الصنف بنجاح",
+        "category_add_failed": "فشل في إضافة الصنف",
+        "category_updated": "تم تحديث الصنف بنجاح",
+        "category_update_failed": "فشل في تحديث الصنف",
+        "fetch_failed": "فشل في جلب بيانات الصنف",
+        "updating_category": "جاري تحديث الصنف...",
+        "update_category": "تحديث الصنف",
+        "deleted_successfully": "تم حذف الصنف بنجاح.",
+        "delete_failed": "فشل حذف الصنف."
+      }
     },
     "invitations": {
       "code": "رقم الدعوة",
@@ -117,13 +183,28 @@
     "create-invitation": "إنشاء دعوة جديدة"
   },
   "generic": {
+    "403-title": "غير مصرح",
+    "403-message": "ليس لديك صلاحية للوصول إلى هذه الصفحة.",
     "404-message": "Ooops! ... الصفحة غير موجودة",
     "back-home": "الرجوع للصفحة للرئيسية",
     "addtocart": "إضافة إلى السلة",
     "discount": "تخفيض",
     "success": "نجاح",
     "error": "خطأ",
-    "checkout": "صفحة الدفع"
+    "checkout": "صفحة الدفع",
+    "confirm": "تأكيد",
+    "yes": "نعم",
+    "no": "لا",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "save": "حفظ",
+    "close": "إغلاق",
+    "actions": "الإجراءات",
+    "loading": "جاري التحميل...",
+    "submit": "إرسال",
+    "delete_confirmation": "هل أنت متأكد أنك تريد حذف هذا العنصر؟",
+    "required_field": "هذا الحقل مطلوب."
   },
   "products": {
     "similar-products": "منتجات مشابهة",

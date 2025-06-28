@@ -18,7 +18,7 @@
       <div>
         <div class="flex items-center">
           <!-- profile icon -->
-          <app-profile-icon></app-profile-icon>
+          <app-profile-icon v-if="loggedInUser"></app-profile-icon>
         </div>
       </div>
     </div>
@@ -26,16 +26,16 @@
 </template>
 
 <script setup>
-  import AppProfileIcon from "../components/AppProfileIcon.vue";
-  import AppCartIcon from "../components/AppCartIcon.vue";
-  import { computed, ref } from "vue";
-  import { RouterLink } from "vue-router";
-  import { useProductsStore } from "../store/product";
+import AppProfileIcon from "../components/AppProfileIcon.vue";
+import { computed } from "vue";
+import { RouterLink } from "vue-router";
+import { useAuthStore } from "../store/auth";
 
-  const productsStore = useProductsStore();
-  const cartCount = computed(() => productsStore?.getCartProducts?.length);
-  // const cartCount = computed(() => productsStore?.getCartProducts?.reduce((acc, item) => acc + item.quantity, 0) || 0);
+const authStore = useAuthStore();
+const loggedInUser = computed(() => authStore?.getUser);
+
 </script>
+
 
 <style>
   #header-main .p-menubar-button {

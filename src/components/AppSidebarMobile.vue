@@ -22,7 +22,7 @@
         <template #item="{ item }">
           <router-link
             class="text-white hover:text-slate-900 focus:text-slate-900"
-            v-if="item.link"
+            v-if="item.link && hasPermission(loggedInUser, item?.permissions)"
             :to="item.link"
             :active-class="`active`"
             @click="closeSidebar"
@@ -39,15 +39,19 @@
 </template>
 
 <script setup>
-  import { ref, watch } from "vue";
+  import { computed, ref, watch } from "vue";
   import { RouterLink } from "vue-router";
   import { useRouter } from "vue-router";
   import { useI18n } from "vue-i18n";
   import { useGeneralStore } from "../store/general";
   import { sidebarItems } from "../utils/constants";
-
+  import { useAuthStore } from "../store/auth";
+  import { hasPermission } from "../utils/permissions";
+  
+  
   const t = useI18n();
   const generalStore = useGeneralStore();
+  const authStore = useAuthStore()
 
   const visible = ref(generalStore?.getSidebarVisible);
 
@@ -67,6 +71,9 @@
   const closeSidebar = () => {
     generalStore?.setSidebarVisible(false);
   };
+
+  const loggedInUser = computed(() => authStore?.getUser);
+
 
   const router = useRouter();
   const goToRoute = (route) => {

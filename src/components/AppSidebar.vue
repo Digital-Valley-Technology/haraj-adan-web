@@ -16,7 +16,7 @@
       <template #item="{ item }">
         <router-link
           class="text-white hover:text-slate-900 focus:text-slate-900"
-          v-if="item.link"
+          v-if="item.link && hasPermission(loggedInUser, item?.permissions)"
           :to="item.link"
           :active-class="`active`"
         >
@@ -36,12 +36,17 @@
   import { useRouter } from "vue-router";
   import { sidebarItems } from "../utils/constants";
   import { useGeneralStore } from "../store/general";
+  import { useAuthStore } from "../store/auth";
+  import { hasPermission } from "../utils/permissions";
 
   const generalStore = useGeneralStore();
+  const authStore = useAuthStore()
 
   const desktopSidebarVisible = computed(
     () => generalStore?.getDesktopSidebarVisible
   );
+
+const loggedInUser = computed(() => authStore?.getUser);
 
   const router = useRouter();
   const goToRoute = (route) => {

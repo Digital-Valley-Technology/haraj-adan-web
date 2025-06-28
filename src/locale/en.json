@@ -49,6 +49,16 @@
   "about": {},
   "policy": {},
   "terms": {},
+  "validation": {
+    "email": {
+      "required": "Email is required.",
+      "invalid": "Email must be valid."
+    },
+    "password": {
+      "required": "Password is required."
+    },
+    "fill-all-fields": "Please fill in all required fields."
+  },
   "register": {
     "username": "Username",
     "name": "Name",
@@ -65,9 +75,13 @@
     "login": "Login",
     "platform-language": "Platform language",
     "change-password": "Change password",
-    "save": "Save"
+    "save": "Save",
+    "logging_in": "Logging in...",
+    "login_success": "Login successful!",
+    "login_failed": "Login failed. Please try again."
   },
   "sidebar": {
+    "analytics": "Analytics",
     "profile": "Profile",
     "categories": "Categories",
     "contact-list": "Contact List",
@@ -79,13 +93,65 @@
     "settings": "Settings",
     "customers": "Customers",
     "admin-invitations": "Invitations List",
-    "manage-invitations-permissions": "Manage Invitations Permissions"
+    "manage-invitations-permissions": "Manage Invitations Permissions",
+    "ads": "Advertisements",
+    "transactions": "Transactions",
+    "users": "Users",
+    "banners": "Banners"
   },
   "dashboard": {
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "analytics": {
+      "title": "Analytics Dashboard",
+      "totalUsers": "Total Users",
+      "totalSessions": "Total Sessions",
+      "conversionRate": "Conversion Rate",
+      "chartPlaceholder": "Chart/graph will be displayed here"
+    },
+    "banners": {
+      "title": "Banners"
+    },
+    "ads": {
+      "title": "Advertisements"
+    },
+    "transactions": {
+      "title": "Transactions"
+    },
+    "users": {
+      "title": "Users"
+    },
     "categories": {
       "main_category": "Main Category",
       "no-data": "There are no categories currently. Start by creating your first category.",
-      "create-category": "Create a Category"
+      "create-category": "Create a Category",
+      "edit-category": "Edit Category",
+      "form": {
+        "add_category": "Add Category",
+        "adding_category": "Adding...",
+        "no_parent": "No parent",
+        "name": "Name",
+        "name_en": "Name (EN)",
+        "name_required": "Name is required",
+        "name_en_required": "English name is required",
+        "parent_category": "Parent Category",
+        "select_parent": "Select Parent Category",
+        "image": "Image",
+        "choose_image": "Choose Image",
+        "image_required": "Image is required",
+        "image_type_error": "Only image files are allowed",
+        "category_added": "Category added successfully",
+        "category_add_failed": "Failed to add category",
+        "category_updated": "Category updated successfully",
+        "category_update_failed": "Failed to update category",
+        "fetch_failed": "Failed to fetch category",
+        "updating_category": "Updating category...",
+        "update_category": "Update Category",
+        "deleted_successfully": "Category deleted successfully.",
+        "delete_failed": "Failed to delete category."
+      }
     },
     "invitations": {
       "code": "Invitation Code",
@@ -117,13 +183,28 @@
     "create-invitation": "Create New Invitation"
   },
   "generic": {
+    "403-title": "Unauthorized",
+    "403-message": "You do not have permission to view this page.",
     "404-message": "Ooops! ... Page not found",
     "back-home": "Go back Home",
     "addtocart": "Add To Cart",
     "discount": "Discount",
     "success": "Success",
     "error": "Error",
-    "checkout": "Checkout"
+    "checkout": "Checkout",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "save": "Save",
+    "close": "Close",
+    "actions": "Actions",
+    "loading": "Loading...",
+    "submit": "Submit",
+    "delete_confirmation": "Are you sure you want to delete this item?",
+    "required_field": "This field is required."
   },
   "products": {
     "similar-products": "Similar Products",

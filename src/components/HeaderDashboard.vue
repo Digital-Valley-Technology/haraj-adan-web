@@ -48,24 +48,24 @@
           </div>
         </div>
         <Menu ref="menu" id="overlay_menu" :model="profileItems" :popup="true">
-          <template #item="{ item }">
-            <router-link v-if="item.link" :to="item.link">
-              <span class="block w-full py-2 px-3 cursor-pointer text-sm">
-                <span :class="item.icon" class="me-3" />
-                <span>{{ $t(item.label) }}</span>
+            <template #item="{ item }">
+              <router-link v-if="item.link" :to="item.link">
+                <span class="block w-full py-2 px-3 cursor-pointer text-sm">
+                  <span :class="item.icon" class="me-3" />
+                  <span>{{ $t(item.label) }}</span>
+                </span>
+              </router-link>
+              <span
+                v-else-if="loggedInUser"
+                @click="logout"
+                class="border-t block w-full py-2 px-3 cursor-pointer text-sm"
+                v-ripple
+              >
+                <span :class="item.icon" class="text-red-500 me-3" />
+                <span class="text-red-500">{{ $t(item.label) }}</span>
               </span>
-            </router-link>
-            <span
-              v-else
-              @click="logout"
-              class="border-t block w-full py-2 px-3 cursor-pointer text-sm"
-              v-ripple
-            >
-              <span :class="item.icon" class="text-red-500 me-3" />
-              <span class="text-red-500">{{ $t(item.label) }}</span>
-            </span>
-          </template>
-        </Menu>
+            </template>
+          </Menu>
       </template>
     </Menubar>
   </div>
@@ -73,11 +73,14 @@
 
 <script setup>
   import { ref, computed } from "vue";
-  import { RouterLink } from "vue-router";
+  import { RouterLink, useRouter } from "vue-router";
   import { useGeneralStore } from "../store/general";
   import { dashboardProfileItems } from "../utils/constants";
+  import { useAuthStore } from "../store/auth";
 
   const generalStore = useGeneralStore();
+  const authStore = useAuthStore();
+  const router = useRouter()
 
   const menu = ref();
   const profileItems = ref(dashboardProfileItems);
@@ -96,6 +99,13 @@
 
   const toggleDesktopSidebarVisibility = () => {
     generalStore?.toggleDesktopSidebarVisibility();
+  };
+
+  const loggedInUser = computed(() => authStore?.getUser);
+
+  const logout = async () => {
+    await authStore.logout();
+    router.replace("/login");
   };
 </script>
 

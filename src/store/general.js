@@ -4,12 +4,14 @@ export const useGeneralStore = defineStore("general", {
   state: () => ({
     sidebarVisible: false,
     disktopSidebarVisible: true,
-    lang: localStorage.raheed_lang || "ar",
+    lang: localStorage.haraj_lang || "ar",
+    isLoading: false,
   }),
   getters: {
     getSidebarVisible: (state) => state.sidebarVisible,
     getDesktopSidebarVisible: (state) => state.disktopSidebarVisible,
     getLang: (state) => state.lang,
+    getIsLoading: (state) => state.isLoading,
   },
   actions: {
     setSidebarVisible(payload) {
@@ -17,6 +19,9 @@ export const useGeneralStore = defineStore("general", {
     },
     toggleSidebarVisible() {
       this.sidebarVisible = !this.sidebarVisible;
+    },
+    setLoading(value) {
+      this.isLoading = value;
     },
     toggleDesktopSidebarVisibility() {
       this.disktopSidebarVisible = !this.disktopSidebarVisible;
@@ -37,7 +42,7 @@ export const useGeneralStore = defineStore("general", {
         document.body.classList.add("ar");
       }
       // save to localStorage
-      localStorage.raheed_lang = selectedLang;
+      localStorage.haraj_lang = selectedLang;
       // change the state lang
       this.lang = selectedLang;
     },

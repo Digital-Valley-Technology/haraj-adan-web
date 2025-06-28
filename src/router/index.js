@@ -1,4 +1,5 @@
 import { createWebHashHistory, createRouter } from "vue-router";
+import { useAuthStore } from "../store/auth";
 
 const routes = [
   { name: "home", path: "/", component: () => import("../pages/HomePage.vue") },
@@ -11,6 +12,10 @@ const routes = [
     name: "user-profile",
     path: "/user-profile",
     component: () => import("../pages/ProfilePage.vue"),
+    meta: {
+      requiresAuth: true,
+      permissions: ["profile.read", "profile.write"],
+    },
   },
   {
     name: "register",
@@ -85,20 +90,105 @@ const routes = [
   {
     name: "dashboard",
     path: "/dashboard",
-    redirect: "/dashboard/profile",
+    redirect: "/dashboard/analytics",
     children: [
+      {
+        name: "analytics",
+        path: "analytics",
+        component: () => import("../dashboard/analytics/AnalyticsPage.vue"),
+        meta: {
+          requiresAuth: true,
+          permissions: ["dashboard.read", "dashboard.write"],
+        },
+      },
       {
         name: "profile",
         path: "profile",
         component: () => import("../dashboard/ProfilePage.vue"),
+        meta: {
+          requiresAuth: true,
+          permissions: ["dashboard.profile.read", "dashboard.profile.write"],
+        },
       },
       {
         name: "categories",
         path: "categories",
         component: () => import("../dashboard/categories/CategoriesPage.vue"),
+        meta: {
+          requiresAuth: true,
+          permissions: [
+            "dashboard.categories.read",
+            "dashboard.categories.write",
+          ],
+        },
+      },
+      {
+        name: "banners",
+        path: "banners",
+        component: () => import("../dashboard/banners/BannersPage.vue"),
+        meta: {
+          requiresAuth: true,
+          permissions: ["dashboard.banners.read", "dashboard.banners.write"],
+        },
+      },
+      {
+        name: "ads",
+        path: "ads",
+        component: () => import("../dashboard/ads/AdsPage.vue"),
+        meta: {
+          requiresAuth: true,
+          permissions: ["dashboard.ads.read", "dashboard.ads.write"],
+        },
+      },
+      {
+        name: "transactions",
+        path: "transactions",
+        component: () =>
+          import("../dashboard/transactions/TransactionsPage.vue"),
+        meta: {
+          requiresAuth: true,
+          permissions: [
+            "dashboard.transactions.read",
+            "dashboard.transactions.write",
+          ],
+        },
+      },
+      {
+        name: "users",
+        path: "users",
+        component: () => import("../dashboard/users/UsersPage.vue"),
+        meta: {
+          requiresAuth: true,
+          permissions: ["dashboard.users.read", "dashboard.users.write"],
+        },
+      },
+
+      // add and edit
+      {
+        name: "add-category",
+        path: "categories/add-category",
+        component: () => import("../dashboard/categories/add/index.vue"),
+        meta: {
+          requiresAuth: true,
+          permissions: ["dashboard.categories.write"],
+        },
+      },
+      {
+        path: "/categories/edit-category/:categoryId",
+        name: "edit-category",
+        component: () => import("../dashboard/categories/edit/index.vue"),
+        meta: {
+          requiresAuth: true,
+          permissions: ["dashboard.categories.write"],
+        },
       },
     ],
     meta: { requiresAuth: true, requiresAdmin: true },
+  },
+  {
+    name: "unauthorized",
+    path: "/unauthorized",
+    component: () => import("../pages/UnauthorizedPage.vue"),
   },
   {
     name: "404",
@@ -126,4 +216,52 @@ export const router = createRouter({
     // If no hash and the route is not product details, return to top of the page or saved position
     else return savedPosition || { top: 0 };
   },
+});
+
+router.beforeEach(async (to, from, next) => {
+  const authStore = useAuthStore();
+  const token = localStorage.getItem("token");
+
+  if (token && !authStore.user) {
+    await authStore.getMe();
+  }
+
+  const user = authStore.user;
+  const isAuthenticated = !!user;
+
+  // Not logged in
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    return next({ path: "/login", query: { redirect: to.fullPath } });
+  }
+
+  // Admin role check
+  if (to.meta.requiresAdmin) {
+    const isAdmin = user?.user_roles?.some((ur) =>
+      ["MANAGER", "ADMIN"].includes(ur.roles?.code)
+    );
+
+    if (!isAdmin) {
+      return next({ name: "unauthorized" }); // or redirect to 403
+    }
+  }
+
+  // Permission check (based on `meta.permissions`)
+  if (to.meta.permissions) {
+    // Get all permission codes from all user roles
+    const userPermissions = user.user_roles.flatMap(
+      (ur) =>
+        ur.roles?.role_permissions?.map((rp) => rp.permissions?.code) || []
+    );
+
+    // Check if user has every required permission
+    const hasPermissions = to.meta.permissions.every((requiredCode) =>
+      userPermissions.includes(requiredCode)
+    );
+
+    if (!hasPermissions) {
+      return next({ name: "unauthorized" }); // or redirect to 403
+    }
+  }
+
+  return next();
 });
