@@ -92,6 +92,7 @@ const total = computed(() => categoryStore.getTotal); // use total from store
           v-if="categories?.length > 0"
           :categories="categories"
           @delete="(cat) => processDelete(cat)"
+          @fetch-categories="fetchData()"
         />
         <no-data
           v-else

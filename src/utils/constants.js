@@ -4,9 +4,9 @@ export const PROD_BASE_URL = "https://unityhelp.net/idps/api/v1";
 
 export const DEV_BASE_URL = "http://localhost:3059/api/v1";
 
-export const DEV_MEDIA_URL = "http://localhost:3059/uploads";
+export const DEV_MEDIA_URL = "http://localhost:3059/uploads/";
 
-export const PROD_MEDIA_URL = "https://unityhelp.net/idps";
+export const PROD_MEDIA_URL = "https://unityhelp.net/uploads/";
 
 export const DashboardBreadCrumbBase = {
   icon: "pi pi-home",
