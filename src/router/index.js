@@ -182,6 +182,16 @@ const routes = [
           permissions: ["dashboard.categories.write"],
         },
       },
+      {
+        path: "/categories/attributes/:categoryId",
+        name: "category-attributes",
+        component: () =>
+          import("../dashboard/categories/attributes/CategoryAttributes.vue"),
+        meta: {
+          requiresAuth: true,
+          permissions: ["dashboard.categories.write"],
+        },
+      },
     ],
     meta: { requiresAuth: true, requiresAdmin: true },
   },

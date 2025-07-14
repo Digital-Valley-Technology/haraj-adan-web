@@ -57,7 +57,8 @@
     "password": {
       "required": "Password is required."
     },
-    "fill-all-fields": "Please fill in all required fields."
+    "fill-all-fields": "Please fill in all required fields.",
+    "required": "This Field is required."
   },
   "register": {
     "username": "Username",
@@ -102,7 +103,8 @@
   "dashboard": {
     "actions": {
       "edit": "Edit",
-      "delete": "Delete"
+      "delete": "Delete",
+      "manage-attributes": "Manage Attributes"
     },
     "analytics": {
       "title": "Analytics Dashboard",
@@ -151,6 +153,24 @@
         "update_category": "Update Category",
         "deleted_successfully": "Category deleted successfully.",
         "delete_failed": "Failed to delete category."
+      },
+      "attributes": {
+        "name_ar": "الاسم (عربي)",
+        "name_en": "الاسم (إنجليزي)",
+        "type": "النوع",
+        "confirm_delete": "هل أنت متأكد أنك تريد حذف هذه الخاصية؟",
+        "deleted_success": "تم حذف الخاصية بنجاح.",
+        "delete_failed": "فشل في حذف الخاصية.",
+        "save_failed": "فشل في حفظ الخاصية.",
+        "added_success": "تمت إضافة الخاصية بنجاح.",
+        "updated_success": "تم تحديث الخاصية بنجاح.",
+        "type_required": "نوع الخاصية مطلوب.",
+        "confirmation": "تأكيد",
+        "edit": "تعديل الخاصية",
+        "add": "إضافة خاصية",
+        "cancel": "إلغاء",
+        "save": "حفظ",
+        "no_data": "لم يتم العثور على خصائص. جرب إضافة واحدة!"
       }
     },
     "invitations": {

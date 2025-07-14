@@ -1,4 +1,4 @@
-export const MODE = "DEV";
+export const MODE = "PROD";
 
 export const PROD_BASE_URL = "https://unityhelp.net/idps/api/v1";
 

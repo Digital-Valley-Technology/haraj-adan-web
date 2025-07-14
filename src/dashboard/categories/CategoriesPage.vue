@@ -81,33 +81,16 @@ const total = computed(() => categoryStore.getTotal); // use total from store
   <dashboard-layout>
     <main class="py-[var(--padding-dashboard-section)] custom-container">
       <div
-        class="card min-h-[500px] w-full mx-auto px-4 md:px-8 py-8 md:py-12 shadow-lg border border-gray-200 rounded-lg"
-      >
-        <categories-table-header
-          :total="total"
-          v-model:modelValue="searchText"
-          v-model:selectedFilter="selectedFilter"
-        />
-        <categories-table
-          v-if="categories?.length > 0"
-          :categories="categories"
-          @delete="(cat) => processDelete(cat)"
-          @fetch-categories="fetchData()"
-        />
-        <no-data
-          v-else
-          class="mt-12"
-          :content="$t('dashboard.categories.no-data')"
-          :button-text="$t('dashboard.categories.create-category')"
-          button-link="/dashboard/new-category"
-        />
+        class="card min-h-[500px] w-full mx-auto px-4 md:px-8 py-8 md:py-12 shadow-lg border border-gray-200 rounded-lg">
+        <categories-table-header :total="total" v-model:modelValue="searchText"
+          v-model:selectedFilter="selectedFilter" />
+        <categories-table v-if="categories?.length > 0" :categories="categories" @delete="(cat) => processDelete(cat)"
+          @fetch-categories="fetchData()" />
+        <no-data v-else class="mt-12" :content="$t('dashboard.categories.no-data')"
+          :button-text="$t('dashboard.categories.create-category')" button-link="/dashboard/new-category" />
       </div>
     </main>
-    <DeleteDialog
-      v-model="isDeleteDialogOpen"
-      :content="$t('generic.delete_confirmation')"
-      @confirm="handleDelete"
-    />
+    <DeleteDialog v-model="isDeleteDialogOpen" :content="$t('generic.delete_confirmation')" @confirm="handleDelete" />
   </dashboard-layout>
 </template>
 

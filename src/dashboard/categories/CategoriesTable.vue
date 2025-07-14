@@ -17,22 +17,39 @@ const handleEdit = (category) =>
     name: "edit-category",
     params: { categoryId: encode(category?.id) },
   });
+
+const handleAttributes = (category) => {
+  router.push({
+    name: "category-attributes",
+    params: { categoryId: encode(category.id) },
+  });
+};
+
 const handleDelete = (category) => emit("delete", category);
 </script>
 
 <template>
-  <DataTable :value="categories" paginator :rowsPerPageOptions="[5, 10, 20, 50]" tableStyle="min-width: 50rem"
-    :rows="categoryStore.limit" :totalRecords="categoryStore.total"
-    :first="(categoryStore.page - 1) * categoryStore.limit" @page="(e) => {
-      if (e.rows !== categoryStore.limit) {
-        categoryStore.page = 1;
-        categoryStore.limit = e.rows;
-      } else {
-        categoryStore.page = e.page + 1;
+  <DataTable
+    :value="categories"
+    paginator
+    :rowsPerPageOptions="[5, 10, 20, 50]"
+    tableStyle="min-width: 50rem"
+    :rows="categoryStore.limit"
+    :totalRecords="categoryStore.total"
+    :first="(categoryStore.page - 1) * categoryStore.limit"
+    @page="
+      (e) => {
+        if (e.rows !== categoryStore.limit) {
+          categoryStore.page = 1;
+          categoryStore.limit = e.rows;
+        } else {
+          categoryStore.page = e.page + 1;
+        }
+        emit('fetchCategories');
       }
-      emit('fetchCategories')
-    }" 
-    :loading="categoryStore?.loading">
+    "
+    :loading="categoryStore?.loading"
+  >
     <Column field="name" :header="$t('table.name')"></Column>
     <Column field="name_en" :header="$t('table.name_en')"></Column>
     <Column field="parent" :header="$t('dashboard.categories.main_category')">
@@ -41,9 +58,9 @@ const handleDelete = (category) => emit("delete", category);
           {{
             slotProps?.data?.categories
               ? localeText(
-                slotProps?.data?.categories?.name,
-                slotProps?.data?.categories?.name_en
-              )
+                  slotProps?.data?.categories?.name,
+                  slotProps?.data?.categories?.name_en
+                )
               : "__"
           }}
         </p>
@@ -52,8 +69,12 @@ const handleDelete = (category) => emit("delete", category);
     <Column field="image" :header="$t('table.image')">
       <template #body="slotProps">
         <div class="w-[100px] aspect-square me-auto">
-          <img :src="`${MEDIA_URL}/${slotProps?.data?.image}`" :alt="slotProps?.data?.name"
-            class="w-full h-full object-cover" loading="lazy" />
+          <img
+            :src="`${MEDIA_URL}/${slotProps?.data?.image}`"
+            :alt="slotProps?.data?.name"
+            class="w-full h-full object-cover"
+            loading="lazy"
+          />
         </div>
       </template>
     </Column>
@@ -61,10 +82,34 @@ const handleDelete = (category) => emit("delete", category);
     <Column :header="$t('table.actions')">
       <template #body="slotProps">
         <div class="flex gap-2">
-          <Button icon="pi pi-pencil" severity="info" :label="$t('dashboard.actions.edit')"
-            @click="() => handleEdit(slotProps.data)" outlined rounded size="small" />
-          <Button icon="pi pi-trash" severity="danger" :label="$t('dashboard.actions.delete')"
-            @click="() => handleDelete(slotProps.data)" outlined rounded size="small" />
+          <Button
+            icon="pi pi-sliders-h"
+            severity="secondary"
+            :label="$t('dashboard.actions.manage-attributes')"
+            @click="() => handleAttributes(slotProps.data)"
+            outlined
+            rounded
+            size="small"
+          />
+
+          <Button
+            icon="pi pi-pencil"
+            severity="info"
+            :label="$t('dashboard.actions.edit')"
+            @click="() => handleEdit(slotProps.data)"
+            outlined
+            rounded
+            size="small"
+          />
+          <Button
+            icon="pi pi-trash"
+            severity="danger"
+            :label="$t('dashboard.actions.delete')"
+            @click="() => handleDelete(slotProps.data)"
+            outlined
+            rounded
+            size="small"
+          />
         </div>
       </template>
     </Column>

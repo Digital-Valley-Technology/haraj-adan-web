@@ -15,7 +15,7 @@ const route = useRoute();
 const { showError, showSuccess } = useCustomToast();
 const authStore = useAuthStore();
 
-// ✅ Define schema using Yup with i18n messages
+// Define schema using Yup with i18n messages
 const schema = yup.object({
   email: yup.string().email(t("validation.email.invalid")).required(t("validation.email.required")),
   password: yup.string().required(t("validation.password.required")),

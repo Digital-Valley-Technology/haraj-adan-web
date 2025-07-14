@@ -57,7 +57,8 @@
     "password": {
       "required": "كلمة المرور مطلوبة."
     },
-    "fill-all-fields": "يرجى ملء جميع الحقول المطلوبة."
+    "fill-all-fields": "يرجى ملء جميع الحقول المطلوبة.",
+    "required": "هذا الحقل مطلوب."
   },
   "register": {
     "username": "إسم المستخدم",
@@ -102,7 +103,8 @@
   "dashboard": {
     "actions": {
       "edit": "تعديل",
-      "delete": "حذف"
+      "delete": "حذف",
+      "manage-attributes": "إدارة الصفات"
     },
     "analytics": {
       "title": "الإحصائيات",
@@ -151,7 +153,30 @@
         "update_category": "تحديث الصنف",
         "deleted_successfully": "تم حذف الصنف بنجاح.",
         "delete_failed": "فشل حذف الصنف."
-      }
+      },
+      "attributes": {
+        "name_ar": "الاسم (عربي)",
+        "name_en": "الاسم (إنجليزي)",
+        "type": "النوع",
+        "confirm_delete": "هل أنت متأكد أنك تريد حذف هذه الخاصية؟",
+        "deleted_success": "تم حذف الخاصية بنجاح.",
+        "delete_failed": "فشل في حذف الخاصية.",
+        "save_failed": "فشل في حفظ الخاصية.",
+        "added_success": "تمت إضافة الخاصية بنجاح.",
+        "updated_success": "تم تحديث الخاصية بنجاح.",
+        "type_required": "نوع الخاصية مطلوب.",
+        "confirmation": "تأكيد",
+        "edit": "تعديل الخاصية",
+        "add": "إضافة خاصية",
+        "cancel": "إلغاء",
+        "save": "حفظ",
+        "no_data": "No attributes found. Try adding one!"
+      },
+      "confirmation": "تأكيد",
+      "edit": "تعديل السمة",
+      "add": "إضافة سمة",
+      "cancel": "إلغاء",
+      "save": "حفظ"
     },
     "invitations": {
       "code": "رقم الدعوة",
