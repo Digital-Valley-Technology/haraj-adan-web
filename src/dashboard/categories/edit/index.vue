@@ -292,7 +292,7 @@ const onSubmit = handleSubmit(async (values) => {
 
           <Button
             type="submit"
-            class="!block w-full !rounded-xl flex items-center justify-center gap-2"
+            class="w-full !rounded-xl flex items-center justify-center gap-2"
             size="large"
             :disabled="isSubmitting"
           >
