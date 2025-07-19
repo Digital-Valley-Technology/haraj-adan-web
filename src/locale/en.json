@@ -52,13 +52,34 @@
   "validation": {
     "email": {
       "required": "Email is required.",
-      "invalid": "Email must be valid."
+      "invalid": "Email must be valid.",
+      "email_or_phone": {
+        "required": "Email or phone is required"
+      }
     },
     "password": {
       "required": "Password is required."
     },
     "fill-all-fields": "Please fill in all required fields.",
     "required": "This Field is required."
+  },
+  "login": {
+    "login_with_google": "Login with Google",
+    "google_failed": "Google login failed"
+  },
+  "otp": {
+    "send_code": "Send OTP",
+    "sending": "Sending OTP...",
+    "enter_code": "Enter OTP",
+    "code_placeholder": "Enter your OTP code",
+    "verify": "Verify",
+    "verifying": "Verifying...",
+    "verified": "OTP verified successfully",
+    "sent_successfully": "OTP sent successfully",
+    "send_failed": "Failed to send OTP",
+    "invalid": "Invalid or expired OTP",
+    "identifier_missing": "No identifier found. Please login again.",
+    "required": "OTP is required"
   },
   "register": {
     "username": "Username",
@@ -79,7 +100,10 @@
     "save": "Save",
     "logging_in": "Logging in...",
     "login_success": "Login successful!",
-    "login_failed": "Login failed. Please try again."
+    "login_failed": "Login failed. Please try again.",
+    "email_or_phone": "Email or phone number",
+    "registering": "Registering...",
+    "register_with_google": "Register with Google"
   },
   "sidebar": {
     "analytics": "Analytics",
@@ -104,7 +128,8 @@
     "actions": {
       "edit": "Edit",
       "delete": "Delete",
-      "manage-attributes": "Manage Attributes"
+      "manage-attributes": "Manage Attributes",
+      "preview": "Preview"
     },
     "analytics": {
       "title": "Analytics Dashboard",
@@ -112,9 +137,6 @@
       "totalSessions": "Total Sessions",
       "conversionRate": "Conversion Rate",
       "chartPlaceholder": "Chart/graph will be displayed here"
-    },
-    "banners": {
-      "title": "Banners"
     },
     "ads": {
       "title": "Advertisements"
@@ -124,6 +146,26 @@
     },
     "users": {
       "title": "Users"
+    },
+    "banners": {
+      "title": "Banners",
+      "add": "Add Banner",
+      "add_banner": "Add New Banner",
+      "image_upload": "Upload Image(s)",
+      "drop_or_click": "Drag and drop images here or click to select",
+      "success": "Banner uploaded successfully!",
+      "error": "Failed to upload banner.",
+      "reorder_success": "Banners reordered successfully!",
+      "reorder_error": "Failed to reorder banners.",
+      "save_order":"Save Order",
+      "order":"Order",
+      "no-data": "No banners available.",
+      "create-banner": "Create Banner",
+      "validation": {
+        "required": "Please upload at least one image.",
+        "type": "Only image files are allowed.",
+        "max": "You can upload a maximum of {count} images."
+      }
     },
     "categories": {
       "main_category": "Main Category",
@@ -142,7 +184,6 @@
         "select_parent": "Select Parent Category",
         "image": "Image",
         "choose_image": "Choose Image",
-        "image_required": "Image is required",
         "image_type_error": "Only image files are allowed",
         "category_added": "Category added successfully",
         "category_add_failed": "Failed to add category",
@@ -152,25 +193,31 @@
         "updating_category": "Updating category...",
         "update_category": "Update Category",
         "deleted_successfully": "Category deleted successfully.",
-        "delete_failed": "Failed to delete category."
+        "delete_failed": "Failed to delete category.",
+        "image_required": "Image is required",
+        "image_invalid": "Invalid image file"
       },
       "attributes": {
-        "name_ar": "الاسم (عربي)",
-        "name_en": "الاسم (إنجليزي)",
-        "type": "النوع",
-        "confirm_delete": "هل أنت متأكد أنك تريد حذف هذه الخاصية؟",
-        "deleted_success": "تم حذف الخاصية بنجاح.",
-        "delete_failed": "فشل في حذف الخاصية.",
-        "save_failed": "فشل في حفظ الخاصية.",
-        "added_success": "تمت إضافة الخاصية بنجاح.",
-        "updated_success": "تم تحديث الخاصية بنجاح.",
-        "type_required": "نوع الخاصية مطلوب.",
-        "confirmation": "تأكيد",
-        "edit": "تعديل الخاصية",
-        "add": "إضافة خاصية",
-        "cancel": "إلغاء",
-        "save": "حفظ",
-        "no_data": "لم يتم العثور على خصائص. جرب إضافة واحدة!"
+        "name_ar": "Name (Arabic)",
+        "name_en": "Name (English)",
+        "type": "Type",
+        "confirm_delete": "Are you sure you want to delete this attribute?",
+        "deleted_success": "Attribute deleted successfully.",
+        "delete_failed": "Failed to delete the attribute.",
+        "save_failed": "Failed to save the attribute.",
+        "added_success": "Attribute added successfully.",
+        "updated_success": "Attribute updated successfully.",
+        "type_required": "Attribute type is required.",
+        "confirmation": "Confirmation",
+        "edit": "Edit Attribute",
+        "add": "Add Attribute",
+        "cancel": "Cancel",
+        "save": "Save",
+        "no_data": "No attributes found. Try adding one!",
+        "values": "Attribute Values",
+        "value_ar": "Value (Arabic)",
+        "value_en": "Value (English)",
+        "type_value_required": "Attributes of type Checkbox or Radio must include at least one value."
       }
     },
     "invitations": {
@@ -224,7 +271,8 @@
     "loading": "Loading...",
     "submit": "Submit",
     "delete_confirmation": "Are you sure you want to delete this item?",
-    "required_field": "This field is required."
+    "required_field": "This field is required.",
+    "add": "Add"
   },
   "products": {
     "similar-products": "Similar Products",

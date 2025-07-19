@@ -26,10 +26,9 @@ const isSubmitting = ref(false);
 const previewUrl = ref(null);
 
 const breadcrumbItems = [
-  { label: 'sidebar.categories', route: "/dashboard/categories" },
-  { label: 'dashboard.categories.edit-category' },
+  { label: "sidebar.categories", route: "/dashboard/categories" },
+  { label: "dashboard.categories.edit-category" },
 ];
-
 
 const categories = ref([]);
 const fetchCategories = async () => {
@@ -81,7 +80,17 @@ const schema = yup.object({
     .string()
     .required(t("dashboard.categories.form.name_en_required")),
   parent_id: yup.number().nullable(),
-  image: yup.mixed().nullable(),
+  image: yup
+    .mixed()
+    .test(
+      "required-image",
+      t("dashboard.categories.form.image_required"),
+      function (value) {
+        // Only require image if no existing preview
+        if (!previewUrl.value && !value) return false;
+        return true;
+      }
+    ),
 });
 
 const { handleSubmit, errors } = useForm({ validationSchema: schema });

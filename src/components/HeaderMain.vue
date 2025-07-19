@@ -18,7 +18,7 @@
       <div>
         <div class="flex items-center">
           <!-- profile icon -->
-          <app-profile-icon v-if="loggedInUser"></app-profile-icon>
+          <app-profile-icon></app-profile-icon>
         </div>
       </div>
     </div>

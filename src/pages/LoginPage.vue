@@ -7,7 +7,7 @@ import requestService from "../services/api/requestService";
 import { useI18n } from "vue-i18n";
 import { useForm, useField } from "vee-validate";
 import * as yup from "yup";
-import { ref } from "vue";
+import { BASE_URL } from "../services/axios";
 
 const { t } = useI18n();
 const router = useRouter();
@@ -15,34 +15,34 @@ const route = useRoute();
 const { showError, showSuccess } = useCustomToast();
 const authStore = useAuthStore();
 
-// Define schema using Yup with i18n messages
 const schema = yup.object({
-  email: yup.string().email(t("validation.email.invalid")).required(t("validation.email.required")),
-  password: yup.string().required(t("validation.password.required")),
+  identifier: yup.string().required(t("validation.email_or_phone.required")),
 });
 
-const { handleSubmit, isSubmitting } = useForm({
-  validationSchema: schema,
-});
-
-const { value: email, errorMessage: emailError } = useField("email");
-const { value: password, errorMessage: passwordError } = useField("password");
+const { handleSubmit, isSubmitting } = useForm({ validationSchema: schema });
+const { value: identifier, errorMessage: identifierError } =
+  useField("identifier");
 
 const onSubmit = handleSubmit(async (values) => {
   try {
-    const response = await requestService.create("auth/signin", {...values, source: "web"});
-    localStorage.setItem("token", response?.access_token);
+    const response = await requestService.create("auth/otp-request", {
+      ...values,
+    });
 
-    showSuccess(response?.message || t("register.login_success"));
-    authStore.user = response?.data;
-    authStore.isAuthenticated = true;
-
-    const redirectTo = route.query.redirect || "/";
-    router.push(redirectTo);
+    showSuccess(response?.message || t("otp.sent_successfully"));
+    router.push("/verify-otp");
   } catch (error) {
-    showError(error?.message || t("register.login_failed"));
+    showError(error?.message || t("otp.send_failed"));
   }
 });
+
+const loginWithGoogle = async () => {
+  try {
+    window.location.href = `${BASE_URL}/auth/google`;
+  } catch (err) {
+    showError(t("login.google_failed"));
+  }
+};
 </script>
 
 <template>
@@ -51,33 +51,32 @@ const onSubmit = handleSubmit(async (values) => {
       <div
         class="card px-6 py-8 mx-auto max-w-[600px] shadow-lg border border-gray-200 rounded-lg"
       >
-        <!-- email -->
+        <!-- Google login -->
+        <Button
+          class="!block w-full !rounded-md mb-6 !bg-red-500 !border-red-500 text-white"
+          size="large"
+          @click="loginWithGoogle"
+        >
+          <i class="pi pi-google me-2"></i>
+          {{ $t("login.login_with_google") }}
+        </Button>
+
+        <!-- Email or phone input -->
         <IconField class="mb-4">
-          <InputIcon size="large" class="pi pi-envelope" />
+          <InputIcon size="large" class="pi pi-user" />
           <InputText
-            v-model="email"
+            v-model="identifier"
             class="w-full !border-gray-300"
             size="large"
-            type="email"
-            :placeholder="$t('register.email')"
+            type="text"
+            :placeholder="$t('register.email_or_phone')"
           />
         </IconField>
-        <p v-if="emailError" class="text-red-500 text-sm mt-1">{{ emailError }}</p>
+        <p v-if="identifierError" class="text-red-500 text-sm mt-1">
+          {{ identifierError }}
+        </p>
 
-        <!-- password -->
-        <IconField class="mb-4">
-          <InputIcon size="large" class="pi pi-lock" />
-          <InputText
-            v-model="password"
-            class="w-full !border-gray-300"
-            size="large"
-            type="password"
-            :placeholder="$t('register.password')"
-          />
-        </IconField>
-        <p v-if="passwordError" class="text-red-500 text-sm mt-1">{{ passwordError }}</p>
-
-        <!-- login button -->
+        <!-- Send OTP button -->
         <Button
           type="button"
           class="!block w-full !rounded-md mb-4 !bg-[var(--primary-clr)] !border-[var(--primary-clr)]"
@@ -86,15 +85,11 @@ const onSubmit = handleSubmit(async (values) => {
           :disabled="isSubmitting"
         >
           <i v-if="isSubmitting" class="pi pi-spinner pi-spin me-2"></i>
-          <i v-else class="pi pi-sign-in me-2"></i>
-          <span>
-            {{
-              isSubmitting ? $t("register.logging_in") : $t("register.login")
-            }}
-          </span>
+          <i v-else class="pi pi-key me-2"></i>
+          {{ isSubmitting ? $t("otp.sending") : $t("otp.send_code") }}
         </Button>
 
-        <!-- register link -->
+        <!-- Register -->
         <p class="text-center text-sm">
           <span class="inline-block me-2">{{ $t("register.no-account") }}</span>
           <RouterLink to="/register" class="text-[#596e60]">

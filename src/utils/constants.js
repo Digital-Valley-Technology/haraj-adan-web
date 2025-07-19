@@ -128,6 +128,10 @@ export const websiteProfileItems = [
         permissions: ["profile.read", "profile.write"],
       },
       {
+        label: "header.login",
+        icon: "pi pi-sign-in",
+      },
+      {
         label: "header.logout",
         icon: "pi pi-sign-out",
       },

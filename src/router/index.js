@@ -192,6 +192,16 @@ const routes = [
           permissions: ["dashboard.categories.write"],
         },
       },
+
+            {
+        name: "add-banner",
+        path: "banners/add-banner",
+        component: () => import("../dashboard/banners/add/index.vue"),
+        meta: {
+          requiresAuth: true,
+          permissions: ["dashboard.banners.write"],
+        },
+      },
     ],
     meta: { requiresAuth: true, requiresAdmin: true },
   },
@@ -199,6 +209,16 @@ const routes = [
     name: "unauthorized",
     path: "/unauthorized",
     component: () => import("../pages/UnauthorizedPage.vue"),
+  },
+  {
+    path: "/oauth-success",
+    name: "OAuthSuccess",
+    component: () => import("../pages/OAuthSuccess.vue"),
+  },
+    {
+    path: "/verify-otp",
+    name: "verify-otp",
+    component: () => import("../pages/VerifyOtp.vue"),
   },
   {
     name: "404",

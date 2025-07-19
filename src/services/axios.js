@@ -1,16 +1,19 @@
 import axios from "axios";
-import { DEV_BASE_URL, DEV_MEDIA_URL, MODE, PROD_MEDIA_URL } from "../utils/constants"; //  PROD || DEV
+import { router } from "../router";
+
+import {
+  DEV_BASE_URL,
+  DEV_MEDIA_URL,
+  MODE,
+  PROD_MEDIA_URL,
+} from "../utils/constants"; //  PROD || DEV
 import qs from "qs";
 // ===================
 // API Configuration
 // ===================
 
-export const MEDIA_URL =
-  MODE == "DEV" ? DEV_MEDIA_URL : PROD_MEDIA_URL;
-export const BASE_URL =
-  MODE == "DEV"
-    ? DEV_BASE_URL
-    : PROD_MEDIA_URL;
+export const MEDIA_URL = MODE == "DEV" ? DEV_MEDIA_URL : PROD_MEDIA_URL;
+export const BASE_URL = MODE == "DEV" ? DEV_BASE_URL : PROD_MEDIA_URL;
 
 // ===================
 // Redirect to Login
@@ -18,7 +21,8 @@ export const BASE_URL =
 
 const redirectToLogin = () => {
   localStorage.removeItem("token");
-  window.location.href = "/login";
+  // window.location.href = `${window.location.origin}/#/login`;
+  router.push("/login");
 };
 
 // ===================

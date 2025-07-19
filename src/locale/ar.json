@@ -54,11 +54,32 @@
       "required": "البريد الإلكتروني مطلوب.",
       "invalid": "يرجى إدخال بريد إلكتروني صالح."
     },
+    "email_or_phone": {
+      "required": "البريد الإلكتروني أو رقم الهاتف مطلوب"
+    },
     "password": {
       "required": "كلمة المرور مطلوبة."
     },
     "fill-all-fields": "يرجى ملء جميع الحقول المطلوبة.",
     "required": "هذا الحقل مطلوب."
+  },
+  "login": {
+    "login_with_google": "تسجيل الدخول باستخدام جوجل",
+    "google_failed": "فشل تسجيل الدخول باستخدام جوجل"
+  },
+  "otp": {
+    "send_code": "إرسال رمز التحقق",
+    "sending": "جارٍ إرسال رمز التحقق...",
+    "enter_code": "أدخل رمز التحقق",
+    "code_placeholder": "أدخل رمز التحقق المرسل",
+    "verify": "تحقق",
+    "verifying": "جارٍ التحقق...",
+    "verified": "تم التحقق بنجاح",
+    "sent_successfully": "تم إرسال رمز التحقق بنجاح",
+    "send_failed": "فشل في إرسال رمز التحقق",
+    "invalid": "رمز التحقق غير صحيح أو منتهي الصلاحية",
+    "identifier_missing": "لم يتم العثور على البريد الإلكتروني أو رقم الهاتف. الرجاء تسجيل الدخول مرة أخرى.",
+    "required": "رمز التحقق مطلوب"
   },
   "register": {
     "username": "إسم المستخدم",
@@ -79,7 +100,10 @@
     "save": "حفظ",
     "logging_in": "جارٍ تسجيل الدخول...",
     "login_success": "تم تسجيل الدخول بنجاح!",
-    "login_failed": "فشل تسجيل الدخول. حاول مرة أخرى."
+    "login_failed": "فشل تسجيل الدخول. حاول مرة أخرى.",
+    "email_or_phone": "البريد الإلكتروني أو رقم الهاتف",
+    "registering": "جارٍ التسجيل...",
+    "register_with_google": "سجّل باستخدام جوجل"
   },
   "sidebar": {
     "analytics": "الإحصائيات",
@@ -104,7 +128,8 @@
     "actions": {
       "edit": "تعديل",
       "delete": "حذف",
-      "manage-attributes": "إدارة الصفات"
+      "manage-attributes": "إدارة الصفات",
+      "preview": "عرض"
     },
     "analytics": {
       "title": "الإحصائيات",
@@ -112,9 +137,6 @@
       "totalSessions": "إجمالي الجلسات",
       "conversionRate": "معدل التحويل",
       "chartPlaceholder": "سيتم عرض الرسم البياني هنا"
-    },
-    "banners": {
-      "title": "اللافتات"
     },
     "ads": {
       "title": "الإعلانات"
@@ -124,6 +146,26 @@
     },
     "users": {
       "title": "المستخدمون"
+    },
+    "banners": {
+      "title": "البنرات",
+      "add": "إضافة بنر",
+      "add_banner": "إضافة بنر جديد",
+      "image_upload": "تحميل الصور",
+      "drop_or_click": "اسحب الصور هنا أو انقر للاختيار",
+      "success": "تم تحميل البنر بنجاح!",
+      "error": "فشل في تحميل البنر.",
+      "reorder_success": "تم ترتيب البنرات بنجاح!",
+      "reorder_error": "فشل في ترتيب البنرات.",
+      "save_order":"حفظ الترتيب",
+      "order":"الترتيب",
+      "no-data": "لا توجد بنرات متاحة.",
+      "create-banner": "إنشاء بنر",
+      "validation": {
+        "required": "يرجى تحميل صورة واحدة على الأقل.",
+        "type": "يُسمح فقط بملفات الصور.",
+        "max": "يمكنك تحميل {count} صورة كحد أقصى."
+      }
     },
     "categories": {
       "main_category": "الصنف الرئيسي",
@@ -142,7 +184,6 @@
         "select_parent": "اختر الصنف الرئيسي",
         "image": "الصورة",
         "choose_image": "اختر صورة",
-        "image_required": "الصورة مطلوبة",
         "image_type_error": "يُسمح فقط بملفات الصور",
         "category_added": "تمت إضافة الصنف بنجاح",
         "category_add_failed": "فشل في إضافة الصنف",
@@ -152,7 +193,9 @@
         "updating_category": "جاري تحديث الصنف...",
         "update_category": "تحديث الصنف",
         "deleted_successfully": "تم حذف الصنف بنجاح.",
-        "delete_failed": "فشل حذف الصنف."
+        "delete_failed": "فشل حذف الصنف.",
+        "image_required": "الصورة مطلوبة",
+        "image_invalid": "ملف الصورة غير صالح"
       },
       "attributes": {
         "name_ar": "الاسم (عربي)",
@@ -170,7 +213,11 @@
         "add": "إضافة خاصية",
         "cancel": "إلغاء",
         "save": "حفظ",
-        "no_data": "No attributes found. Try adding one!"
+        "no_data": "لم يتم العثور على خصائص. جرب إضافة واحدة!",
+        "values": "قيم الخاصية",
+        "value_ar": "القيمة (عربي)",
+        "value_en": "القيمة (إنجليزي)",
+        "type_value_required": "يجب أن تحتوي السمات من النوع خانة اختيار أو زر اختيار على خيار قيمة واحد على الأقل."
       },
       "confirmation": "تأكيد",
       "edit": "تعديل السمة",
@@ -229,7 +276,8 @@
     "loading": "جاري التحميل...",
     "submit": "إرسال",
     "delete_confirmation": "هل أنت متأكد أنك تريد حذف هذا العنصر؟",
-    "required_field": "هذا الحقل مطلوب."
+    "required_field": "هذا الحقل مطلوب.",
+    "add": "إضافة"
   },
   "products": {
     "similar-products": "منتجات مشابهة",

@@ -159,7 +159,6 @@ const dialogTitle = computed(() =>
     : t("dashboard.categories.attributes.add")
 );
 
-// --- API Callers ---
 const fetchAttributes = async () => {
   loadingAttributes.value = true;
   try {
@@ -191,24 +190,56 @@ const fetchAttributesTypes = async () => {
   }
 };
 
-// --- Form Handlers ---
 const onAdd = () => {
-  editingAttr.value = { name: "", name_en: "", type_id: null };
+  editingAttr.value = { name: "", name_en: "", type_id: null, values: [] };
   errors.value = {};
   dialogVisible.value = true;
 };
 
 const onEdit = (attr) => {
-  editingAttr.value = { ...attr };
+  editingAttr.value = {
+    ...attr,
+    values: attr?.values?.length ? attr.values.map((v) => ({ ...v })) : [],
+  };
   errors.value = {};
   dialogVisible.value = true;
 };
 
 const closeDialog = () => {
-  editingAttr.value = null;
+  editingAttr.value = { name: "", name_en: "", type_id: null, values: [] };
   errors.value = {};
   dialogVisible.value = false;
 };
+
+// const validateForm = () => {
+//   const val = editingAttr.value || {};
+//   const errs = {
+//     name: !val.name ? t("validation.required") : "",
+//     name_en: !val.name_en ? t("validation.required") : "",
+//     type_id: !val.type_id ? t("validation.required") : "",
+//   };
+
+//   const type = attributesTypes.value.find((t) => t.id === val.type_id)?.code;
+
+//   if (["checkbox", "radio"].includes(type)) {
+//     if (!val.values?.length) {
+//       showError(t("dashboard.categories.attributes.type_required"));
+//       return false;
+//     }
+
+//     val.values.forEach((v, idx) => {
+//       if (!v.name?.trim()) {
+//         errs[`values.${idx}.name`] = t("validation.required");
+//       }
+//       if (!v.name_en?.trim()) {
+//         errs[`values.${idx}.name_en`] = t("validation.required");
+//       }
+//     });
+//   }
+
+//   errors.value = errs;
+//   return Object.values(errs).every((e) => e === "");
+// };
 
 const validateForm = () => {
   const val = editingAttr.value || {};
@@ -217,13 +248,57 @@ const validateForm = () => {
     name_en: !val.name_en ? t("validation.required") : "",
     type_id: !val.type_id ? t("validation.required") : "",
   };
+
+  const type = attributesTypes.value.find((t) => t.id === val.type_id)?.code;
+
+  if (["checkbox", "radio"].includes(type)) {
+    if (!val.values || val.values.length === 0) {
+      showError(t("dashboard.categories.attributes.type_value_required"));
+      return false;
+    }
+
+    let hasErrors = false;
+
+    val.values.forEach((v, idx) => {
+      if (!v.name?.trim()) {
+        errs[`values.${idx}.name`] = t("validation.required");
+        hasErrors = true;
+      }
+      if (!v.name_en?.trim()) {
+        errs[`values.${idx}.name_en`] = t("validation.required");
+        hasErrors = true;
+      }
+    });
+
+    if (hasErrors) {
+      errors.value = errs;
+      return false;
+    }
+  }
+
   errors.value = errs;
-  return !Object.values(errs).some(Boolean);
+  return Object.values(errs).every((e) => e === "");
 };
 
 const buildPayload = (attr) => {
-  const { name, name_en, type_id } = attr;
-  return { name, name_en, type_id };
+  const { name, name_en, type_id, values } = attr;
+  const payload = { name, name_en, type_id };
+
+  const type = attributesTypes.value.find((t) => t.id === type_id)?.code;
+
+  if (["checkbox", "radio"].includes(type)) {
+    payload.values = (values || []).map((v, index) => {
+      const result = {
+        name: v.name.trim(),
+        name_en: v.name_en.trim(),
+        value_order: index,
+      };
+      if (v.id) result.id = v.id;
+      return result;
+    });
+  }
+
+  return payload;
 };
 
 const saveAttribute = async () => {
@@ -256,7 +331,6 @@ const saveAttribute = async () => {
   }
 };
 
-// --- Delete Handler ---
 const processDelete = (attrId) => {
   isDeleteDialogOpen.value = true;
   selectedCategoryId.value = attrId;
@@ -277,16 +351,15 @@ const onDelete = async () => {
       res?.message || t("dashboard.categories.form.deleted_successfully")
     );
 
-    fetchAttributes(); // Fetch updated categories after delete
+    fetchAttributes();
   } catch (error) {
     showError(error?.message || t("dashboard.categories.form.delete_failed"));
   } finally {
-    isDeleteDialogOpen.value = false; // Close dialog
+    isDeleteDialogOpen.value = false;
     isSubmitting.value = false;
   }
 };
 
-// --- Load on mount ---
 onMounted(() => {
   fetchAttributes();
   fetchAttributesTypes();
