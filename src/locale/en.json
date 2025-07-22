@@ -54,8 +54,15 @@
       "required": "Email is required.",
       "invalid": "Email must be valid.",
       "email_or_phone": {
-        "required": "Email or phone is required"
+        "required": "phone is required"
       }
+    },
+    "phone": {
+      "required": "Phone number is required",
+      "invalid": "Please enter a valid phone number"
+    },
+    "name": {
+      "required": "Name is required"
     },
     "password": {
       "required": "Password is required."
@@ -101,7 +108,7 @@
     "logging_in": "Logging in...",
     "login_success": "Login successful!",
     "login_failed": "Login failed. Please try again.",
-    "email_or_phone": "Email or phone number",
+    "email_or_phone": "Phone number",
     "registering": "Registering...",
     "register_with_google": "Register with Google"
   },
@@ -147,6 +154,40 @@
     "users": {
       "title": "Users"
     },
+    "profile": {
+      "account-settings": "Account Settings",
+      "email": "Email",
+      "phone": "Phone",
+      "platform-language": "Platform Language",
+      "save-account": "Save Account Settings",
+      "profile-info": "Profile Info",
+      "name": "Name",
+      "save-profile": "Save Profile Info",
+      "profile-updated": "Profile updated successfully",
+      "account-updated": "Account updated successfully",
+      "google-linked-success": "Google account linked successfully",
+      "link-google": "Link Google Account",
+      "link-other-google": "Link Other Google Account",
+      "switch-to-google-login": "Switch to Google Login",
+      "switch-to-phone-login": "Switch to Phone Login",
+      "edit-account": "Edit Account",
+      "edit-profile": "Edit Profile",
+      "cancel-edit": "Cancel",
+      "invalid-phone": "Please enter a valid phone number",
+      "name-required": "Name is required",
+      "name-too-short": "Name must be at least 2 characters long",
+      "phone-required": "Phone number is required",
+      "confirm-language-change": "Are you sure you want to change the language? This will refresh the interface.",
+      "language-updated": "Language updated successfully",
+      "confirm-google-link": "Do you want to link your Google account? This will connect your current account with Google.",
+      "google-link-error": "Failed to link Google account",
+      "load-error": "Failed to load user data",
+      "update-error": "Failed to update profile",
+      "email-readonly": "Email cannot be changed",
+      "language-help": "Select your preferred language",
+      "no-name": "No name provided",
+      "no-email": "No email provided"
+    },
     "banners": {
       "title": "Banners",
       "add": "Add Banner",
@@ -157,8 +198,8 @@
       "error": "Failed to upload banner.",
       "reorder_success": "Banners reordered successfully!",
       "reorder_error": "Failed to reorder banners.",
-      "save_order":"Save Order",
-      "order":"Order",
+      "save_order": "Save Order",
+      "order": "Order",
       "no-data": "No banners available.",
       "create-banner": "Create Banner",
       "validation": {

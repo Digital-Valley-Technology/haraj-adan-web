@@ -20,8 +20,9 @@ const schema = yup.object({
   }),
   identifier: yup
     .string()
-    .nullable()
-    .test("emailOrPhone", t("validation.email_or_phone.required"), (value) => {
+    .matches(/^[0-9]{8,15}$/, t("validation.phone.invalid"))
+    .required(t("validation.phone.required"))
+    .test("phone", t("validation.phone.required"), (value) => {
       return !!value;
     }),
 });
@@ -82,15 +83,15 @@ const registerWithGoogle = () => {
           {{ nameError }}
         </p>
 
-        <!-- Email or Phone -->
+        <!-- Phone -->
         <IconField class="mb-4">
-          <InputIcon size="large" class="pi pi-envelope" />
+          <InputIcon size="large" class="pi pi-user" />
           <InputText
             v-model="identifier"
             class="w-full !border-gray-300"
             size="large"
             type="text"
-            :placeholder="$t('register.email_or_phone')"
+            :placeholder="$t('register.phone')"
           />
         </IconField>
         <p v-if="identifierError" class="text-red-500 text-sm mt-1">

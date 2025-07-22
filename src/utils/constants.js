@@ -130,6 +130,7 @@ export const websiteProfileItems = [
       {
         label: "header.login",
         icon: "pi pi-sign-in",
+        link: '/login'
       },
       {
         label: "header.logout",

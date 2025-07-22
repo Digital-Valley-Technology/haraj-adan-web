@@ -5,7 +5,13 @@ import draggable from "vuedraggable";
 import { ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 
-defineProps(["banners"]);
+const props = defineProps({
+  banners: Array,
+  loadingReorder: Boolean,
+  loadingUpdate: Boolean,
+  loadingFetch: Boolean,
+});
+
 const emit = defineEmits(["delete", "fetchBanners", "saveOrder", "update"]);
 
 const { t } = useI18n();
@@ -38,7 +44,7 @@ const handlePreview = (banner) => {
 const onSaveOrder = () => {
   const payload = reorderedBanners.value.map((banner, index) => ({
     id: banner.id,
-    image_order: index,
+    image_order: index + 1,
   }));
   emit("saveOrder", payload);
 };
@@ -79,20 +85,19 @@ const resetModal = () => {
       class="grid gap-4"
       ghost-class="opacity-40"
       handle=".drag-handle"
+      :disabled="props.loadingReorder"
     >
       <template #item="{ element, index }">
         <div
           v-if="element && element.id"
           class="flex items-center gap-4 p-4 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-lg transition-all group"
         >
-          <!-- Drag Handle -->
           <div
             class="text-gray-400 hover:text-gray-600 drag-handle cursor-move"
           >
             <i class="pi pi-bars text-lg"></i>
           </div>
 
-          <!-- Image Upload -->
           <div class="flex items-center gap-4 flex-grow">
             <div
               class="relative w-20 h-20 rounded-lg overflow-hidden border group"
@@ -121,12 +126,11 @@ const resetModal = () => {
                 {{ t("dashboard.banners.order") }}
               </span>
               <span class="text-base font-semibold text-gray-800">
-                {{ (bannerStore.page - 1) * bannerStore.limit + index }}
+                {{ element?.image_order }}
               </span>
             </div>
           </div>
 
-          <!-- Actions -->
           <div class="flex gap-2">
             <Button
               icon="pi pi-eye"
@@ -145,23 +149,28 @@ const resetModal = () => {
               size="small"
               @click="() => handleDelete(element)"
               v-tooltip.bottom="$t('dashboard.actions.delete')"
+              :disabled="props.loadingUpdate"
             />
           </div>
         </div>
       </template>
     </draggable>
 
-    <!-- Save Order Button -->
     <div class="flex justify-end">
       <Button
         icon="pi pi-check"
         :label="$t('dashboard.banners.save_order')"
         class="mt-4"
         @click="onSaveOrder"
+        :loading="props.loadingReorder"
+        :disabled="props.loadingReorder"
       />
     </div>
 
-    <!-- Pagination -->
+    <div v-if="props.loadingFetch" class="flex justify-center py-6">
+      <i class="pi pi-spinner pi-spin text-2xl text-primary"></i>
+    </div>
+
     <Paginator
       v-if="bannerStore && bannerStore.limit"
       :rows="bannerStore.limit"
@@ -181,7 +190,6 @@ const resetModal = () => {
       "
     />
 
-    <!-- Preview Modal -->
     <Dialog
       v-model:visible="showModal"
       modal
@@ -205,6 +213,7 @@ const resetModal = () => {
             :label="$t('generic.save')"
             icon="pi pi-check"
             @click="confirmUpdate"
+            :loading="props.loadingUpdate"
           />
         </div>
       </div>

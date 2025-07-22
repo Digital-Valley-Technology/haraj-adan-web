@@ -54,8 +54,15 @@
       "required": "البريد الإلكتروني مطلوب.",
       "invalid": "يرجى إدخال بريد إلكتروني صالح."
     },
+    "name": {
+      "required": "الاسم مطلوب"
+    },
+    "phone": {
+      "required": "رقم الهاتف مطلوب",
+      "invalid": "يرجى إدخال رقم هاتف صالح"
+    },
     "email_or_phone": {
-      "required": "البريد الإلكتروني أو رقم الهاتف مطلوب"
+      "required": "الهاتف مطلوب"
     },
     "password": {
       "required": "كلمة المرور مطلوبة."
@@ -101,7 +108,7 @@
     "logging_in": "جارٍ تسجيل الدخول...",
     "login_success": "تم تسجيل الدخول بنجاح!",
     "login_failed": "فشل تسجيل الدخول. حاول مرة أخرى.",
-    "email_or_phone": "البريد الإلكتروني أو رقم الهاتف",
+    "email_or_phone": "رقم الهاتف",
     "registering": "جارٍ التسجيل...",
     "register_with_google": "سجّل باستخدام جوجل"
   },
@@ -147,6 +154,40 @@
     "users": {
       "title": "المستخدمون"
     },
+    "profile": {
+      "account-settings": "إعدادات الحساب",
+      "email": "البريد الإلكتروني",
+      "phone": "رقم الهاتف",
+      "platform-language": "لغة المنصة",
+      "save-account": "حفظ إعدادات الحساب",
+      "profile-info": "معلومات الملف الشخصي",
+      "name": "الاسم",
+      "save-profile": "حفظ معلومات الملف الشخصي",
+      "profile-updated": "تم تحديث الملف الشخصي بنجاح",
+      "account-updated": "تم تحديث الحساب بنجاح",
+      "google-linked-success": "تم ربط حساب جوجل بنجاح",
+      "link-google": "ربط حساب جوجل",
+      "link-other-google": "ربط حساب جوجل آخر",
+      "switch-to-google-login": "التبديل إلى تسجيل الدخول بجوجل",
+      "switch-to-phone-login": "التبديل إلى تسجيل الدخول بالهاتف",
+      "edit-account": "تعديل الحساب",
+      "edit-profile": "تعديل الملف الشخصي",
+      "cancel-edit": "إلغاء",
+      "invalid-phone": "يرجى إدخال رقم هاتف صالح",
+      "name-required": "الاسم مطلوب",
+      "name-too-short": "يجب أن يكون الاسم مكونًا من حرفين على الأقل",
+      "phone-required": "رقم الهاتف مطلوب",
+      "confirm-language-change": "هل أنت متأكد من تغيير اللغة؟ سيتم تحديث الواجهة.",
+      "language-updated": "تم تحديث اللغة بنجاح",
+      "confirm-google-link": "هل تريد ربط حساب جوجل الخاص بك؟ سيتم ربط حسابك الحالي بجوجل.",
+      "google-link-error": "فشل ربط حساب جوجل",
+      "load-error": "فشل تحميل بيانات المستخدم",
+      "update-error": "فشل تحديث الملف الشخصي",
+      "email-readonly": "لا يمكن تغيير البريد الإلكتروني",
+      "language-help": "اختر لغتك المفضلة",
+      "no-name": "لم يتم توفير اسم",
+      "no-email": "لم يتم توفير بريد إلكتروني"
+    },
     "banners": {
       "title": "البنرات",
       "add": "إضافة بنر",
@@ -157,8 +198,8 @@
       "error": "فشل في تحميل البنر.",
       "reorder_success": "تم ترتيب البنرات بنجاح!",
       "reorder_error": "فشل في ترتيب البنرات.",
-      "save_order":"حفظ الترتيب",
-      "order":"الترتيب",
+      "save_order": "حفظ الترتيب",
+      "order": "الترتيب",
       "no-data": "لا توجد بنرات متاحة.",
       "create-banner": "إنشاء بنر",
       "validation": {

@@ -2,7 +2,6 @@
 import { useRouter, useRoute } from "vue-router";
 import AppLayout from "../Layout/AppLayout.vue";
 import { useCustomToast } from "../composables/toast";
-import { useAuthStore } from "../store/auth";
 import requestService from "../services/api/requestService";
 import { useI18n } from "vue-i18n";
 import { useForm, useField } from "vee-validate";
@@ -11,12 +10,13 @@ import { BASE_URL } from "../services/axios";
 
 const { t } = useI18n();
 const router = useRouter();
-const route = useRoute();
 const { showError, showSuccess } = useCustomToast();
-const authStore = useAuthStore();
 
 const schema = yup.object({
-  identifier: yup.string().required(t("validation.email_or_phone.required")),
+  identifier: yup
+    .string()
+    .matches(/^[0-9]{8,15}$/, t("validation.phone.invalid"))
+    .required(t("validation.phone.required")),
 });
 
 const { handleSubmit, isSubmitting } = useForm({ validationSchema: schema });
@@ -69,10 +69,10 @@ const loginWithGoogle = async () => {
             class="w-full !border-gray-300"
             size="large"
             type="text"
-            :placeholder="$t('register.email_or_phone')"
+            :placeholder="$t('register.phone')"
           />
         </IconField>
-        <p v-if="identifierError" class="text-red-500 text-sm mt-1">
+        <p v-if="identifierError" class="text-red-500 text-sm my-1">
           {{ identifierError }}
         </p>
 
@@ -85,7 +85,7 @@ const loginWithGoogle = async () => {
           :disabled="isSubmitting"
         >
           <i v-if="isSubmitting" class="pi pi-spinner pi-spin me-2"></i>
-          <i v-else class="pi pi-key me-2"></i>
+          <i v-else class="pi pi-whatsapp me-2"></i>
           {{ isSubmitting ? $t("otp.sending") : $t("otp.send_code") }}
         </Button>
 

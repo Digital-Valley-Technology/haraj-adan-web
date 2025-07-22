@@ -13,7 +13,10 @@ import BannersTableHeader from "./BannersTableHeader.vue";
 
 const bannerStore = useBannersStore();
 
-const isSubmitting = ref(false);
+const isSubmitting = ref(false); // shared for delete + update
+const isReordering = ref(false);
+const isFetching = ref(false); // for pagination & search
+
 const selectedBannerId = ref(null); // or passed as a prop if used inside a row
 
 // Delete dialog state
@@ -24,11 +27,18 @@ const searchText = ref("");
 const selectedFilter = ref({ name: "name" }); //  default filter set
 
 // Fetch banners from store
-const fetchData = () => {
-  bannerStore.fetchBanners({
-    page: bannerStore.page,
-    limit: bannerStore.limit,
-  });
+const fetchData = async () => {
+  isFetching.value = true;
+  try {
+    await bannerStore.fetchBanners({
+      page: bannerStore.page,
+      limit: bannerStore.limit,
+    });
+  } catch (error) {
+    showError(error?.message || "Failed to fetch banners.");
+  } finally {
+    isFetching.value = false;
+  }
 };
 
 const handleDelete = async () => {
@@ -62,11 +72,10 @@ const handleImageUpdate = async ({ id, image }) => {
   formData.append("image", image);
 
   isSubmitting.value = true;
-
   try {
     const res = await requestService.update("/banners", id, formData);
     showSuccess(res?.message || t("dashboard.banners.image_updated"));
-    fetchData(); // Refresh after update
+    await fetchData();
   } catch (e) {
     showError(e?.message || t("dashboard.banners.update_failed"));
   } finally {
@@ -75,12 +84,15 @@ const handleImageUpdate = async ({ id, image }) => {
 };
 
 const handleSaveOrder = async (orderedPayload) => {
+  isReordering.value = true;
   try {
     const res = await requestService.create("/banners/reorder", orderedPayload);
     showSuccess(res?.message || t("dashboard.banners.success"));
-    fetchData(); // Refresh table
+    await fetchData(); // refresh after saving order
   } catch (e) {
     showError(e?.message || t("dashboard.banners.error"));
+  } finally {
+    isReordering.value = false;
   }
 };
 
@@ -116,11 +128,15 @@ const total = computed(() => bannerStore.getTotal); // use total from store
         <BannersTable
           v-if="banners?.length > 0"
           :banners="banners"
+          :loading-reorder="isReordering"
+          :loading-update="isSubmitting"
+          :loading-fetch="isFetching"
           @delete="(banner) => processDelete(banner)"
           @update="handleImageUpdate"
           @fetch-banners="fetchData()"
           @saveOrder="handleSaveOrder"
         />
+
         <no-data
           v-else
           class="mt-12"

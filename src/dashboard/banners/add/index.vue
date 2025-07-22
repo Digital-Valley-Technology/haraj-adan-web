@@ -105,7 +105,7 @@ const onSubmit = handleSubmit(async () => {
     // Update image order based on current index
     imagesData.value.forEach((image, index) => {
       formData.append("images[]", image.file);
-      formData.append("image_orders[]", index); // Assuming 1-based index
+      formData.append("image_orders[]", index + 1); // Assuming 1-based index
     });
 
     const res = await requestService.create("/banners", formData, {
