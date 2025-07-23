@@ -5,6 +5,7 @@ import {
   DEV_BASE_URL,
   DEV_MEDIA_URL,
   MODE,
+  PROD_BASE_URL,
   PROD_MEDIA_URL,
 } from "../utils/constants"; //  PROD || DEV
 import qs from "qs";
@@ -13,7 +14,7 @@ import qs from "qs";
 // ===================
 
 export const MEDIA_URL = MODE == "DEV" ? DEV_MEDIA_URL : PROD_MEDIA_URL;
-export const BASE_URL = MODE == "DEV" ? DEV_BASE_URL : PROD_MEDIA_URL;
+export const BASE_URL = MODE == "DEV" ? DEV_BASE_URL : PROD_BASE_URL;
 
 // ===================
 // Redirect to Login
