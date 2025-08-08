@@ -34,7 +34,7 @@ const onSubmit = handleSubmit(async (values) => {
     showSuccess(response?.message || t("otp.sent_successfully"));
     router.push("/verify-otp");
   } catch (error) {
-    showError(error?.message || t("otp.send_failed"));
+    showError(error || t("otp.send_failed"));
   }
 });
 
