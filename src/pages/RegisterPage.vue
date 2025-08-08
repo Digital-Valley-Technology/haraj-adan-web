@@ -14,7 +14,7 @@ const router = useRouter();
 // Validation schema
 const schema = yup.object({
   name: yup.string().required(t("validation.name.required")),
-  identifier: yup
+  phone: yup
     .string()
     .matches(/^[0-9]{8,15}$/, t("validation.phone.invalid"))
     .required(t("validation.phone.required")),
@@ -23,8 +23,7 @@ const schema = yup.object({
 const { handleSubmit, isSubmitting } = useForm({ validationSchema: schema });
 
 const { value: name, errorMessage: nameError } = useField("name");
-const { value: identifier, errorMessage: identifierError } =
-  useField("identifier");
+const { value: phone, errorMessage: phoneError } = useField("phone");
 
 const onSubmit = handleSubmit(async (values) => {
   try {
@@ -71,13 +70,13 @@ const registerWithGoogle = () => {
           {{ $t("register.phone") }}
         </label>
         <input
-          v-model="identifier"
+          v-model="phone"
           type="text"
           class="w-full border border-gray-300 rounded-lg px-4 py-2 mb-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
           :placeholder="$t('register.phone')"
         />
-        <p v-if="identifierError" class="text-red-500 text-xs mb-3">
-          {{ identifierError }}
+        <p v-if="phoneError" class="text-red-500 text-xs mb-3">
+          {{ phoneError }}
         </p>
 
         <!-- Create Account Button -->
