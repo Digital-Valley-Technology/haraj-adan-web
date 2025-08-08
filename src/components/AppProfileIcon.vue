@@ -1,7 +1,7 @@
 <template>
   <div>
     <div
-      class="p-1 border border-[var(--primary-clr)] rounded-full flex justify-between items-center w-[70px]"
+      class="p-1 border border-[var(--primary-clr)] rounded-full flex items-center cursor-pointer"
       @click="toggleProfile"
     >
       <i
@@ -15,8 +15,13 @@
         size="small"
         aria-haspopup="true"
         aria-controls="overlay_menu"
-        class="!h-[24px] !w-[24px] !bg-[var(--primary-clr)] !border-[var(--primary-clr)]"
+        class="!h-[24px] !w-[24px] !bg-[var(--primary-clr)] !border-[var(--primary-clr)] ml-1"
       />
+      <span
+        class="ml-2 text-sm font-medium truncate max-w-[100px] whitespace-nowrap"
+      >
+        {{ currentUserName }}
+      </span>
     </div>
 
     <Menu ref="menu" id="overlay_menu" :model="profileItems" :popup="true">
@@ -64,8 +69,10 @@ import { websiteProfileItems } from "../utils/constants";
 import { useAuthStore } from "../store/auth";
 import { useRouter } from "vue-router";
 import { hasPermission } from "../utils/permissions";
+import { useI18n } from "vue-i18n";
 
 const authStore = useAuthStore();
+const { t } = useI18n();
 const router = useRouter();
 const menu = ref();
 const profileItems = ref(websiteProfileItems);
@@ -75,6 +82,9 @@ const toggleProfile = (event) => {
 };
 
 const loggedInUser = computed(() => authStore?.getUser);
+const currentUserName = computed(
+  () => authStore.getUser?.name || t("generic.guest")
+);
 
 const logout = async () => {
   await authStore.logout();

@@ -87,7 +87,6 @@ const handleDelete = (category) => emit("delete", category);
             severity="secondary"
             :label="$t('dashboard.actions.manage-attributes')"
             @click="() => handleAttributes(slotProps.data)"
-            outlined
             rounded
             size="small"
           />
@@ -97,7 +96,6 @@ const handleDelete = (category) => emit("delete", category);
             severity="info"
             :label="$t('dashboard.actions.edit')"
             @click="() => handleEdit(slotProps.data)"
-            outlined
             rounded
             size="small"
           />
@@ -106,7 +104,6 @@ const handleDelete = (category) => emit("delete", category);
             severity="danger"
             :label="$t('dashboard.actions.delete')"
             @click="() => handleDelete(slotProps.data)"
-            outlined
             rounded
             size="small"
           />

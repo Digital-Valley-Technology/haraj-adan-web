@@ -10,8 +10,10 @@ import requestService from "../../services/api/requestService";
 import BannersTable from "./BannersTable.vue";
 import { useBannersStore } from "../../store/banners";
 import BannersTableHeader from "./BannersTableHeader.vue";
+import { useI18n } from "vue-i18n";
 
 const bannerStore = useBannersStore();
+const { t } = useI18n();
 
 const isSubmitting = ref(false); // shared for delete + update
 const isReordering = ref(false);
@@ -35,7 +37,7 @@ const fetchData = async () => {
       limit: bannerStore.limit,
     });
   } catch (error) {
-    showError(error?.message || "Failed to fetch banners.");
+    showError(error || "Failed to fetch banners.");
   } finally {
     isFetching.value = false;
   }
@@ -53,12 +55,13 @@ const handleDelete = async () => {
     );
 
     showSuccess(
-      response?.message || t("dashboard.banners.form.deleted_successfully")
+      response?.status?.message ||
+        t("dashboard.banners.form.deleted_successfully")
     );
 
     fetchData(); // Fetch updated banners after delete
   } catch (error) {
-    showError(error?.message || t("dashboard.banners.form.delete_failed"));
+    showError(error || t("dashboard.banners.form.delete_failed"));
   } finally {
     isDeleteDialogOpen.value = false; // Close dialog
     isSubmitting.value = false;
@@ -74,10 +77,10 @@ const handleImageUpdate = async ({ id, image }) => {
   isSubmitting.value = true;
   try {
     const res = await requestService.update("/banners", id, formData);
-    showSuccess(res?.message || t("dashboard.banners.image_updated"));
+    showSuccess(res?.status?.message || t("dashboard.banners.image_updated"));
     await fetchData();
-  } catch (e) {
-    showError(e?.message || t("dashboard.banners.update_failed"));
+  } catch (error) {
+    showError(error || t("dashboard.banners.update_failed"));
   } finally {
     isSubmitting.value = false;
   }
@@ -87,10 +90,10 @@ const handleSaveOrder = async (orderedPayload) => {
   isReordering.value = true;
   try {
     const res = await requestService.create("/banners/reorder", orderedPayload);
-    showSuccess(res?.message || t("dashboard.banners.success"));
+    showSuccess(res?.status?.message || t("dashboard.banners.success"));
     await fetchData(); // refresh after saving order
-  } catch (e) {
-    showError(e?.message || t("dashboard.banners.error"));
+  } catch (error) {
+    showError(error || t("dashboard.banners.error"));
   } finally {
     isReordering.value = false;
   }

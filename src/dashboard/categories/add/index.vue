@@ -94,14 +94,13 @@ const onSubmit = handleSubmit(async (values) => {
 
     const response = await requestService.create("/categories", formData);
     showSuccess(
-      response?.message || t("dashboard.categories.form.category_created")
+      response?.status?.message ||
+        t("dashboard.categories.form.category_created")
     );
     router.push("/dashboard/categories");
   } catch (error) {
     console.error(error);
-    showError(
-      error?.message || t("dashboard.categories.form.category_create_failed")
-    );
+    showError(error || t("dashboard.categories.form.category_create_failed"));
   } finally {
     isSubmitting.value = false;
   }
@@ -265,22 +264,20 @@ const onSubmit = handleSubmit(async (values) => {
             </div>
           </div>
 
-          <Button
-            type="submit"
-            class="w-full !rounded-xl flex items-center justify-center gap-2"
-            size="large"
+          <button
             :disabled="isSubmitting"
+            class="custom-base-button w-full !rounded-xl flex items-center justify-center"
+            type="submit"
           >
-            <i v-if="!isSubmitting" class="pi pi-save me-2"></i>
-            <i v-else class="pi pi-spinner pi-spin me-2"></i>
-            <span>
-              {{
-                isSubmitting
-                  ? t("dashboard.categories.form.adding_category")
-                  : t("dashboard.categories.form.add_category")
-              }}
-            </span>
-          </Button>
+            <i
+              :class="isSubmitting ? 'pi pi-spinner pi-spin' : 'pi pi-plus'"
+            ></i>
+            {{
+              isSubmitting
+                ? t("dashboard.categories.form.adding_category")
+                : t("dashboard.categories.form.add_category")
+            }}
+          </button>
         </form>
       </div>
     </main>

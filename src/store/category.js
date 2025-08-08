@@ -37,8 +37,8 @@ export const useCategoriesStore = defineStore("categories", {
         );
 
         this.categories = response?.data;
-        this.total = response.total;
-        this.page = response.page;
+        this.total = response.meta.total;
+        this.page = response.meta.page;
       } catch (err) {
         console.error("Failed to fetch categories:", err);
       } finally {

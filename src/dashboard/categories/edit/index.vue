@@ -27,7 +27,7 @@ const previewUrl = ref(null);
 
 const breadcrumbItems = [
   { label: "sidebar.categories", route: "/dashboard/categories" },
-  { label: "dashboard.categories.edit-category" },
+  { label: "dashboard.categories.form.update_category" },
 ];
 
 const categories = ref([]);
@@ -57,7 +57,7 @@ const fetchCategory = async () => {
     parent_id.value = data?.parent_id || null;
     previewUrl.value = data?.image ? `${MEDIA_URL}/${data?.image}` : null;
   } catch (error) {
-    showError(error?.message || t("dashboard.categories.form.fetch_failed"));
+    showError(error || t("dashboard.categories.form.fetch_failed"));
     router.push("/dashboard/categories");
   } finally {
     generalStore.setLoading(false);
@@ -128,14 +128,13 @@ const onSubmit = handleSubmit(async (values) => {
     );
 
     showSuccess(
-      response?.message || t("dashboard.categories.form.category_updated")
+      response?.status?.message ||
+        t("dashboard.categories.form.category_updated")
     );
     router.push("/dashboard/categories");
   } catch (error) {
     console.error(error);
-    showError(
-      error?.message || t("dashboard.categories.form.category_update_failed")
-    );
+    showError(error || t("dashboard.categories.form.category_update_failed"));
   } finally {
     isSubmitting.value = false;
   }
@@ -299,22 +298,20 @@ const onSubmit = handleSubmit(async (values) => {
             </div>
           </div>
 
-          <Button
-            type="submit"
-            class="w-full !rounded-xl flex items-center justify-center gap-2"
-            size="large"
+          <button
             :disabled="isSubmitting"
+            class="custom-base-button w-full !rounded-xl flex items-center justify-center"
+            type="submit"
           >
-            <i v-if="!isSubmitting" class="pi pi-save me-2"></i>
-            <i v-else class="pi pi-spinner pi-spin me-2"></i>
-            <span>
-              {{
-                isSubmitting
-                  ? t("dashboard.categories.form.updating_category")
-                  : t("dashboard.categories.form.update_category")
-              }}
-            </span>
-          </Button>
+            <i
+              :class="isSubmitting ? 'pi pi-spinner pi-spin' : 'pi pi-save'"
+            ></i>
+            {{
+              isSubmitting
+                ? t("dashboard.categories.form.updating_category")
+                : t("dashboard.categories.form.update_category")
+            }}
+          </button>
         </form>
       </div>
     </main>

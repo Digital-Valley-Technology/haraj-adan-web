@@ -31,14 +31,19 @@
         <div class="flex justify-center gap-2">
           <Button
             icon="pi pi-pencil"
+            :label="$t('dashboard.actions.edit')"
+            size="small"
             @click="$emit('edit', slotProps.data)"
-            class="p-button-sm"
+            severity="info"
+            rounded
           />
           <Button
             icon="pi pi-trash"
             severity="danger"
+            :label="$t('dashboard.actions.delete')"
+            size="small"
             @click="$emit('delete', slotProps.data.id)"
-            class="p-button-sm"
+            rounded
           />
         </div>
       </template>

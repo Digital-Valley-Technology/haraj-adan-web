@@ -29,16 +29,34 @@
     "ksa-delivery": "توصيل إلى المملكة العربية"
   },
   "footer": {
-    "short-desc": "إكتشف سهولة الإعلان مع حراج عدن",
-    "service": "خدمات حراج عدن",
-    "links": "روابط مهمة",
-    "contact-through": "تواصل معنا",
-    "service-content": "حراج عدن خدمة مقدمة من مؤسسة ريي سيل لنظم تقنية المعلومات ، سجل تجاري رقم (3550161196)، المملكة العربية السعودية، تبوك6478",
-    "faq": "الأسئلة الشائعة",
-    "policy": "سياسة الاستخدام والخصوصية",
-    "return-policy": "سياسة الإستبدال و الإسترجاع",
+    "brand": "حراج عدن",
+    "product": {
+      "title": "المنتج",
+      "features": "المميزات",
+      "pricing": "الأسعار",
+      "caseStudies": "دراسات حالة"
+    },
+    "company": {
+      "title": "الشركة",
+      "about": "معلومات عنا",
+      "contact": "اتصل بنا",
+      "careers": "وظائف"
+    },
+    "support": {
+      "title": "الدعم",
+      "gettingStarted": "البدء",
+      "helpCenter": "مركز المساعدة",
+      "serverStatus": "حالة الخادم"
+    },
+    "contacts": {
+      "title": "تواصل معنا",
+      "email": "contact@company.com",
+      "phone": "(XXX) XXX – XXX",
+      "address": "العنوان هنا"
+    },
+    "copy": "جميع الحقوق محفوظة.",
     "terms": "الشروط والأحكام",
-    "about": "ما هي خدمات حراج عدن؟"
+    "privacy": "سياسة الخصوصية"
   },
   "home": {
     "best-seller": "المنتجات الأكثر مبيعًا",
@@ -70,7 +88,12 @@
     "fill-all-fields": "يرجى ملء جميع الحقول المطلوبة.",
     "required": "هذا الحقل مطلوب."
   },
+  "ads": {
+    "post_ad": "نشر إعلان",
+    "search_placeholder": "المكان، الموقع"
+  },
   "login": {
+    "login": "تسجيل الدخول",
     "login_with_google": "تسجيل الدخول باستخدام جوجل",
     "google_failed": "فشل تسجيل الدخول باستخدام جوجل"
   },
@@ -86,7 +109,11 @@
     "send_failed": "فشل في إرسال رمز التحقق",
     "invalid": "رمز التحقق غير صحيح أو منتهي الصلاحية",
     "identifier_missing": "لم يتم العثور على البريد الإلكتروني أو رقم الهاتف. الرجاء تسجيل الدخول مرة أخرى.",
-    "required": "رمز التحقق مطلوب"
+    "required": "رمز التحقق مطلوب",
+    "instruction": "لتحقق من حسابك، أدخل رمز التحقق المرسل إلى",
+    "no_code": "لم تستلم الرمز؟",
+    "resend": "إعادة الإرسال",
+    "title": "تأكيد البريد الإلكتروني"
   },
   "register": {
     "username": "إسم المستخدم",
@@ -128,31 +155,137 @@
     "manage-invitations-permissions": "إدارة الأذونات",
     "ads": "الإعلانات",
     "transactions": "المعاملات",
-    "users": "المستخدمون",
-    "banners": "اللافتات"
+    "users": "المستخدمين",
+    "banners": "اللافتات",
+    "wallet-deposits-requests": "طلبات إيداع المحفظة",
+    "wallet-transactions": "معاملات المحفظة"
   },
   "dashboard": {
     "actions": {
       "edit": "تعديل",
       "delete": "حذف",
       "manage-attributes": "إدارة الصفات",
-      "preview": "عرض"
+      "preview": "عرض",
+      "details": "التفاصيل"
     },
     "analytics": {
-      "title": "الإحصائيات",
+      "title": "لوحة تحليلات",
       "totalUsers": "إجمالي المستخدمين",
-      "totalSessions": "إجمالي الجلسات",
-      "conversionRate": "معدل التحويل",
-      "chartPlaceholder": "سيتم عرض الرسم البياني هنا"
+      "totalAds": "إجمالي الإعلانات",
+      "totalCategories": "إجمالي الفئات",
+      "featuredAds": "الإعلانات المميزة",
+      "activeUsers": "المستخدمون النشطون",
+      "inactiveUsers": "المستخدمون غير النشطين",
+      "walletTotalBalance": "إجمالي رصيد المحفظة",
+      "chartPlaceholder": "سيتم عرض الرسم البياني هنا",
+      "errorLoading": "حدث خطأ أثناء تحميل الإحصائيات"
     },
     "ads": {
       "title": "الإعلانات"
     },
+    "wallet-deposits-requests": {
+      "table": {
+        "user_id": "معرّف المستخدم",
+        "status_id": "الحالة",
+        "amount": "المبلغ",
+        "proof_image": "صورة الإثبات",
+        "created": "تاريخ الإرسال",
+        "updated": "تاريخ التحديث",
+        "actions": "الإجراءات",
+        "view-proof": "عرض الإثبات",
+        "approve": "الموافقة",
+        "reject": "رفض",
+        "name": "الاسم",
+        "status": "الحالة"
+      },
+      "actions": {
+        "approve": "الموافقة",
+        "reject": "رفض",
+        "view-proof": "عرض الإثبات",
+        "delete": "حذف",
+        "info": "التفاصيل"
+      },
+      "details": {
+        "title": "تفاصيل طلب الإيداع",
+        "user": "المستخدم",
+        "amount": "المبلغ",
+        "status": "الحالة",
+        "created_at": "تاريخ الإنشاء",
+        "updated_at": "تاريخ التحديث",
+        "proof_image": "صورة الإثبات",
+        "view_proof": "عرض صورة الإثبات"
+      },
+      "confirmation": {
+        "title": "تأكيد الإجراء",
+        "approve": "هل أنت متأكد أنك تريد الموافقة على طلب الإيداع؟",
+        "reject": "هل أنت متأكد أنك تريد رفض طلب الإيداع؟",
+        "delete": "هل أنت متأكد أنك تريد حذف طلب الإيداع؟"
+      },
+      "error": {
+        "invalid_amount": "يرجى إدخال مبلغ صالح أكبر من 0."
+      },
+      "amount": "المبلغ",
+      "enter-amount": "أدخل المبلغ",
+      "amount-placeholder": "أدخل المبلغ للموافقة عليه",
+      "no-data": "لا توجد طلبات إيداع في المحفظة حاليًا.",
+      "proof_label": "إيصال الدفع"
+    },
     "transactions": {
-      "title": "المعاملات"
+      "title": "المعاملات",
+      "table": {
+        "transaction_id": "معرّف المعاملة",
+        "amount": "المبلغ",
+        "type": "النوع",
+        "description": "الوصف",
+        "user": "المستخدم",
+        "date": "التاريخ",
+        "currency": "دولار أمريكي",
+        "view": "عرض التفاصيل",
+        "name": "الاسم",
+        "status": "الحالة",
+        "updated_at": "تاريخ التحديث",
+        "descr": "الوصف"
+      },
+      "fetching": "جارٍ جلب المعاملات...",
+      "no-data": "لا توجد معاملات متاحة.",
+      "search-placeholder": "ابحث عن المعاملات باستخدام المعرّف أو المستخدم أو الوصف",
+      "filter-by": "تصفية حسب النوع",
+      "filter-options": {
+        "all": "الكل",
+        "credit": "إيداع",
+        "debit": "سحب",
+        "refund": "استرداد",
+        "payment": "دفع"
+      },
+      "pagination": {
+        "previous": "السابق",
+        "next": "التالي",
+        "page-info": "{currentPage} من {totalPages}"
+      }
     },
     "users": {
-      "title": "المستخدمون"
+      "title": "المستخدمين",
+      "not_provided": "— غير متوفر —",
+      "ban_confirm": "هل أنت متأكد أنك تريد حظر هذا المستخدم؟",
+      "activate_confirm": "هل أنت متأكد أنك تريد تفعيل هذا المستخدم؟",
+      "no_data": "لا توجد بيانات",
+      "table": {
+        "name": "الاسم",
+        "email": "البريد الإلكتروني",
+        "phone": "رقم الهاتف",
+        "role": "الدور",
+        "is_active": "الحالة",
+        "actions": "الإجراءات"
+      },
+      "status": {
+        "active": "نشط",
+        "banned": "محظور"
+      },
+      "actions": {
+        "ban": "حظر",
+        "activate": "تفعيل",
+        "delete": "حذف"
+      }
     },
     "profile": {
       "account-settings": "إعدادات الحساب",
@@ -318,7 +451,11 @@
     "submit": "إرسال",
     "delete_confirmation": "هل أنت متأكد أنك تريد حذف هذا العنصر؟",
     "required_field": "هذا الحقل مطلوب.",
-    "add": "إضافة"
+    "add": "إضافة",
+    "confirmation_message": "هل أنت متأكد أنك تريد المتابعة؟",
+    "processing": "جارٍ المعالجة...",
+    "or": "أو",
+    "guest": "ضيف"
   },
   "products": {
     "similar-products": "منتجات مشابهة",

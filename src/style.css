@@ -89,6 +89,33 @@ body {
   max-width: 92%;
 }
 
+/* Base button styles */
+.custom-base-button {
+  background-color: #fbbf24 !important; /* bg-yellow-400 */
+  color: black !important; /* text-black */
+  font-weight: 600 !important; /* font-semibold */
+  padding: 0.5rem 1rem !important; /* py-2 px-4 */
+  border-radius: 0.375rem !important; /* rounded (6px) */
+  display: flex !important; /* flex */
+  align-items: center !important; /* items-center */
+  gap: 0.5rem !important; /* space-x-2 (~8px spacing between flex items) */
+  cursor: pointer !important;
+  transition: background-color 0.2s ease !important; /* transition */
+}
+
+/* Hover state */
+.custom-base-button:hover:not(:disabled) {
+  background-color: #fcd34d !important; /* hover:bg-yellow-300 */
+}
+
+.custom-base-button:disabled {
+  background-color: #f3f4f6 !important; /* light gray */
+  color: #9ca3af !important; /* gray text */
+  cursor: not-allowed !important;
+  opacity: 0.9 !important;
+  pointer-events: none !important;
+}
+
 @media screen and (min-width: 1440px) {
   .custom-container {
     max-width: 1290px;

@@ -11,20 +11,13 @@ import { BASE_URL } from "../services/axios";
 const { t } = useI18n();
 const router = useRouter();
 
-// Form schema
+// Validation schema
 const schema = yup.object({
-  name: yup.string().when("identifier", {
-    is: (val) => !!val,
-    then: (schema) => schema.required(t("validation.name.required")),
-    otherwise: (schema) => schema,
-  }),
+  name: yup.string().required(t("validation.name.required")),
   identifier: yup
     .string()
     .matches(/^[0-9]{8,15}$/, t("validation.phone.invalid"))
-    .required(t("validation.phone.required"))
-    .test("phone", t("validation.phone.required"), (value) => {
-      return !!value;
-    }),
+    .required(t("validation.phone.required")),
 });
 
 const { handleSubmit, isSubmitting } = useForm({ validationSchema: schema });
@@ -33,13 +26,11 @@ const { value: name, errorMessage: nameError } = useField("name");
 const { value: identifier, errorMessage: identifierError } =
   useField("identifier");
 
-// Submit handler
 const onSubmit = handleSubmit(async (values) => {
   try {
     const response = await requestService.create("auth/otp-request", {
       ...values,
     });
-
     showSuccess(response?.message || t("otp.sent_successfully"));
     router.push("/verify-otp");
   } catch (error) {
@@ -54,74 +45,82 @@ const registerWithGoogle = () => {
 
 <template>
   <app-layout>
-    <main class="relative py-32 px-6">
-      <div
-        class="card px-6 py-8 mx-auto max-w-[600px] shadow-lg border border-gray-200 rounded-lg"
-      >
-        <!-- Google register -->
-        <Button
-          class="!block w-full !rounded-md mb-6 !bg-red-500 !border-red-500 text-white"
-          size="large"
-          @click="registerWithGoogle"
-        >
-          <i class="pi pi-google me-2"></i>
-          {{ $t("register.register_with_google") }}
-        </Button>
+    <main class="relative py-20 px-6">
+      <div class="mx-auto max-w-[400px]">
+        <!-- Title -->
+        <h1 class="text-2xl font-semibold text-center mb-8">
+          {{ $t("register.register") }}
+        </h1>
 
         <!-- Name -->
-        <IconField class="mb-4">
-          <InputIcon size="large" class="pi pi-user" />
-          <InputText
-            v-model="name"
-            class="w-full !border-gray-300"
-            size="large"
-            type="text"
-            :placeholder="$t('register.name')"
-          />
-        </IconField>
-        <p v-if="nameError" class="text-red-500 text-sm mt-1">
+        <label class="block mb-1 font-medium text-sm">
+          {{ $t("register.name") }}
+        </label>
+        <input
+          v-model="name"
+          type="text"
+          class="w-full border border-gray-300 rounded-lg px-4 py-2 mb-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          :placeholder="$t('register.name')"
+        />
+        <p v-if="nameError" class="text-red-500 text-xs mb-3">
           {{ nameError }}
         </p>
 
         <!-- Phone -->
-        <IconField class="mb-4">
-          <InputIcon size="large" class="pi pi-user" />
-          <InputText
-            v-model="identifier"
-            class="w-full !border-gray-300"
-            size="large"
-            type="text"
-            :placeholder="$t('register.phone')"
-          />
-        </IconField>
-        <p v-if="identifierError" class="text-red-500 text-sm mt-1">
+        <label class="block mb-1 font-medium text-sm">
+          {{ $t("register.phone") }}
+        </label>
+        <input
+          v-model="identifier"
+          type="text"
+          class="w-full border border-gray-300 rounded-lg px-4 py-2 mb-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          :placeholder="$t('register.phone')"
+        />
+        <p v-if="identifierError" class="text-red-500 text-xs mb-3">
           {{ identifierError }}
         </p>
 
-        <!-- Register button -->
-        <Button
+        <!-- Create Account Button -->
+        <button
           type="button"
-          class="!block w-full !rounded-md mb-4 !bg-[var(--primary-clr)] !border-[var(--primary-clr)]"
-          size="large"
           @click="onSubmit"
           :disabled="isSubmitting"
+          class="w-full bg-yellow-300 text-gray-800 font-medium py-3 rounded-lg mb-6 disabled:opacity-50"
         >
-          <i v-if="isSubmitting" class="pi pi-spinner pi-spin me-2"></i>
-          <i v-else class="pi pi-user-plus me-2"></i>
-          {{
-            isSubmitting ? $t("register.registering") : $t("register.register")
-          }}
-        </Button>
+          <span v-if="isSubmitting">{{ $t("register.registering") }}...</span>
+          <span v-else>{{ $t("register.register") }}</span>
+        </button>
 
         <!-- Login link -->
-        <p class="text-center text-sm">
-          <span class="inline-block me-2">{{
-            $t("register.has-account")
-          }}</span>
-          <RouterLink to="/login" class="text-[#596e60]">
+        <p class="text-center text-sm mb-4">
+          {{ $t("register.has-account") }}
+          <RouterLink to="/login" class="text-blue-600">
             {{ $t("register.login") }}
           </RouterLink>
         </p>
+
+        <!-- Divider -->
+        <div class="flex items-center my-4">
+          <hr class="flex-grow border-gray-300" />
+          <span class="px-2 text-gray-400 text-sm">{{ $t("generic.or") }}</span>
+          <hr class="flex-grow border-gray-300" />
+        </div>
+
+        <!-- Google Button -->
+        <button
+          type="button"
+          @click="registerWithGoogle"
+          class="w-full flex items-center justify-center gap-3 border border-gray-300 rounded-lg py-3 hover:bg-gray-50 transition"
+        >
+          <img
+            src="https://www.svgrepo.com/show/355037/google.svg"
+            alt="Google"
+            class="w-5 h-5"
+          />
+          <span class="text-sm font-medium text-gray-700">
+            {{ $t("register.register_with_google") }}
+          </span>
+        </button>
       </div>
     </main>
   </app-layout>

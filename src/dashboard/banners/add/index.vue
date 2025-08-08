@@ -4,7 +4,6 @@ import { useI18n } from "vue-i18n";
 import { useRouter } from "vue-router";
 import { useForm, useField } from "vee-validate";
 import * as yup from "yup";
-
 import DashboardLayout from "../../../Layout/DashboardLayout.vue";
 import { DashboardBreadCrumbBase } from "../../../utils/constants";
 import requestService from "../../../services/api/requestService";
@@ -39,10 +38,6 @@ const schema = yup.object({
       (files) => files && files.length <= MAX_IMAGES
     ),
 });
-
-// const { handleSubmit, setFieldValue, resetForm } = useForm({
-//   validationSchema: schema,
-// });
 
 const { handleSubmit, setFieldValue, resetForm } = useForm({
   validationSchema: schema,
@@ -112,13 +107,13 @@ const onSubmit = handleSubmit(async () => {
       headers: { "Content-Type": "multipart/form-data" },
     });
 
-    showSuccess(res?.message || t("dashboard.banners.success"));
+    showSuccess(res?.status?.message || t("dashboard.banners.success"));
     resetForm();
     imagesData.value = [];
     router.push("/dashboard/banners");
-  } catch (err) {
-    console.error(err);
-    showError(err?.message || t("dashboard.banners.error"));
+  } catch (error) {
+    console.error(error);
+    showError(err || t("dashboard.banners.error"));
   } finally {
     isSubmitting.value = false;
   }
@@ -227,14 +222,17 @@ const onSubmit = handleSubmit(async () => {
           </draggable>
 
           <div class="pt-6 flex justify-end">
-            <Button
-              type="submit"
-              :label="t('generic.save')"
-              icon="pi pi-check"
-              class="px-6 py-2 rounded-lg"
-              :loading="isSubmitting"
+            <button
               :disabled="imagesData.length === 0"
-            />
+              class="custom-base-button"
+              @click="onSubmit"
+              type="submit"
+            >
+              <i
+                :class="isSubmitting ? 'pi pi-spinner pi-spin' : 'pi pi-plus'"
+              ></i>
+              {{ $t("generic.save") }}
+            </button>
           </div>
         </form>
       </div>

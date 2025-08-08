@@ -60,12 +60,10 @@ const breadcrumbItems = ref([{ label: "sidebar.banners" }]);
       />
 
       <!-- Right side: add button -->
-      <Button
-        :label="$t('dashboard.banners.add')"
-        icon="pi pi-plus"
-        size="small"
-        @click="goToAddPage"
-      />
+      <button class="custom-base-button" @click="goToAddPage">
+        <i class="pi pi-plus"></i>
+        {{ $t("dashboard.banners.add") }}
+      </button>
     </div>
   </div>
 </template>

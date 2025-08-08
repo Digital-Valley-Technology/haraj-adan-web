@@ -29,16 +29,34 @@
     "ksa-delivery": "Delivery to KSA"
   },
   "footer": {
-    "short-desc": "Discover the ease of Advertising with Haraj Adan",
-    "service": "Haraj adan Services",
-    "links": "Important Links",
-    "contact-through": "Contact Us",
-    "service-content": "Haraj adan is a service provided by Haraj adan Information Technology Systems, Commercial Registration No. (3550161196), Kingdom of Saudi Arabia, Tabuk 6478",
-    "faq": "Frequently Asked Questions",
-    "policy": "Use & Privacy Policy",
-    "return-policy": "Return & Replacement Policy",
-    "terms": "Terms & Conditions",
-    "about": "What Are Haraj adan Services?"
+    "brand": "Haraj Aden",
+    "product": {
+      "title": "Product",
+      "features": "Features",
+      "pricing": "Pricing",
+      "caseStudies": "Case Studies"
+    },
+    "company": {
+      "title": "Company",
+      "about": "About",
+      "contact": "Contact Us",
+      "careers": "Careers"
+    },
+    "support": {
+      "title": "Support",
+      "gettingStarted": "Getting Started",
+      "helpCenter": "Help Center",
+      "serverStatus": "Server Status"
+    },
+    "contacts": {
+      "title": "Contact Us",
+      "email": "contact@company.com",
+      "phone": "(XXX) XXX – XXX",
+      "address": "XXX Address"
+    },
+    "copy": "All rights reserved.",
+    "terms": "Terms and Conditions",
+    "privacy": "Privacy Policy"
   },
   "home": {
     "best-seller": "Best Sellers",
@@ -71,8 +89,13 @@
     "required": "This Field is required."
   },
   "login": {
+    "login": "Login",
     "login_with_google": "Login with Google",
     "google_failed": "Google login failed"
+  },
+  "ads": {
+    "post_ad": "Post Ad",
+    "search_placeholder": "Place, Location"
   },
   "otp": {
     "send_code": "Send OTP",
@@ -86,7 +109,11 @@
     "send_failed": "Failed to send OTP",
     "invalid": "Invalid or expired OTP",
     "identifier_missing": "No identifier found. Please login again.",
-    "required": "OTP is required"
+    "required": "OTP is required",
+    "instruction": "To verify your account, enter the verification code sent to",
+    "no_code": "Didn't receive the code?",
+    "resend": "Resend",
+    "title": "Email Verification"
   },
   "register": {
     "username": "Username",
@@ -129,30 +156,136 @@
     "ads": "Advertisements",
     "transactions": "Transactions",
     "users": "Users",
-    "banners": "Banners"
+    "banners": "Banners",
+    "wallet-deposits-requests": "Wallet Deposits Requests",
+    "wallet-transactions": "Wallet Transactions"
   },
   "dashboard": {
     "actions": {
       "edit": "Edit",
       "delete": "Delete",
       "manage-attributes": "Manage Attributes",
-      "preview": "Preview"
+      "preview": "Preview",
+      "details": "Details"
     },
     "analytics": {
       "title": "Analytics Dashboard",
       "totalUsers": "Total Users",
-      "totalSessions": "Total Sessions",
-      "conversionRate": "Conversion Rate",
-      "chartPlaceholder": "Chart/graph will be displayed here"
+      "totalAds": "Total Ads",
+      "totalCategories": "Total Categories",
+      "featuredAds": "Featured Ads",
+      "activeUsers": "Active Users",
+      "inactiveUsers": "Inactive Users",
+      "walletTotalBalance": "Wallet Total Balance",
+      "chartPlaceholder": "Chart will be displayed here",
+      "errorLoading": "Error loading statistics"
     },
     "ads": {
       "title": "Advertisements"
     },
+    "wallet-deposits-requests": {
+      "table": {
+        "user_id": "User ID",
+        "status_id": "Status",
+        "amount": "Amount",
+        "proof_image": "Proof Image",
+        "created": "Submitted On",
+        "updated": "Updated At",
+        "actions": "Actions",
+        "view-proof": "View Proof",
+        "approve": "Approve",
+        "reject": "Reject",
+        "name": "Name",
+        "status": "Status"
+      },
+      "actions": {
+        "approve": "Approve Request",
+        "reject": "Reject Request",
+        "view-proof": "View Proof Image",
+        "delete": "Delete Request",
+        "info": "Request Info"
+      },
+      "details": {
+        "title": "Wallet Deposit Request Details",
+        "user": "User",
+        "amount": "Amount",
+        "status": "Status",
+        "created_at": "Created At",
+        "updated_at": "Updated At",
+        "proof_image": "Proof Image",
+        "view-proof": "View Proof Image"
+      },
+      "confirmation": {
+        "title": "Confirmation",
+        "approve": "Are you sure you want to approve this request?",
+        "reject": "Are you sure you want to reject this request?",
+        "delete": "Are you sure you want to delete this request?"
+      },
+      "error": {
+        "invalid_amount": "Please enter a valid amount greater than 0."
+      },
+      "amount": "Amount",
+      "enter-amount": "Enter the amount",
+      "amount-placeholder": "Enter the amount to approve",
+      "no-data": "There are currently no wallet deposit requests.",
+      "proof_label": "Payment Receipt"
+    },
     "transactions": {
-      "title": "Transactions"
+      "title": "Transactions",
+      "table": {
+        "transaction_id": "Transaction ID",
+        "amount": "Amount",
+        "type": "Type",
+        "description": "Description",
+        "user": "User",
+        "date": "Date",
+        "currency": "USD",
+        "view": "View",
+        "name": "Name",
+        "status": "Status",
+        "updated_at": "Updated At",
+        "descr": "Description"
+      },
+      "fetching": "Fetching transactions...",
+      "no-data": "No transactions available.",
+      "search-placeholder": "Search transactions by ID, user, or description",
+      "filter-by": "Filter by Type",
+      "filter-options": {
+        "all": "All",
+        "credit": "Credit",
+        "debit": "Debit",
+        "refund": "Refund",
+        "payment": "Payment"
+      },
+      "pagination": {
+        "previous": "Previous",
+        "next": "Next",
+        "page-info": "{currentPage} of {totalPages}"
+      }
     },
     "users": {
-      "title": "Users"
+      "title": "Users",
+      "not_provided": "— Not Provided —",
+      "no_data": "No data available",
+      "ban_confirm": "Are you sure you want to ban this user?",
+      "activate_confirm": "Are you sure you want to activate this user?",
+      "table": {
+        "name": "Name",
+        "email": "Email",
+        "phone": "Phone",
+        "role": "Role",
+        "is_active": "Status",
+        "actions": "Actions"
+      },
+      "status": {
+        "active": "Active",
+        "banned": "Banned"
+      },
+      "actions": {
+        "ban": "Ban",
+        "activate": "Activate",
+        "delete": "Delete"
+      }
     },
     "profile": {
       "account-settings": "Account Settings",
@@ -313,7 +446,11 @@
     "submit": "Submit",
     "delete_confirmation": "Are you sure you want to delete this item?",
     "required_field": "This field is required.",
-    "add": "Add"
+    "add": "Add",
+    "confirmation_message": "Are you sure you want to proceed?",
+    "processing": "Processing...",
+    "or": "OR",
+    "guest": "Guest"
   },
   "products": {
     "similar-products": "Similar Products",

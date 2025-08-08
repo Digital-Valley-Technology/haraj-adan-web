@@ -41,12 +41,11 @@
             <h2 class="text-2xl font-semibold">
               {{ t("dashboard.actions.manage-attributes") }}
             </h2>
-            <Button
-              :label="$t('dashboard.categories.attributes.add')"
-              icon="pi pi-plus"
-              class="p-button-success"
-              @click="onAdd"
-            />
+
+            <button class="custom-base-button" @click="onAdd">
+              <i class="pi pi-plus"></i>
+              {{ $t("dashboard.categories.attributes.add") }}
+            </button>
           </div>
 
           <div
@@ -96,11 +95,11 @@
                 severity="secondary"
                 @click="dialogVisible = false"
               />
-              <Button
-                :label="t('generic.save')"
-                icon="pi pi-check"
-                @click="saveAttribute"
-              />
+
+              <button class="custom-base-button" @click="saveAttribute">
+                <i :class="isAdd ? 'pi pi-plus' : 'pi pi-save'"></i>
+                {{ isAdd ? $t("generic.add") : $t("generic.save") }}
+              </button>
             </div>
           </Dialog>
           <DeleteDialog
@@ -146,6 +145,7 @@ const errors = ref({});
 const selectedCategoryId = ref(null);
 const isDeleteDialogOpen = ref(false);
 const isSubmitting = ref(false);
+const isAdd = ref(false);
 
 const totalRecords = ref(0);
 const rowsPerPage = ref(10);
@@ -169,9 +169,9 @@ const fetchAttributes = async () => {
     );
     attributes.value = res.data || [];
     totalRecords.value = res.meta?.total || 0;
-  } catch (err) {
+  } catch (error) {
     console.error(err);
-    showError(t("dashboard.fetch_error"));
+    showError(error || t("dashboard.fetch_error"));
   } finally {
     loadingAttributes.value = false;
   }
@@ -191,12 +191,14 @@ const fetchAttributesTypes = async () => {
 };
 
 const onAdd = () => {
+  isAdd.value = true;
   editingAttr.value = { name: "", name_en: "", type_id: null, values: [] };
   errors.value = {};
   dialogVisible.value = true;
 };
 
 const onEdit = (attr) => {
+  isAdd.value = false;
   editingAttr.value = {
     ...attr,
     values: attr?.values?.length ? attr.values.map((v) => ({ ...v })) : [],
@@ -210,36 +212,6 @@ const closeDialog = () => {
   errors.value = {};
   dialogVisible.value = false;
 };
-
-// const validateForm = () => {
-//   const val = editingAttr.value || {};
-//   const errs = {
-//     name: !val.name ? t("validation.required") : "",
-//     name_en: !val.name_en ? t("validation.required") : "",
-//     type_id: !val.type_id ? t("validation.required") : "",
-//   };
-
-//   const type = attributesTypes.value.find((t) => t.id === val.type_id)?.code;
-
-//   if (["checkbox", "radio"].includes(type)) {
-//     if (!val.values?.length) {
-//       showError(t("dashboard.categories.attributes.type_required"));
-//       return false;
-//     }
-
-//     val.values.forEach((v, idx) => {
-//       if (!v.name?.trim()) {
-//         errs[`values.${idx}.name`] = t("validation.required");
-//       }
-//       if (!v.name_en?.trim()) {
-//         errs[`values.${idx}.name_en`] = t("validation.required");
-//       }
-//     });
-//   }
-
-//   errors.value = errs;
-//   return Object.values(errs).every((e) => e === "");
-// };
 
 const validateForm = () => {
   const val = editingAttr.value || {};
@@ -312,7 +284,8 @@ const saveAttribute = async () => {
         buildPayload(editingAttr.value)
       );
       showSuccess(
-        res?.message || t("dashboard.categories.attributes.updated_success")
+        res?.status?.message ||
+          t("dashboard.categories.attributes.updated_success")
       );
     } else {
       const res = await requestService.create(
@@ -320,14 +293,15 @@ const saveAttribute = async () => {
         buildPayload(editingAttr.value)
       );
       showSuccess(
-        res?.message || t("dashboard.categories.attributes.added_success")
+        res?.status?.message ||
+          t("dashboard.categories.attributes.added_success")
       );
     }
 
     closeDialog();
     fetchAttributes();
-  } catch (err) {
-    showError(t("generic.save_failed"));
+  } catch (error) {
+    showError(error || t("generic.save_failed"));
   }
 };
 
@@ -348,12 +322,13 @@ const onDelete = async () => {
     );
 
     showSuccess(
-      res?.message || t("dashboard.categories.form.deleted_successfully")
+      res?.status?.message ||
+        t("dashboard.categories.form.deleted_successfully")
     );
 
     fetchAttributes();
   } catch (error) {
-    showError(error?.message || t("dashboard.categories.form.delete_failed"));
+    showError(error || t("dashboard.categories.form.delete_failed"));
   } finally {
     isDeleteDialogOpen.value = false;
     isSubmitting.value = false;

@@ -13,11 +13,11 @@ const goToAddPage = () => {
   router.push("/dashboard/categories/add-category");
 };
 
-const breadcrumbItems = ref([{ label: "sidebar.categories" }]);
+const breadcrumbItems = ref([{ label: "sidebar.wallet-deposits-requests" }]);
 
 const filters = ref([
   { id: 1, name: "name" },
-  { id: 2, name: "name_en" },
+  { id: 2, name: "amount" },
 ]);
 // Local search & filter proxies
 const searchText = ref(props.modelValue || "");
@@ -81,7 +81,11 @@ watch(selectedFilter, (value) => emit("update:selectedFilter", value));
           <template #value="slotProps">
             <div v-if="slotProps.value" class="flex items-center">
               <div>
-                {{ $t(`table.${slotProps?.value.name}`) }}
+                {{
+                  $t(
+                    `dashboard.wallet-deposits-requests.table.${slotProps?.value.name}`
+                  )
+                }}
               </div>
             </div>
             <div v-else>
@@ -90,7 +94,13 @@ watch(selectedFilter, (value) => emit("update:selectedFilter", value));
             </div>
           </template>
           <template #option="slotProps">
-            <div>{{ $t(`table.${slotProps?.option.name}`) }}</div>
+            <div>
+              {{
+                $t(
+                  `dashboard.wallet-deposits-requests.table.${slotProps?.option.name}`
+                )
+              }}
+            </div>
           </template>
           <template #dropdownicon>
             <i class="pi pi-filter" />
@@ -104,11 +114,6 @@ watch(selectedFilter, (value) => emit("update:selectedFilter", value));
           size="small"
           variant="outlined"
         />
-
-        <button class="custom-base-button" @click="goToAddPage">
-          <i class="pi pi-plus"></i>
-          {{ $t("dashboard.categories.form.add_category") }}
-        </button>
       </div>
     </div>
   </div>

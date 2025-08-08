@@ -8,6 +8,8 @@ export const DEV_MEDIA_URL = "http://localhost:3059/uploads/";
 
 export const PROD_MEDIA_URL = "https://unityaid.net/haraj/uploads/";
 
+export const COMPANY_EAMIL = "contact@company.com";
+
 export const DashboardBreadCrumbBase = {
   icon: "pi pi-home",
   route: "/dashboard/analytics",
@@ -69,9 +71,18 @@ export const sidebarItems = [
         ],
       },
       {
+        label: "sidebar.wallet-deposits-requests",
+        icon: "pi pi-wallet",
+        link: "/dashboard/wallet-deposits-requests",
+        permissions: [
+          "dashboard.wallet_deposits_requests.read",
+          "dashboard.wallet_deposits_requests.write",
+        ],
+      },
+      {
         label: "sidebar.transactions",
         icon: "pi pi-money-bill",
-        link: "/dashboard/transactions",
+        link: "/dashboard/wallet-transactions",
         permissions: [
           "dashboard.categories.read",
           "dashboard.categories.write",
@@ -130,7 +141,7 @@ export const websiteProfileItems = [
       {
         label: "header.login",
         icon: "pi pi-sign-in",
-        link: '/login'
+        link: "/login",
       },
       {
         label: "header.logout",

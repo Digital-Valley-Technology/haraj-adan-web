@@ -134,18 +134,18 @@ const resetModal = () => {
           <div class="flex gap-2">
             <Button
               icon="pi pi-eye"
-              severity="secondary"
-              outlined
+              severity="info"
               rounded
               size="small"
+              :label="$t('dashboard.actions.details')"
               @click="() => handlePreview(element)"
-              v-tooltip.bottom="$t('dashboard.actions.preview')"
+              v-tooltip.bottom="$t('dashboard.actions.details')"
             />
             <Button
               icon="pi pi-trash"
               severity="danger"
-              outlined
               rounded
+              :label="$t('dashboard.actions.delete')"
               size="small"
               @click="() => handleDelete(element)"
               v-tooltip.bottom="$t('dashboard.actions.delete')"
@@ -157,14 +157,17 @@ const resetModal = () => {
     </draggable>
 
     <div class="flex justify-end">
-      <Button
-        icon="pi pi-check"
-        :label="$t('dashboard.banners.save_order')"
-        class="mt-4"
-        @click="onSaveOrder"
-        :loading="props.loadingReorder"
+      <button
         :disabled="props.loadingReorder"
-      />
+        class="custom-base-button mt-4"
+        @click="onSaveOrder"
+        type="submit"
+      >
+        <i
+          :class="props.loadingReorder ? 'pi pi-spinner pi-spin' : 'pi pi-save'"
+        ></i>
+        {{ $t("dashboard.banners.save_order") }}
+      </button>
     </div>
 
     <div v-if="props.loadingFetch" class="flex justify-center py-6">
@@ -193,7 +196,7 @@ const resetModal = () => {
     <Dialog
       v-model:visible="showModal"
       modal
-      header="Preview Image"
+      :header="$t('generic.edit')"
       :closable="false"
     >
       <div class="flex flex-col items-center gap-4">
@@ -206,15 +209,17 @@ const resetModal = () => {
           <Button
             :label="$t('generic.cancel')"
             severity="secondary"
-            outlined
             @click="resetModal"
           />
-          <Button
-            :label="$t('generic.save')"
-            icon="pi pi-check"
-            @click="confirmUpdate"
-            :loading="props.loadingUpdate"
-          />
+
+          <button class="custom-base-button" @click="confirmUpdate">
+            <i
+              :class="
+                props.loadingUpdate ? 'pi pi-spinner pi-spin' : 'pi pi-save'
+              "
+            ></i>
+            <span>{{ $t("generic.save") }}</span>
+          </button>
         </div>
       </div>
     </Dialog>

@@ -39,7 +39,7 @@ export const useAuthStore = defineStore("auth", {
         return response?.data;
       } catch (error) {
         this.revokeAccess();
-        showWarning(error?.message || "Authentication failed");
+        showWarning(error?.status?.message || "Authentication failed");
         return null;
       }
     },
@@ -48,10 +48,10 @@ export const useAuthStore = defineStore("auth", {
         const response = await requestService.getAll("auth/logout");
         localStorage.removeItem("token");
         this.revokeAccess();
-        showSuccess(response?.message);
+        showSuccess(response?.status?.message);
       } catch (error) {
         this.revokeAccess();
-        showWarning(error?.message || "Unable to logout");
+        showWarning(error?.status?.message || "Unable to logout");
         return null;
       }
     },

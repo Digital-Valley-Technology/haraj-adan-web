@@ -141,10 +141,53 @@ const routes = [
         },
       },
       {
-        name: "transactions",
-        path: "transactions",
+        name: "wallet-deposits-requests",
+        path: "wallet-deposits-requests",
         component: () =>
-          import("../dashboard/transactions/TransactionsPage.vue"),
+          import(
+            "../dashboard/walletDepositRequests/WalletDepositRequestPage.vue"
+          ),
+        meta: {
+          requiresAuth: true,
+          permissions: [
+            "dashboard.wallet_deposits_requests.read",
+            "dashboard.wallet_deposits_requests.write",
+          ],
+        },
+      },
+      {
+        name: "wallet-deposit-request-details",
+        path: "wallet-deposit-request-details/:requestId",
+        component: () =>
+          import(
+            "../dashboard/walletDepositRequests/WalletDepositRequestDetails.vue"
+          ),
+        meta: {
+          requiresAuth: true,
+          permissions: [
+            "dashboard.wallet_deposits_requests.read",
+            "dashboard.wallet_deposits_requests.write",
+          ],
+        },
+      },
+      {
+        name: "wallet-transactions",
+        path: "wallet-transactions",
+        component: () =>
+          import("../dashboard/transactions/WalletTransactionsPage.vue"),
+        meta: {
+          requiresAuth: true,
+          permissions: [
+            "dashboard.transactions.read",
+            "dashboard.transactions.write",
+          ],
+        },
+      },
+      {
+        name: "transaction-details",
+        path: "wallet-transactions-details/:transactionId",
+        component: () =>
+          import("../dashboard/transactions/WalletTransactionDetails.vue"),
         meta: {
           requiresAuth: true,
           permissions: [
@@ -193,7 +236,7 @@ const routes = [
         },
       },
 
-            {
+      {
         name: "add-banner",
         path: "banners/add-banner",
         component: () => import("../dashboard/banners/add/index.vue"),
@@ -215,7 +258,12 @@ const routes = [
     name: "OAuthSuccess",
     component: () => import("../pages/OAuthSuccess.vue"),
   },
-    {
+  {
+    path: "/oauth-error",
+    name: "OAuthError",
+    component: () => import("../pages/OAuthError.vue"),
+  },
+  {
     path: "/verify-otp",
     name: "verify-otp",
     component: () => import("../pages/VerifyOtp.vue"),
