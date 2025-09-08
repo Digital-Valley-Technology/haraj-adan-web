@@ -2,7 +2,7 @@ export const MODE = "PROD";
 
 export const PROD_BASE_URL = "https://unityaid.net/haraj/api/v1";
 
-export const DEV_BASE_URL = "http://localhost:3059/api/v1";
+export const DEV_BASE_URL = "http://localhost:3059/haraj/api/v1";
 
 export const DEV_MEDIA_URL = "http://localhost:3059/uploads/";
 

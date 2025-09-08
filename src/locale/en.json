@@ -75,6 +75,7 @@
         "required": "phone is required"
       }
     },
+    "contact_required": "Either phone or email is required",
     "phone": {
       "required": "Phone number is required",
       "invalid": "Please enter a valid phone number"
@@ -108,6 +109,8 @@
     "sent_successfully": "OTP sent successfully",
     "send_failed": "Failed to send OTP",
     "invalid": "Invalid or expired OTP",
+    "resend_in": "You can resend in {seconds}s",
+    "invalid_length": "OTP must be exactly 6 digits",
     "identifier_missing": "No identifier found. Please login again.",
     "required": "OTP is required",
     "instruction": "To verify your account, enter the verification code sent to",
@@ -293,6 +296,7 @@
       "phone": "Phone",
       "platform-language": "Platform Language",
       "save-account": "Save Account Settings",
+      "email-verified": "Email Verified",
       "profile-info": "Profile Info",
       "name": "Name",
       "save-profile": "Save Profile Info",

@@ -75,6 +75,7 @@
     "name": {
       "required": "الاسم مطلوب"
     },
+    "contact_required": "مطلوب رقم هاتف أو بريد إلكتروني",
     "phone": {
       "required": "رقم الهاتف مطلوب",
       "invalid": "يرجى إدخال رقم هاتف صالح"
@@ -103,6 +104,8 @@
     "enter_code": "أدخل رمز التحقق",
     "code_placeholder": "أدخل رمز التحقق المرسل",
     "verify": "تحقق",
+    "invalid_length": "يجب أن يتكون رمز التحقق من 6 أرقام",
+    "resend_in": "يمكنك إعادة الإرسال خلال {seconds} ثانية",
     "verifying": "جارٍ التحقق...",
     "verified": "تم التحقق بنجاح",
     "sent_successfully": "تم إرسال رمز التحقق بنجاح",
@@ -291,6 +294,7 @@
       "account-settings": "إعدادات الحساب",
       "email": "البريد الإلكتروني",
       "phone": "رقم الهاتف",
+      "email-verified": "تم التحقق الإيميل",
       "platform-language": "لغة المنصة",
       "save-account": "حفظ إعدادات الحساب",
       "profile-info": "معلومات الملف الشخصي",
