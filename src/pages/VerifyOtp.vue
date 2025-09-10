@@ -78,11 +78,10 @@ const onSubmit = handleSubmit(async (values) => {
       otp: values.otp,
     });
 
-    const access =
-      response?.data?.tokens?.access_token ?? response?.access_token ?? null;
+    const access = response?.tokens?.access_token ?? null;
     if (access) localStorage.setItem("token", access);
 
-    authStore.user = response?.data?.data ?? response?.data ?? response?.data;
+    authStore.user = response?.data;
     authStore.isAuthenticated = true;
 
     showSuccess(response?.status?.message || t("otp.verified"));

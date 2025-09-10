@@ -44,8 +44,20 @@ export const useAuthStore = defineStore("auth", {
       }
     },
     async logout() {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        this.revokeAccess();
+        return null;
+      }
+
       try {
-        const response = await requestService.getAll("auth/logout");
+        const response = await requestService.getAll("auth/logout", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
         localStorage.removeItem("token");
         this.revokeAccess();
         showSuccess(response?.status?.message);
