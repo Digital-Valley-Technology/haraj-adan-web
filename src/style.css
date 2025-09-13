@@ -2,6 +2,7 @@
 @import "tailwindcss";
 
 :root {
+  --body-bg: #f5f6f7;
   --primary-clr: #146aab;
   --primary-clr-tint: rgb(32, 136, 215);
   --primary-clr-shade: rgb(11, 81, 134);
@@ -82,6 +83,7 @@ body {
   font-family: "Almarai", sans-serif;
   font-style: normal;
   overflow-x: hidden !important;
+  background-color: var(--body-bg);
 }
 
 .custom-container {
@@ -123,7 +125,7 @@ body {
 }
 
 .page-wapper {
-  @apply min-h-[80vh] pt-[var(--padding-page-top-lg)] lg:pt-[var(--padding-page-top)] px-[var(--padding-page-x)] pb-[var(--padding-page-bottom)];
+  @apply min-h-[80vh] pt-[var(--padding-page-top-lg)] lg:pt-[var(--padding-page-top)] px-4 pb-[var(--padding-page-bottom)];
 }
 
 h1,
