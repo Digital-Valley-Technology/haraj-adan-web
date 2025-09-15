@@ -897,6 +897,12 @@ export const specialAds = [
     alt: "macbook",
     name: "ماك بوك 14",
     name_en: "Macbook 14",
+    images: [
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+    ],
   },
   {
     id: 2,
@@ -904,6 +910,12 @@ export const specialAds = [
     alt: "macbook",
     name: "ماك بوك 14",
     name_en: "Macbook 14",
+    images: [
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+    ],
   },
   {
     id: 3,
@@ -911,6 +923,12 @@ export const specialAds = [
     alt: "macbook",
     name: "ماك بوك 14",
     name_en: "Macbook 14",
+    images: [
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+    ],
   },
   {
     id: 4,
@@ -918,6 +936,12 @@ export const specialAds = [
     alt: "macbook",
     name: "ماك بوك 14",
     name_en: "Macbook 14",
+    images: [
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+    ],
   },
   {
     id: 5,
@@ -925,6 +949,12 @@ export const specialAds = [
     alt: "macbook",
     name: "ماك بوك 14",
     name_en: "Macbook 14",
+    images: [
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+    ],
   },
   {
     id: 6,
@@ -932,6 +962,12 @@ export const specialAds = [
     alt: "macbook",
     name: "ماك بوك 14",
     name_en: "Macbook 14",
+    images: [
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+    ],
   },
   {
     id: 7,
@@ -939,6 +975,12 @@ export const specialAds = [
     alt: "macbook",
     name: "ماك بوك 14",
     name_en: "Macbook 14",
+    images: [
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+    ],
   },
   {
     id: 8,
@@ -946,6 +988,12 @@ export const specialAds = [
     alt: "macbook",
     name: "ماك بوك 14",
     name_en: "Macbook 14",
+    images: [
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+    ],
   },
   {
     id: 9,
@@ -953,6 +1001,12 @@ export const specialAds = [
     alt: "macbook",
     name: "ماك بوك 14",
     name_en: "Macbook 14",
+    images: [
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+    ],
   },
   {
     id: 10,
@@ -960,6 +1014,12 @@ export const specialAds = [
     alt: "macbook",
     name: "ماك بوك 14",
     name_en: "Macbook 14",
+    images: [
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+    ],
   },
   {
     id: 11,
@@ -967,6 +1027,12 @@ export const specialAds = [
     alt: "macbook",
     name: "ماك بوك 14",
     name_en: "Macbook 14",
+    images: [
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+    ],
   },
   {
     id: 12,
@@ -974,6 +1040,12 @@ export const specialAds = [
     alt: "macbook",
     name: "ماك بوك 14",
     name_en: "Macbook 14",
+    images: [
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+    ],
   },
   {
     id: 13,
@@ -981,6 +1053,12 @@ export const specialAds = [
     alt: "macbook",
     name: "ماك بوك 14",
     name_en: "Macbook 14",
+    images: [
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+    ],
   },
   {
     id: 14,
@@ -988,6 +1066,12 @@ export const specialAds = [
     alt: "macbook",
     name: "ماك بوك 14",
     name_en: "Macbook 14",
+    images: [
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+    ],
   },
   {
     id: 15,
@@ -995,6 +1079,12 @@ export const specialAds = [
     alt: "macbook",
     name: "ماك بوك 14",
     name_en: "Macbook 14",
+    images: [
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+    ],
   },
   {
     id: 16,
@@ -1002,6 +1092,12 @@ export const specialAds = [
     alt: "macbook",
     name: "ماك بوك 14",
     name_en: "Macbook 14",
+    images: [
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+      "/images/macbook14.jpg",
+    ],
   },
 ];
 
@@ -1015,6 +1111,12 @@ export const homeAds = [
     name: "لوحة إعلانات غاجا مادا",
     name_en: "Gaja Mada Billboard",
     price: 1000,
+    images: [
+      "/images/room1.jpg",
+      "/images/room1.jpg",
+      "/images/room1.jpg",
+      "/images/room1.jpg",
+    ],
   },
   {
     id: 18,
@@ -1025,6 +1127,12 @@ export const homeAds = [
     name: "لوحة إعلانات غاجا مادا",
     name_en: "Gaja Mada Billboard",
     price: 1000,
+    images: [
+      "/images/room2.jpg",
+      "/images/room2.jpg",
+      "/images/room2.jpg",
+      "/images/room2.jpg",
+    ],
   },
   {
     id: 19,
@@ -1035,6 +1143,12 @@ export const homeAds = [
     name: "لوحة إعلانات غاجا مادا",
     name_en: "Gaja Mada Billboard",
     price: 1000,
+    images: [
+      "/images/room1.jpg",
+      "/images/room1.jpg",
+      "/images/room1.jpg",
+      "/images/room1.jpg",
+    ],
   },
   {
     id: 20,
@@ -1045,6 +1159,12 @@ export const homeAds = [
     name: "لوحة إعلانات غاجا مادا",
     name_en: "Gaja Mada Billboard",
     price: 1000,
+    images: [
+      "/images/room2.jpg",
+      "/images/room2.jpg",
+      "/images/room2.jpg",
+      "/images/room2.jpg",
+    ],
   },
   {
     id: 21,
@@ -1055,6 +1175,12 @@ export const homeAds = [
     name: "لوحة إعلانات غاجا مادا",
     name_en: "Gaja Mada Billboard",
     price: 1000,
+    images: [
+      "/images/room1.jpg",
+      "/images/room1.jpg",
+      "/images/room1.jpg",
+      "/images/room1.jpg",
+    ],
   },
   {
     id: 22,
@@ -1065,6 +1191,12 @@ export const homeAds = [
     name: "لوحة إعلانات غاجا مادا",
     name_en: "Gaja Mada Billboard",
     price: 1000,
+    images: [
+      "/images/room2.jpg",
+      "/images/room2.jpg",
+      "/images/room2.jpg",
+      "/images/room2.jpg",
+    ],
   },
   {
     id: 23,
@@ -1075,6 +1207,12 @@ export const homeAds = [
     name: "لوحة إعلانات غاجا مادا",
     name_en: "Gaja Mada Billboard",
     price: 1000,
+    images: [
+      "/images/room1.jpg",
+      "/images/room1.jpg",
+      "/images/room1.jpg",
+      "/images/room1.jpg",
+    ],
   },
   {
     id: 24,
@@ -1085,6 +1223,12 @@ export const homeAds = [
     name: "لوحة إعلانات غاجا مادا",
     name_en: "Gaja Mada Billboard",
     price: 1000,
+    images: [
+      "/images/room2.jpg",
+      "/images/room2.jpg",
+      "/images/room2.jpg",
+      "/images/room2.jpg",
+    ],
   },
   {
     id: 25,
@@ -1095,6 +1239,12 @@ export const homeAds = [
     name: "لوحة إعلانات غاجا مادا",
     name_en: "Gaja Mada Billboard",
     price: 1000,
+    images: [
+      "/images/room1.jpg",
+      "/images/room1.jpg",
+      "/images/room1.jpg",
+      "/images/room1.jpg",
+    ],
   },
   {
     id: 26,
@@ -1105,6 +1255,12 @@ export const homeAds = [
     name: "لوحة إعلانات غاجا مادا",
     name_en: "Gaja Mada Billboard",
     price: 1000,
+    images: [
+      "/images/room2.jpg",
+      "/images/room2.jpg",
+      "/images/room2.jpg",
+      "/images/room2.jpg",
+    ],
   },
   {
     id: 27,
@@ -1115,6 +1271,12 @@ export const homeAds = [
     name: "لوحة إعلانات غاجا مادا",
     name_en: "Gaja Mada Billboard",
     price: 1000,
+    images: [
+      "/images/room1.jpg",
+      "/images/room1.jpg",
+      "/images/room1.jpg",
+      "/images/room1.jpg",
+    ],
   },
   {
     id: 28,
@@ -1125,6 +1287,12 @@ export const homeAds = [
     name: "لوحة إعلانات غاجا مادا",
     name_en: "Gaja Mada Billboard",
     price: 1000,
+    images: [
+      "/images/room2.jpg",
+      "/images/room2.jpg",
+      "/images/room2.jpg",
+      "/images/room2.jpg",
+    ],
   },
   {
     id: 29,
@@ -1135,6 +1303,12 @@ export const homeAds = [
     name: "لوحة إعلانات غاجا مادا",
     name_en: "Gaja Mada Billboard",
     price: 1000,
+    images: [
+      "/images/room1.jpg",
+      "/images/room1.jpg",
+      "/images/room1.jpg",
+      "/images/room1.jpg",
+    ],
   },
   {
     id: 30,
@@ -1145,6 +1319,12 @@ export const homeAds = [
     name: "لوحة إعلانات غاجا مادا",
     name_en: "Gaja Mada Billboard",
     price: 1000,
+    images: [
+      "/images/room2.jpg",
+      "/images/room2.jpg",
+      "/images/room2.jpg",
+      "/images/room2.jpg",
+    ],
   },
   {
     id: 31,
@@ -1155,6 +1335,12 @@ export const homeAds = [
     name: "لوحة إعلانات غاجا مادا",
     name_en: "Gaja Mada Billboard",
     price: 1000,
+    images: [
+      "/images/room1.jpg",
+      "/images/room1.jpg",
+      "/images/room1.jpg",
+      "/images/room1.jpg",
+    ],
   },
   {
     id: 32,
@@ -1165,6 +1351,12 @@ export const homeAds = [
     name: "لوحة إعلانات غاجا مادا",
     name_en: "Gaja Mada Billboard",
     price: 1000,
+    images: [
+      "/images/room2.jpg",
+      "/images/room2.jpg",
+      "/images/room2.jpg",
+      "/images/room2.jpg",
+    ],
   },
 ];
 
@@ -1252,4 +1444,80 @@ export const adsCategories = [
       { id: 4, name: "إدارة", name_en: "Management", image: "" },
     ],
   },
+];
+
+export const adDetails = [
+  {
+    id: 1,
+    label: "تاريخ الإدراج",
+    label_en: "Listing Date",
+    value: "11/11/24",
+    value_en: "11/11/24",
+  },
+  {
+    id: 2,
+    label: "رقم الإعلان",
+    label_en: "Ad Number",
+    value: "121006850",
+    value_en: "121006850",
+  },
+  {
+    id: 3,
+    label: "الفئة",
+    label_en: "Category",
+    value: "تجاري",
+    value_en: "Commercial",
+  },
+  {
+    id: 4,
+    label: "الحالة",
+    label_en: "Condition",
+    value: "للايجار محل و متجر",
+    value_en: "For Rent Store & Shop",
+  },
+  { id: 5, label: "المساحة", label_en: "m2", value: "35", value_en: "35" },
+  {
+    id: 6,
+    label: "عمر المبنى",
+    label_en: "Age of building",
+    value: "0",
+    value_en: "0",
+  },
+  {
+    id: 7,
+    label: "رقم الصف و الغرفة",
+    label_en: "Class & Room Number",
+    value: "2",
+    value_en: "2",
+  },
+  {
+    id: 8,
+    label: "التدفئة",
+    label_en: "Heating",
+    value: "مركزي (Pay Iicer)",
+    value_en: "Merkezi (Pay Iicer)",
+  },
+  {
+    id: 9,
+    label: "حالة المبنى",
+    label_en: "Building's Condition",
+    value: "جديد",
+    value_en: "New",
+  },
+  { id: 10, label: "الرسوم", label_en: "Dues", value: "400", value_en: "400" },
+  {
+    id: 11,
+    label: "الوديعة (TL)",
+    label_en: "Deposit (TL)",
+    value: "20000",
+    value_en: "20000",
+  },
+  {
+    id: 12,
+    label: "حالة سند الملكية",
+    label_en: "Title Deed Status",
+    value: "عمارات",
+    value_en: "Condominium",
+  },
+  { id: 13, label: "من", label_en: "From", value: "مالك", value_en: "Owner" },
 ];
