@@ -1,5 +1,6 @@
 <template>
-  <div>
+  <!-- Sidebar -->
+  <div class="category-side">
     <div class="flex items-start gap-3">
       <div
         class="flex items-center justify-center bg-gray-200 w-8 h-8 rounded-full"
@@ -12,10 +13,24 @@
           {{ i18?.locale?.value == "ar" ? category?.name : category?.name_en }}
         </p>
         <ul>
-          <li v-for="item in category?.subCategories" :key="item?.id">
-            <a href="#" class="text-[#146AAB] text-xs font-normal">{{
-              i18?.locale?.value == "ar" ? item?.name : item?.name_en
-            }}</a>
+          <li
+            v-for="item in category?.subCategories"
+            :key="item?.id"
+            @click="goToCategoryListingPage"
+          >
+            <router-link
+              :to="{
+                name: 'category-listing',
+                params: {
+                  id: i18?.locale?.value === 'ar' ? item?.name : item?.name_en,
+                },
+              }"
+              class="text-[#146AAB] text-xs font-normal"
+              active-class="underline font-bold text-lg"
+              >{{
+                i18?.locale?.value == "ar" ? item?.name : item?.name_en
+              }}</router-link
+            >
           </li>
         </ul>
       </div>
@@ -31,3 +46,8 @@ defineProps(["category"]);
 
 const i18 = useI18n();
 </script>
+<style scoped>
+.category-side:last-child hr {
+  display: none;
+}
+</style>

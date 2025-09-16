@@ -93,6 +93,11 @@ const routes = [
     component: () => import("../pages/AdDetailsPage.vue"),
   },
   {
+    name: "category-listing",
+    path: "/category-listing/:id",
+    component: () => import("../pages/CategoryListingPage.vue"),
+  },
+  {
     name: "dashboard",
     path: "/dashboard",
     redirect: "/dashboard/analytics",
