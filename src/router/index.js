@@ -98,6 +98,11 @@ const routes = [
     component: () => import("../pages/CategoryListingPage.vue"),
   },
   {
+    name: "search",
+    path: "/search",
+    component: () => import("../pages/SearchPage.vue"),
+  },
+  {
     name: "dashboard",
     path: "/dashboard",
     redirect: "/dashboard/analytics",
