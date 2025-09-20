@@ -103,6 +103,11 @@ const routes = [
     component: () => import("../pages/SearchPage.vue"),
   },
   {
+    name: "post-ad",
+    path: "/post-ad",
+    component: () => import("../pages/PostAdPage.vue"),
+  },
+  {
     name: "dashboard",
     path: "/dashboard",
     redirect: "/dashboard/analytics",

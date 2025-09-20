@@ -1722,3 +1722,52 @@ export const cars = [
     number: "#7123456789",
   },
 ];
+
+export const postAdCategories = [
+  { id: 1, name: "الحيوانات", name_en: "Animals", image: "" },
+  {
+    id: 2,
+    name: "الملابس والمستلزمات الشخصية",
+    name_en: "Personal clothing & supplies",
+    image: "",
+  },
+  { id: 3, name: "السفر والنقل", name_en: "Travel & Transport", image: "" },
+  {
+    id: 4,
+    name: "الرحلات والترفيه",
+    name_en: "Trips & Entertainment",
+    image: "",
+  },
+  { id: 5, name: "الهوية اليمنية", name_en: "Yemeni Identity", image: "" },
+  {
+    id: 6,
+    name: "المنتجات المنزلية والحرف اليدوية",
+    name_en: "household & handmade products",
+    image: "",
+  },
+  { id: 7, name: "المركبات", name_en: "Vehicles", image: "" },
+  { id: 8, name: "العقارات", name_en: "Real Estate", image: "" },
+  { id: 9, name: "قطع غيار", name_en: "Spare Parts", image: "" },
+  { id: 10, name: "الوظائف", name_en: "Jobs", image: "" },
+  { id: 11, name: "الخدمات", name_en: "Services", image: "" },
+  {
+    id: 12,
+    name: "الأجهزة الكهربائية والمنزلية",
+    name_en: "Electrical & home appliances",
+    image: "",
+  },
+  {
+    id: 13,
+    name: "الآلات والمعدات",
+    name_en: "Machinery and equipment",
+    image: "",
+  },
+  {
+    id: 14,
+    name: "الالكترونيات",
+    name_en: "Phones and Electronics",
+    image: "",
+  },
+  { id: 15, name: "الأثاث", name_en: "Furniture", image: "" },
+  { id: 16, name: "آخرى", name_en: "others", image: "" },
+];
