@@ -1,5 +1,5 @@
 <template>
-  <aside class="w-80 bg-white rounded-lg px-6 py-4 h-fit">
+  <aside class="w-full md:w-80 bg-white rounded-lg px-6 py-4 h-fit">
     <category-side-card
       v-for="category in categories"
       :key="category?.id"

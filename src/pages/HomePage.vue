@@ -12,7 +12,9 @@ const i18 = useI18n();
 <template>
   <app-layout>
     <div class="page-wrapper mx-auto min-h-[500px]">
-      <div class="flex min-h-screen gap-4 custom-container px-4 mb-4">
+      <div
+        class="flex flex-col md:flex-row min-h-screen gap-4 custom-container px-4 mb-4"
+      >
         <!-- Sidebar -->
         <side-menu-client />
         <!-- Main content -->
