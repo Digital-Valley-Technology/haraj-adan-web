@@ -1,8 +1,8 @@
 <template>
   <app-layout>
     <main class="page-wrapper custom-container min-h-screen my-4">
-      <div class="flex gap-4 mx-8">
-        <div class="w-80">
+      <div class="flex flex-col lg:flex-row gap-4 mx-8">
+        <div class="w-full lg:w-80">
           <!-- categories -->
           <div class="flex gap-2 items-start bg-white p-4 rounded-lg">
             <i class="icon pi pi-home"></i>
@@ -130,7 +130,7 @@
               }}</span>
             </div>
             <div class="card flex justify-center mb-4">
-              <Slider v-model="value" range class="w-56" />
+              <Slider v-model="value" range class="w-full" />
             </div>
 
             <h6 class="text-xs font-medium mb-2">
@@ -334,7 +334,7 @@
           </div>
         </div>
         <!-- Main Content -->
-        <div class="flex-1">
+        <div class="lg:flex-1">
           <!-- Results and Sort by -->
           <div
             class="bg-white p-4 rounded-lg shadow flex justify-between items-center mb-4"
@@ -393,16 +393,17 @@
           <div v-else>
             <!-- titles -->
             <div
-              class="flex divide-x bg-[#146AAB] text-white rounded-lg divide-white border border-white mb-4"
+              v-if="activeButtonList === 'list'"
+              class="hidden md:flex divide-x bg-[#146AAB] text-white rounded-lg divide-white border border-white mb-4"
             >
               <div class="px-15 py-2"></div>
               <div class="px-4 py-2 flex-1 text-center text-xs">
                 {{ i18.locale.value === "ar" ? "عنوان الإعلان" : "Ad Title" }}
               </div>
-              <div class="flex-1 px-4 py-2 text-center text-xs">
+              <div class="px-4 py-2 text-center text-xs">
                 {{ i18.locale.value === "ar" ? "السعر" : "Price" }}
               </div>
-              <div class="flex-1 px-4 py-2 text-center text-xs">
+              <div class="px-4 py-2 text-center text-xs">
                 {{
                   i18.locale.value === "ar"
                     ? "تاريخ الإعلان"
@@ -423,17 +424,21 @@
                 v-for="car in cars"
                 :key="car.id"
                 :class="[
-                  'flex justify-between items-center bg-[#FFFEF0] rounded-lg cursor-pointer hover:bg-[#FFFACD] mb-4',
+                  'flex justify-between items-start sm:items-center bg-[#FFFEF0] rounded-lg cursor-pointer p-2 hover:bg-[#FFFACD] mb-4',
                   car.featured ? 'bg-[#FFFACD] ' : ' bg-white ',
                 ]"
               >
                 <!-- Left side: image + title -->
-                <div class="px-4 py-2 flex items-center gap-2">
+
+                <div class="w-20 h-15">
                   <img
                     :src="car.image"
-                    class="w-20 h-16 object-cover rounded"
+                    class="w-full h-full object-cover rounded"
                   />
-                  <div class="px-4 py-2 flex gap-2 flex-col">
+                </div>
+                <div class="flex flex-col sm:items-center sm:flex-row">
+                  <!-- title + featured -->
+                  <div class="px-4 flex gap-2 flex-col">
                     <span
                       v-if="car.featured"
                       class="bg-yellow-300 text-[9px] px-2 py-1 rounded w-fit"
@@ -446,25 +451,25 @@
                       }}
                     </p>
                   </div>
-                </div>
 
-                <!-- Price -->
-                <div class="px-4 py-2 text-blue-600 font-bold text-xs">
-                  {{
-                    i18.locale.value == "ar"
-                      ? car.price + " $"
-                      : "$ " + car.price
-                  }}
-                </div>
+                  <!-- Price -->
+                  <div class="px-4 py-2 text-blue-600 font-bold text-xs">
+                    {{
+                      i18.locale.value == "ar"
+                        ? car.price + " $"
+                        : "$ " + car.price
+                    }}
+                  </div>
 
-                <!-- Date -->
-                <div class="px-4 py-2 text-xs">
-                  {{ i18.locale.value == "ar" ? car.date_ar : car.date }}
-                </div>
+                  <!-- Date -->
+                  <div class="px-4 py-2 text-xs">
+                    {{ i18.locale.value == "ar" ? car.date_ar : car.date }}
+                  </div>
 
-                <!-- City -->
-                <div class="px-4 py-2">
-                  {{ i18.locale.value == "ar" ? car.city_ar : car.city }}
+                  <!-- City -->
+                  <div class="px-4 py-2">
+                    {{ i18.locale.value == "ar" ? car.city_ar : car.city }}
+                  </div>
                 </div>
               </div>
             </div>
