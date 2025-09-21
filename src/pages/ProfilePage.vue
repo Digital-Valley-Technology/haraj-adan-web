@@ -179,9 +179,9 @@ const handleNameInput = () => {
 <template>
   <app-layout>
     <main class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div class="flex gap-4">
+      <div class="flex flex-col md:flex-row gap-4">
         <!-- Profile Category -->
-        <div class="w-96 bg-white rounded-lg p-4">
+        <div class="w-full md:w-96 bg-white rounded-lg p-4">
           <!-- Ad -->
           <div class="p-4 mb-4 bg-[#146AAB] rounded-lg text-white">
             <div class="flex items-center gap-2 mb-2">
