@@ -11,7 +11,7 @@ export const socket =
       })
     : io(`${URL}`, {
         withCredentials: true,
-        path: "/socket.io/", // 👈 keep default unless you changed it server-side
+        // path: "/socket.io/", // 👈 keep default unless you changed it server-side
         withCredentials: true,
       });
 
