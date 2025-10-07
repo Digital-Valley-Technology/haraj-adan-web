@@ -126,9 +126,6 @@ export const useChatStore = defineStore("chats", {
           ? chatData.support_chat_messages
           : [];
 
-        const ordered = batch
-          .slice()
-          .sort((a, b) => new Date(a.created) - new Date(b.created));
 
         if (!prepend) {
           // initial load or refresh
@@ -136,7 +133,7 @@ export const useChatStore = defineStore("chats", {
             ...(this.activeChat || {}),
             id: chatData.id,
             users: chatData.users ?? this.activeChat?.users,
-            messages: ordered,
+            messages: batch,
             _count: chatData._count ?? this.activeChat?._count,
           };
           this.messagePage = 1;
@@ -144,7 +141,7 @@ export const useChatStore = defineStore("chats", {
         } else {
           // prepend older messages
           this.activeChat.messages = [
-            ...ordered,
+            ...batch,
             ...(this.activeChat.messages || []),
           ];
           this.messagePage += 1;

@@ -265,7 +265,7 @@ onUnmounted(() => {
                     class="pi pi-volume-up text-gray-400"
                   ></i>
                   <i
-                    v-else-if="chat.lastMessage.type === 'document'"
+                    v-else-if="chat.lastMessage.type === 'file'"
                     class="pi pi-file text-gray-400"
                   ></i>
                   <span class="truncate">
@@ -397,7 +397,7 @@ onUnmounted(() => {
                   <audio controls :src="getMediaUrl(msg.message)"></audio>
                 </div>
                 <div
-                  v-else-if="msg.type === 'document'"
+                  v-else-if="msg.type === 'file'"
                   class="flex flex-col gap-2"
                 >
                   <div
