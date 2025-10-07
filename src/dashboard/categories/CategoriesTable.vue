@@ -18,12 +18,11 @@ const handleEdit = (category) =>
     params: { categoryId: encode(category?.id) },
   });
 
-const handleAttributes = (category) => {
+const handleNavigation = (param, routeName, paramName) =>
   router.push({
-    name: "category-attributes",
-    params: { categoryId: encode(category.id) },
+    name: routeName,
+    params: { [paramName]: encode(param) },
   });
-};
 
 const handleDelete = (category) => emit("delete", category);
 </script>
@@ -68,7 +67,7 @@ const handleDelete = (category) => emit("delete", category);
     </Column>
     <Column field="image" :header="$t('table.image')">
       <template #body="slotProps">
-        <div class="w-[100px] aspect-square me-auto">
+        <div class="w-[64px] aspect-square me-auto">
           <img
             :src="`${MEDIA_URL}/${slotProps?.data?.image}`"
             :alt="slotProps?.data?.name"
@@ -85,17 +84,71 @@ const handleDelete = (category) => emit("delete", category);
           <Button
             icon="pi pi-sliders-h"
             severity="secondary"
-            :label="$t('dashboard.actions.manage-attributes')"
-            @click="() => handleAttributes(slotProps.data)"
+            :label="$t('dashboard.categories.actions.attributes')"
+            @click="
+              () =>
+                handleNavigation(
+                  slotProps.data?.id,
+                  'category-attributes',
+                  'categoryId'
+                )
+            "
             rounded
             size="small"
           />
+
+          <!-- <Button
+            severity="info"
+            :label="$t('dashboard.categories.actions.sub_categories')"
+            :badge="String(slotProps.data?._count?.other_categories || 0)"
+            badgeSeverity="danger"
+            @click="
+              () =>
+                handleNavigation(
+                  slotProps.data?.id,
+                  'subcategories',
+                  'parentId'
+                )
+            "
+            rounded
+            size="small"
+          /> -->
+
+          <div class="relative inline-block">
+            <Button
+              icon="pi pi-list"
+              severity="info"
+              :label="$t('dashboard.categories.actions.sub_categories')"
+              @click="
+                () =>
+                  handleNavigation(
+                    slotProps.data?.id,
+                    'subcategories',
+                    'parentId'
+                  )
+              "
+              rounded
+              size="small"
+            />
+            <span
+              class="absolute -top-2 -left-2 bg-blue-400 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow"
+            >
+              {{ slotProps.data?._count?.other_categories || 0 }}
+            </span>
+          </div>
 
           <Button
             icon="pi pi-pencil"
             severity="info"
             :label="$t('dashboard.actions.edit')"
-            @click="() => handleEdit(slotProps.data)"
+            @click="
+              () =>
+                handleNavigation(
+                  slotProps.data?.id,
+                  'edit-category',
+                  'categoryId'
+                )
+            "
             rounded
             size="small"
           />

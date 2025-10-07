@@ -145,6 +145,7 @@
   "sidebar": {
     "analytics": "Analytics",
     "profile": "Profile",
+    "support": "Support",
     "categories": "Categories",
     "contact-list": "Contact List",
     "create-invitation": "Create New Invitation",
@@ -183,8 +184,79 @@
       "chartPlaceholder": "Chart will be displayed here",
       "errorLoading": "Error loading statistics"
     },
+    "settings": {
+      "adConfigTitle": "Ad Configuration",
+      "adDiscountsTitle": "Ad Discounts",
+      "featuredAdPrice": "Featured Ad Price",
+      "featuredAdDays": "Featured Ad Days",
+      "showDiscountBanner": "Show Discount Banner",
+      "discountPercentage": "Discount Percentage (%)",
+      "discountPeriod": "Discount Period (days)",
+      "noDiscounts": "No discounts available.",
+      "success": {
+        "config_saved": "Ad configuration saved successfully.",
+        "discounts_saved": "Ad discounts saved successfully."
+      },
+      "errors": {
+        "price_required": "Price is required.",
+        "price_min": "Price must be at least 1.",
+        "days_required": "Days count is required.",
+        "days_integer": "Days count must be an integer.",
+        "days_min": "Days count must be at least 1.",
+        "discount_required": "Discount percentage is required.",
+        "discount_min": "Discount must be at least 1%.",
+        "discount_max": "Discount cannot exceed 100%.",
+        "period_required": "Discount period is required.",
+        "period_min": "Period must be at least 1 day.",
+        "fetch_failed": "Failed to fetch settings.",
+        "save_config_failed": "Failed to save ad configuration.",
+        "save_discounts_failed": "Failed to save ad discounts."
+      }
+    },
+    "support": {
+      "title": "Support",
+      "open-download": "Open / Download",
+      "search-or-start-new": "Search or start new chat",
+      "online": "Online",
+      "offline": "Offline",
+      "document": "Document",
+      "image": "Image",
+      "audio": "Audio",
+      "video": "Video",
+      "file": "File",
+      "select-chat-placeholder": "Select a chat to start messaging",
+      "select-chat-instructions": "Your messages will appear here once you select a chat",
+      "type-message": "Type a message"
+    },
     "ads": {
-      "title": "Advertisements"
+      "title": "Advertisements",
+      "wallet_balance":"Wallet Balance",
+      "featured": "Featured",
+      "table": {
+        "title": "Title",
+        "title_en": "Title (English)",
+        "user": "User",
+        "price": "Price",
+        "color": "Color",
+        "image": "Image",
+        "created": "Created At",
+        "updated": "Updated At",
+        "actions": "Actions"
+      },
+      "actions": {
+        "delete": "Delete",
+        "add_new": "Add New Ad",
+        "details": "Details"
+      },
+      "details": {
+        "title": "Ad Details",
+        "attributes": "Attributes"
+      },
+      "error": {
+        "fetch_ad": "Failed to load advertisement details."
+      },
+      "not_provided": "Not provided",
+      "no_data": "No ads available. Start by creating your first ad!"
     },
     "wallet-deposits-requests": {
       "table": {
@@ -291,6 +363,11 @@
       }
     },
     "profile": {
+      "updated": "Profile updated successfully.",
+      "connect-google": "Connect Google Account",
+      "save": "Save",
+      "edit": "Edit",
+      "google-linked": "This account is linked with Google and the email cannot be edited.",
       "account-settings": "Account Settings",
       "email": "Email",
       "phone": "Phone",
@@ -347,6 +424,7 @@
     },
     "categories": {
       "main_category": "Main Category",
+      "sub_categories": "Sub Categories",
       "no-data": "There are no categories currently. Start by creating your first category.",
       "create-category": "Create a Category",
       "edit-category": "Edit Category",
@@ -396,6 +474,10 @@
         "value_ar": "Value (Arabic)",
         "value_en": "Value (English)",
         "type_value_required": "Attributes of type Checkbox or Radio must include at least one value."
+      },
+      "actions": {
+        "attributes": "Attributes",
+        "sub_categories": "Sub Categories"
       }
     },
     "invitations": {

@@ -51,8 +51,7 @@ const handleDelete = async () => {
     );
 
     showSuccess(
-      response?.status?.message ||
-        t("dashboard.users.form.deleted_successfully")
+      response?.message || t("dashboard.users.form.deleted_successfully")
     );
 
     fetchData(); // Fetch updated users after delete
@@ -79,7 +78,7 @@ const handleToggleBan = async () => {
     );
 
     showSuccess(
-      response?.status?.message || t("dashboard.users.form.edited_successfully")
+      response?.message || t("dashboard.users.form.edited_successfully")
     );
 
     fetchData(); // Fetch updated users after delete

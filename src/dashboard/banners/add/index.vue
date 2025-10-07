@@ -107,7 +107,7 @@ const onSubmit = handleSubmit(async () => {
       headers: { "Content-Type": "multipart/form-data" },
     });
 
-    showSuccess(res?.status?.message || t("dashboard.banners.success"));
+    showSuccess(res?.message || t("dashboard.banners.success"));
     resetForm();
     imagesData.value = [];
     router.push("/dashboard/banners");

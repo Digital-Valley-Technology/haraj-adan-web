@@ -84,7 +84,7 @@ const onSubmit = handleSubmit(async (values) => {
     authStore.user = response?.data;
     authStore.isAuthenticated = true;
 
-    showSuccess(response?.status?.message || t("otp.verified"));
+    showSuccess(response?.message || t("otp.verified"));
     router.push("/");
   } catch (err) {
     showError(err);
@@ -125,14 +125,10 @@ const resendCode = async () => {
       : { email: email.value };
     const response = await requestService.create("auth/resend-otp", payload);
 
-    showSuccess(response?.status?.message || t("otp.resend_success"));
+    showSuccess(response?.message || t("otp.resend_success"));
     startTimer(DEFAULT_COOLDOWN);
   } catch (err) {
-    const backendMsg =
-      err?.response?.data?.status?.message ||
-      err?.status?.message ||
-      err?.message ||
-      "";
+    const backendMsg = err?.response?.message || err?.message || "";
 
     const match = backendMsg.match(/(\d+)\s*s?/);
     if (match) {

@@ -74,7 +74,7 @@ const onSubmit = handleSubmit(async (values) => {
 
     const response = await requestService.create("auth/register", payload);
 
-    showSuccess(response?.status?.message || t("otp.sent_successfully"));
+    showSuccess(response?.message || t("otp.sent_successfully"));
 
     router.push({
       path: "/verify-otp",

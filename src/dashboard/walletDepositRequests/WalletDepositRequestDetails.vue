@@ -91,7 +91,7 @@ const changeStatus = async () => {
     );
 
     showSuccess(
-      response?.status?.message ||
+      response?.message ||
         t("dashboard.wallet-deposit-requests.form.status_changed_successfully")
     );
     await fetchWalletDepositRequest();

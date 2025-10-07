@@ -8,12 +8,13 @@ import requestService from "../../../services/api/requestService";
 import { useGeneralStore } from "../../../store/general";
 import { showError, showSuccess } from "../../../utils/notifications";
 import DashboardLayout from "../../../Layout/DashboardLayout.vue";
-import { decode } from "js-base64";
+import { decode, encode } from "js-base64";
 import { MEDIA_URL } from "../../../services/axios";
 import { useLocaleText } from "../../../utils/useLocaleText";
 import { DashboardBreadCrumbBase } from "../../../utils/constants";
+import { computed } from "vue";
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const router = useRouter();
 const route = useRoute();
 const localeText = useLocaleText();
@@ -25,10 +26,69 @@ const generalStore = useGeneralStore();
 const isSubmitting = ref(false);
 const previewUrl = ref(null);
 
-const breadcrumbItems = [
-  { label: "sidebar.categories", route: "/dashboard/categories" },
-  { label: "dashboard.categories.form.update_category" },
-];
+// Raw breadcrumb items from API + base
+const rawBreadcrumb = ref([]);
+
+// Computed → adapt labels to active locale
+const breadcrumbItems = computed(() =>
+  rawBreadcrumb.value.map((c) => ({
+    ...c,
+    label: locale.value === "en" ? c.name_en : c.name,
+  }))
+);
+
+const fetchBreadcrumb = async () => {
+  try {
+    const base = [
+      {
+        id: null,
+        name_en: "Categories",
+        name: "الأصناف",
+        route: "/dashboard/categories",
+      },
+    ];
+
+    const res = await requestService.getAll(
+      `/categories/${categoryId}/breadcrumb`
+    );
+
+    const apiCrumbs = Array.isArray(res.data) ? res.data : [];
+    const lastCategory = apiCrumbs[apiCrumbs.length - 1];
+
+    rawBreadcrumb.value = [
+      ...base,
+      ...apiCrumbs.slice(0, -1).map((c) => ({
+        ...c,
+        route: {
+          name: "subcategories",
+          params: { parentId: encode(c.id.toString()) },
+        },
+      })),
+      {
+        id: lastCategory?.id || null,
+        name_en: `${t("dashboard.actions.edit")} (${lastCategory?.name_en})`,
+        name: `${t("dashboard.actions.edit")} (${lastCategory?.name})`,
+        route: null,
+      },
+    ];
+  } catch (error) {
+    console.error("Failed to fetch breadcrumb:", error);
+    rawBreadcrumb.value = [
+      {
+        id: null,
+        name_en: "Categories",
+        name: "الأصناف",
+        route: "/dashboard/categories",
+      },
+      {
+        id: null,
+        name_en: `${t("dashboard.categories.form.edit")}`,
+        name: `${t("dashboard.categories.form.edit")}`,
+        route: null,
+      },
+    ];
+  }
+};
 
 const categories = ref([]);
 const fetchCategories = async () => {
@@ -65,7 +125,7 @@ const fetchCategory = async () => {
 };
 
 onMounted(async () => {
-  await Promise.all([fetchCategories(), fetchCategory()]);
+  await Promise.all([fetchCategories(), fetchCategory(), fetchBreadcrumb()]);
 });
 
 onUnmounted(() => {
@@ -128,10 +188,18 @@ const onSubmit = handleSubmit(async (values) => {
     );
 
     showSuccess(
-      response?.status?.message ||
-        t("dashboard.categories.form.category_updated")
+      response?.message || t("dashboard.categories.form.category_updated")
     );
-    router.push("/dashboard/categories");
+    if (values.parent_id) {
+      // Navigate to the parent category
+      const encodedParentId = encode(values?.parent_id?.toString());
+      router.push({
+        name: "subcategories",
+        params: { parentId: encodedParentId },
+      });
+    } else {
+      router.push("/dashboard/categories");
+    }
   } catch (error) {
     console.error(error);
     showError(error || t("dashboard.categories.form.category_update_failed"));
@@ -158,9 +226,9 @@ const onSubmit = handleSubmit(async (values) => {
           >
             <a :href="href" v-bind="props.action" @click="navigate">
               <span :class="[item.icon, 'text-color']" />
-              <span class="text-primary font-semibold">{{
-                item?.label && $t(`${item.label}`)
-              }}</span>
+              <span class="text-primary font-semibold">
+                {{ item?.label }}
+              </span>
             </a>
           </router-link>
           <a
@@ -169,9 +237,9 @@ const onSubmit = handleSubmit(async (values) => {
             :target="item.target"
             v-bind="props.action"
           >
-            <span class="text-surface-700 dark:text-surface-0">{{
-              item?.label && $t(`${item.label}`)
-            }}</span>
+            <span class="text-surface-700 dark:text-surface-0">
+              {{ item?.label }}
+            </span>
           </a>
         </template>
       </Breadcrumb>

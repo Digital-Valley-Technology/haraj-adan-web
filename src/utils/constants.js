@@ -8,6 +8,10 @@ export const DEV_MEDIA_URL = "http://localhost:3059/uploads/";
 
 export const PROD_MEDIA_URL = "https://unityaid.net/haraj/uploads/";
 
+export const DEV_SOCKET_URL = "http://localhost:3059/";
+
+export const PROD_SOCKET_URL = "https://unityaid.net";
+
 export const COMPANY_EAMIL = "contact@company.com";
 
 export const DashboardBreadCrumbBase = {
@@ -96,6 +100,18 @@ export const sidebarItems = [
           "dashboard.categories.read",
           "dashboard.categories.write",
         ],
+      },
+      {
+        label: "sidebar.support",
+        icon: "pi pi-headphones",
+        link: "/dashboard/support",
+        permissions: ["dashboard.support.read", "dashboard.support.write"],
+      },
+      {
+        label: "sidebar.settings",
+        icon: "pi pi-cog",
+        link: "/dashboard/settings",
+        permissions: ["dashboard.settings.read", "dashboard.settings.write"],
       },
     ],
   },

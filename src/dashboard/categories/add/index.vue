@@ -1,8 +1,8 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, computed, watch } from "vue";
 import { useForm, useField } from "vee-validate";
 import * as yup from "yup";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import requestService from "../../../services/api/requestService";
 import { useGeneralStore } from "../../../store/general";
@@ -10,50 +10,29 @@ import { showError, showSuccess } from "../../../utils/notifications";
 import DashboardLayout from "../../../Layout/DashboardLayout.vue";
 import { useLocaleText } from "../../../utils/useLocaleText";
 import { DashboardBreadCrumbBase } from "../../../utils/constants";
+import { decode, encode } from "js-base64";
 
 const { t } = useI18n();
 const router = useRouter();
+const route = useRoute();
 const generalStore = useGeneralStore();
-const isSubmitting = ref(false);
-const previewUrl = ref(null);
 const localeText = useLocaleText();
 
-const breadcrumbItems = [
-  { label: "sidebar.categories", route: "/dashboard/categories" },
-  { label: "dashboard.categories.form.add_category" },
-];
+const isSubmitting = ref(false);
+const previewUrl = ref(null);
 
-const categories = ref([]);
-const fetchCategories = async () => {
-  try {
-    generalStore.setLoading(true);
-    const res = await requestService.getAll("/categories");
-    categories.value = [
-      { id: null, name: t("dashboard.categories.form.no_parent") },
-      ...(res?.data || []),
-    ];
-  } catch (error) {
-    console.error(error);
-  } finally {
-    generalStore.setLoading(false);
-  }
-};
+// data
+const categories = ref([]); // dropdown options (either all categories, or [parent] when locked)
+const rawBreadcrumb = ref([]); // array received from API (name/name_en/id/parent_id)
+const parentName = ref("");
 
-onMounted(fetchCategories);
-
-onUnmounted(() => {
-  if (previewUrl.value?.startsWith("blob:")) {
-    URL.revokeObjectURL(previewUrl.value);
-  }
-});
-
+/* --- validation --- */
 const schema = yup.object({
   name: yup.string().required(t("dashboard.categories.form.name_required")),
   name_en: yup
     .string()
     .required(t("dashboard.categories.form.name_en_required")),
   parent_id: yup.number().nullable(),
-  // image: yup.mixed().nullable(),
   image: yup
     .mixed()
     .required(t("dashboard.categories.form.image_required"))
@@ -70,6 +49,132 @@ const { value: name_en } = useField("name_en");
 const { value: parent_id } = useField("parent_id");
 const { value: image } = useField("image");
 
+const breadcrumbItems = computed(() => {
+  // map raw API crumbs -> items (localized label + route to that crumb)
+  const items = rawBreadcrumb.value.map((c) => ({
+    label: localeText(c.name, c.name_en), // choose correct language
+    route: c.id
+      ? { name: "subcategories", params: { parentId: encode(String(c.id)) } }
+      : null,
+  }));
+
+  // push final "Add" label (localized) — if inside parent include parent name
+  if (route.params?.parentId && parentName.value) {
+    items.push({
+      label: `${t("dashboard.categories.form.add_category")} (${
+        parentName.value
+      })`,
+    });
+  } else {
+    items.push({ label: t("dashboard.categories.form.add_category") });
+  }
+
+  // Always start with base "Categories" (translated)
+  return [
+    { label: t("sidebar.categories"), route: "/dashboard/categories" },
+    ...items,
+  ];
+});
+
+/* --- fetch categories for dropdown (root add) --- */
+const fetchCategories = async () => {
+  try {
+    generalStore.setLoading(true);
+    const res = await requestService.getAll("/categories");
+    categories.value = [
+      {
+        id: null,
+        name: t("dashboard.categories.form.no_parent"),
+        name_en: t("dashboard.categories.form.no_parent"),
+      },
+      ...(res?.data || []),
+    ];
+  } catch (error) {
+    console.error("fetchCategories error:", error);
+  } finally {
+    generalStore.setLoading(false);
+  }
+};
+
+/* --- fetch breadcrumb for a given parentId (and lock parent select) --- */
+const fetchBreadcrumb = async () => {
+  const parentParam = route.params?.parentId;
+  if (!parentParam) {
+    rawBreadcrumb.value = [];
+    parentName.value = "";
+    return;
+  }
+
+  try {
+    const decodedId = decode(parentParam);
+    const res = await requestService.getAll(
+      `/categories/${decodedId}/breadcrumb`
+    );
+    const apiCrumbs = Array.isArray(res.data) ? res.data : [];
+
+    // store the raw chain (ancestors). Example: [{id:1,name,..},{id:2,name..}, ...]
+    rawBreadcrumb.value = apiCrumbs;
+
+    // derive the immediate parent (last item in chain) to lock select + label
+    const last = apiCrumbs[apiCrumbs.length - 1];
+    if (last) {
+      parentName.value = localeText(last.name, last.name_en) || "";
+      // single-option dropdown so user sees selected parent
+      categories.value = [
+        {
+          id: last.id,
+          name: last.name,
+          name_en: last.name_en,
+        },
+      ];
+      parent_id.value = last.id ?? null;
+    } else {
+      // fallback
+      parentName.value = "";
+      categories.value = [];
+      parent_id.value = null;
+    }
+  } catch (err) {
+    console.error("fetchBreadcrumb error:", err);
+    rawBreadcrumb.value = [];
+    parentName.value = "";
+    categories.value = [];
+    parent_id.value = null;
+  }
+};
+
+/* --- lifecycle --- */
+onMounted(async () => {
+  if (route.params?.parentId) {
+    await fetchBreadcrumb();
+  } else {
+    await fetchCategories();
+  }
+});
+
+// react to route parent changes
+watch(
+  () => route.params?.parentId,
+  async (newVal, oldVal) => {
+    if (newVal) {
+      await fetchBreadcrumb();
+    } else {
+      // switched to root
+      parentName.value = "";
+      rawBreadcrumb.value = [];
+      parent_id.value = null;
+      await fetchCategories();
+    }
+  }
+);
+
+onUnmounted(() => {
+  if (previewUrl.value?.startsWith("blob:")) {
+    URL.revokeObjectURL(previewUrl.value);
+  }
+});
+
+/* --- image handling --- */
 const onImageSelect = (e) => {
   const file = e.target.files?.[0];
   if (file) {
@@ -81,6 +186,7 @@ const onImageSelect = (e) => {
   }
 };
 
+/* --- submit --- */
 const onSubmit = handleSubmit(async (values) => {
   isSubmitting.value = true;
   try {
@@ -97,9 +203,18 @@ const onSubmit = handleSubmit(async (values) => {
       response?.status?.message ||
         t("dashboard.categories.form.category_created")
     );
-    router.push("/dashboard/categories");
+
+    // redirect back to the appropriate categories list
+    if (route.params?.parentId) {
+      router.push({
+        name: "subcategories",
+        params: { parentId: route.params.parentId },
+      });
+    } else {
+      router.push("/dashboard/categories");
+    }
   } catch (error) {
-    console.error(error);
+    console.error("create category error:", error);
     showError(error || t("dashboard.categories.form.category_create_failed"));
   } finally {
     isSubmitting.value = false;
@@ -116,6 +231,7 @@ const onSubmit = handleSubmit(async (values) => {
         :model="breadcrumbItems"
       >
         <template #item="{ item, props }">
+          <!-- item.route may be a string (e.g. '/dashboard/categories') or a route object -->
           <router-link
             v-if="item.route"
             v-slot="{ href, navigate }"
@@ -124,11 +240,10 @@ const onSubmit = handleSubmit(async (values) => {
           >
             <a :href="href" v-bind="props.action" @click="navigate">
               <span :class="[item.icon, 'text-color']" />
-              <span class="text-primary font-semibold">{{
-                item?.label && $t(item.label)
-              }}</span>
+              <span class="text-primary font-semibold">{{ item.label }}</span>
             </a>
           </router-link>
+
           <a
             v-else
             :href="item.url"
@@ -136,7 +251,7 @@ const onSubmit = handleSubmit(async (values) => {
             v-bind="props.action"
           >
             <span class="text-surface-700 dark:text-surface-0">{{
-              item?.label && $t(item.label)
+              item.label
             }}</span>
           </a>
         </template>
@@ -186,6 +301,7 @@ const onSubmit = handleSubmit(async (values) => {
               :placeholder="t('dashboard.categories.form.select_parent')"
               class="!bg-slate-50 !rounded-lg !pb-2 w-full"
               showClear
+              :disabled="!!route.params?.parentId"
             >
               <template #value="slotProps">
                 <div v-if="slotProps.value">
@@ -202,6 +318,7 @@ const onSubmit = handleSubmit(async (values) => {
                   {{ t("dashboard.categories.form.select_parent") }}
                 </div>
               </template>
+
               <template #option="slotProps">
                 <div>
                   {{
@@ -212,20 +329,23 @@ const onSubmit = handleSubmit(async (values) => {
                   }}
                 </div>
               </template>
+
               <template #dropdownicon>
                 <i class="pi pi-chevron-down" />
               </template>
             </Select>
 
-            <small v-if="errors.parent_id" class="text-red-500">
-              {{ errors.parent_id }}
-            </small>
+            <small v-if="errors.parent_id" class="text-red-500">{{
+              errors.parent_id
+            }}</small>
           </div>
 
           <div>
-            <label for="image-upload" class="block text-sm font-semibold mb-2">
-              {{ t("dashboard.categories.form.image") }}
-            </label>
+            <label
+              for="image-upload"
+              class="block text-sm font-semibold mb-2"
+              >{{ t("dashboard.categories.form.image") }}</label
+            >
 
             <div class="flex items-center gap-4">
               <label
@@ -238,9 +358,8 @@ const onSubmit = handleSubmit(async (values) => {
               <span
                 v-if="image?.name"
                 class="text-sm text-gray-500 truncate max-w-[200px]"
+                >{{ image?.name }}</span
               >
-                {{ image?.name }}
-              </span>
             </div>
 
             <input
@@ -251,9 +370,9 @@ const onSubmit = handleSubmit(async (values) => {
               @change="onImageSelect"
             />
 
-            <small v-if="errors.image" class="text-red-500 block mt-1">
-              {{ errors.image }}
-            </small>
+            <small v-if="errors.image" class="text-red-500 block mt-1">{{
+              errors.image
+            }}</small>
 
             <div v-if="previewUrl" class="mt-4">
               <img

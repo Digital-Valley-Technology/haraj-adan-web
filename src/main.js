@@ -12,6 +12,7 @@ import "viewerjs/dist/viewer.css";
 import VueViewer from "v-viewer";
 
 import App from "./App.vue";
+import SocketPlugin from "./services/SocketPlugin";
 
 const pinia = createPinia();
 
@@ -27,6 +28,7 @@ createApp(App)
     },
   })
   .use(pinia)
+  .use(SocketPlugin)
   .use(router)
   .use(i18n)
   .use(ToastService)

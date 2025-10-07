@@ -1,52 +1,15 @@
 <template>
   <DashboardLayout>
     <main class="px-4 md:px-8 py-[var(--padding-dashboard-section)]">
-      <Breadcrumb
-        class="!p-0 mb-4"
-        :home="DashboardBreadCrumbBase"
-        :model="breadcrumbItems"
-      >
-        <template #item="{ item, props }">
-          <router-link
-            v-if="item.route"
-            v-slot="{ href, navigate }"
-            :to="item.route"
-            custom
-          >
-            <a :href="href" v-bind="props.action" @click="navigate">
-              <span :class="[item.icon, 'text-color']" />
-              <span class="text-primary font-semibold">{{
-                item?.label && $t(`${item.label}`)
-              }}</span>
-            </a>
-          </router-link>
-          <a
-            v-else
-            :href="item.url"
-            :target="item.target"
-            v-bind="props.action"
-          >
-            <span class="text-surface-700 dark:text-surface-0">{{
-              item?.label && $t(`${item.label}`)
-            }}</span>
-          </a>
-        </template>
-      </Breadcrumb>
-
       <div
         class="card w-full mx-auto px-4 md:px-8 py-8 md:py-12 shadow-lg border border-gray-200 rounded-xl"
       >
         <div>
-          <div class="flex justify-between items-center mb-4">
-            <h2 class="text-2xl font-semibold">
-              {{ t("dashboard.actions.manage-attributes") }}
-            </h2>
-
-            <button class="custom-base-button" @click="onAdd">
-              <i class="pi pi-plus"></i>
-              {{ $t("dashboard.categories.attributes.add") }}
-            </button>
-          </div>
+          <AttributesTableHeader
+            @on-add="onAdd"
+            :categoryId="categoryId"
+            :total="totalRecords"
+          />
 
           <div
             v-if="!loading && attributes.length === 0"
@@ -121,19 +84,14 @@ import requestService from "../../../services/api/requestService";
 import { useI18n } from "vue-i18n";
 import { showSuccess, showError } from "../../../utils/notifications";
 import DashboardLayout from "../../../Layout/DashboardLayout.vue";
-import { DashboardBreadCrumbBase } from "../../../utils/constants";
 import AttributeForm from "./AttributeForm.vue";
 import AttributeTable from "./AttributeTable.vue";
+import AttributesTableHeader from "./AttributesTableHeader.vue";
 
 const { t } = useI18n();
 const route = useRoute();
 const encodedId = route.params.categoryId;
 const categoryId = decode(encodedId);
-
-const breadcrumbItems = [
-  { label: "sidebar.categories", route: "/dashboard/categories" },
-  { label: "dashboard.actions.manage-attributes" },
-];
 
 const attributes = ref([]);
 const attributesTypes = ref([]);
@@ -284,8 +242,7 @@ const saveAttribute = async () => {
         buildPayload(editingAttr.value)
       );
       showSuccess(
-        res?.status?.message ||
-          t("dashboard.categories.attributes.updated_success")
+        res?.message || t("dashboard.categories.attributes.updated_success")
       );
     } else {
       const res = await requestService.create(
@@ -293,8 +250,7 @@ const saveAttribute = async () => {
         buildPayload(editingAttr.value)
       );
       showSuccess(
-        res?.status?.message ||
-          t("dashboard.categories.attributes.added_success")
+        res?.message || t("dashboard.categories.attributes.added_success")
       );
     }
 
@@ -322,8 +278,7 @@ const onDelete = async () => {
     );
 
     showSuccess(
-      res?.status?.message ||
-        t("dashboard.categories.form.deleted_successfully")
+      res?.message || t("dashboard.categories.form.deleted_successfully")
     );
 
     fetchAttributes();

@@ -91,7 +91,20 @@
   },
   "ads": {
     "post_ad": "نشر إعلان",
-    "search_placeholder": "المكان، الموقع"
+    "search_placeholder": "المكان، الموقع",
+    "table": {
+      "title": "العنوان",
+      "price": "السعر",
+      "color": "اللون",
+      "image": "الصورة",
+      "created": "تاريخ الإنشاء",
+      "actions": "الإجراءات"
+    },
+    "actions": {
+      "delete": "حذف",
+      "add_new": "إضافة إعلان جديد"
+    },
+    "not_provided": "غير متوفر"
   },
   "login": {
     "login": "تسجيل الدخول",
@@ -145,6 +158,7 @@
   "sidebar": {
     "analytics": "الإحصائيات",
     "profile": "الملف الشخصي",
+    "support": "الدعم",
     "categories": "الأصناف",
     "contact-list": "جهات الإتصال",
     "create-invitation": "إنشاء دعوة جديدة",
@@ -167,7 +181,7 @@
     "actions": {
       "edit": "تعديل",
       "delete": "حذف",
-      "manage-attributes": "إدارة الصفات",
+      "manage-attributes": "إدارة الخصائص",
       "preview": "عرض",
       "details": "التفاصيل"
     },
@@ -183,8 +197,79 @@
       "chartPlaceholder": "سيتم عرض الرسم البياني هنا",
       "errorLoading": "حدث خطأ أثناء تحميل الإحصائيات"
     },
+    "settings": {
+      "adConfigTitle": "إعدادات الإعلان",
+      "adDiscountsTitle": "خصومات الإعلان",
+      "featuredAdPrice": "سعر الإعلان المميز",
+      "featuredAdDays": "عدد أيام الإعلان المميز",
+      "showDiscountBanner": "إظهار لافتة الخصم",
+      "discountPercentage": "نسبة الخصم (%)",
+      "discountPeriod": "فترة الخصم (أيام)",
+      "noDiscounts": "لا توجد خصومات متاحة.",
+      "success": {
+        "config_saved": "تم حفظ إعدادات الإعلان بنجاح.",
+        "discounts_saved": "تم حفظ خصومات الإعلان بنجاح."
+      },
+      "errors": {
+        "price_required": "السعر مطلوب.",
+        "price_min": "يجب أن يكون السعر 1 على الأقل.",
+        "days_required": "عدد الأيام مطلوب.",
+        "days_integer": "عدد الأيام يجب أن يكون عددًا صحيحًا.",
+        "days_min": "عدد الأيام يجب أن يكون 1 على الأقل.",
+        "discount_required": "نسبة الخصم مطلوبة.",
+        "discount_min": "يجب أن تكون نسبة الخصم 1% على الأقل.",
+        "discount_max": "لا يمكن أن تتجاوز نسبة الخصم 100%.",
+        "period_required": "فترة الخصم مطلوبة.",
+        "period_min": "يجب أن تكون الفترة يومًا واحدًا على الأقل.",
+        "fetch_failed": "فشل في جلب الإعدادات.",
+        "save_config_failed": "فشل في حفظ إعدادات الإعلان.",
+        "save_discounts_failed": "فشل في حفظ خصومات الإعلان."
+      }
+    },
+    "support": {
+      "title": "الدعم",
+      "open-download": "فتح / تنزيل",
+      "search-or-start-new": "ابحث أو ابدأ دردشة جديدة",
+      "online": "متصل",
+      "offline": "غير متصل",
+      "document": "مستند",
+      "image": "صورة",
+      "audio": "صوت",
+      "video": "فيديو",
+      "file": "ملف",
+      "select-chat-placeholder": "اختر دردشة للبدء بالمراسلة",
+      "select-chat-instructions": "ستظهر رسائلك هنا بمجرد اختيارك لدردشة",
+      "type-message": "أكتب رسالة"
+    },
     "ads": {
-      "title": "الإعلانات"
+      "title": "الإعلانات",
+      "wallet_balance":"رصيد المحفظة",
+      "featured":"مميز",
+      "table": {
+        "title": "العنوان",
+        "title_en": "العنوان (بالإنجليزية)",
+        "user": "المستخدم",
+        "price": "السعر",
+        "color": "اللون",
+        "image": "الصورة",
+        "created": "تاريخ الإنشاء",
+        "updated": "تاريخ التحديث",
+        "actions": "الإجراءات"
+      },
+      "actions": {
+        "delete": "حذف",
+        "add_new": "إضافة إعلان جديد",
+        "details": "التفاصيل"
+      },
+      "details": {
+        "title": "تفاصيل الإعلان",
+        "attributes": "الخصائص"
+      },
+      "error": {
+        "fetch_ad": "فشل في تحميل تفاصيل الإعلان."
+      },
+      "not_provided": "غير متوفر",
+      "no_data": "لا توجد إعلانات حالياً. ابدأ بإنشاء إعلانك الأول!"
     },
     "wallet-deposits-requests": {
       "table": {
@@ -291,6 +376,11 @@
       }
     },
     "profile": {
+      "connect-google": "ربط حساب جوجل",
+      "updated": "تم تحديث الملف الشخصي بنجاح.",
+      "save": "حفظ",
+      "edit": "تعديل",
+      "google-linked": "هذا الحساب مرتبط بجوجل ولا يمكن تعديل الإيميل.",
       "account-settings": "إعدادات الحساب",
       "email": "البريد الإلكتروني",
       "phone": "رقم الهاتف",
@@ -347,6 +437,7 @@
     },
     "categories": {
       "main_category": "الصنف الرئيسي",
+      "sub_categories": "الأصناف الفرعية",
       "no-data": "لا توجد أصناف حاليا. إبدأ بإنشاء أول صنف.",
       "create-category": "أنشأ صنف",
       "edit-category": "تعديل الصنف",
@@ -396,6 +487,10 @@
         "value_ar": "القيمة (عربي)",
         "value_en": "القيمة (إنجليزي)",
         "type_value_required": "يجب أن تحتوي السمات من النوع خانة اختيار أو زر اختيار على خيار قيمة واحد على الأقل."
+      },
+      "actions": {
+        "attributes": "الخصائص",
+        "sub_categories": "الأصناف الفرعية"
       },
       "confirmation": "تأكيد",
       "edit": "تعديل السمة",

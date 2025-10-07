@@ -19,7 +19,13 @@ export const useCategoriesStore = defineStore("categories", {
   },
 
   actions: {
-    async fetchCategories({ page, limit, search = "", filterBy = null }) {
+    async fetchCategories({
+      page,
+      limit,
+      search = "",
+      filterBy = null,
+      parentId = undefined,
+    }) {
       try {
         this.loading = true;
         const query = new URLSearchParams();
@@ -31,6 +37,13 @@ export const useCategoriesStore = defineStore("categories", {
 
         query.append("page", page);
         query.append("limit", limit);
+
+        if (parentId !== undefined) {
+          query.append(
+            "parentId",
+            parentId === null ? "null" : String(parentId)
+          );
+        }
 
         const response = await requestService.getAll(
           `/categories/paginate?${query.toString()}`

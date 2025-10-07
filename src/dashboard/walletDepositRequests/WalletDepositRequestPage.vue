@@ -74,13 +74,14 @@ const changeStatus = async () => {
         : undefined
     );
     showSuccess(
-      response?.status?.message ||
+      response?.message ||
         t("dashboard.wallet-deposit-requests.form.status_changed_successfully")
     );
     fetchData();
   } catch (error) {
     showError(
-      error?.status?.message ||
+      error ||
+        error?.message ||
         t("dashboard.wallet-deposit-requests.error.select_request")
     );
   } finally {

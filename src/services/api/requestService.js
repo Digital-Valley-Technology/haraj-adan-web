@@ -9,9 +9,9 @@ export default {
       if (
         error.response &&
         error?.response?.data &&
-        error?.response?.data?.status?.message
+        error?.response?.data?.message
       ) {
-        throw new Error(error?.response?.data?.status?.message);
+        throw new Error(error?.response?.data?.message);
       } else {
         throw new Error("An error occurred while creating the item.");
       }
@@ -26,9 +26,9 @@ export default {
       if (
         error.response &&
         error?.response?.data &&
-        error?.response?.data?.status?.message
+        error?.response?.data?.message
       ) {
-        throw new Error(error?.response?.data?.status?.message);
+        throw new Error(error?.response?.data?.message);
       } else {
         throw new Error("An error occurred while reading the data.");
       }
@@ -43,9 +43,9 @@ export default {
       if (
         error.response &&
         error?.response?.data &&
-        error?.response?.data?.status?.message
+        error?.response?.data?.message
       ) {
-        throw new Error(error?.response?.data?.status?.message);
+        throw new Error(error?.response?.data?.message);
       } else {
         throw new Error("An error occurred while creating the state.");
       }
@@ -60,9 +60,9 @@ export default {
       if (
         error.response &&
         error?.response?.data &&
-        error?.response?.data?.status?.message
+        error?.response?.data?.message
       ) {
-        throw new Error(error?.response?.data?.status?.message);
+        throw new Error(error?.response?.data?.message);
       } else {
         throw new Error("An error occurred while updating.");
       }
@@ -77,9 +77,9 @@ export default {
       if (
         error.response &&
         error?.response?.data &&
-        error?.response?.data?.status?.message
+        error?.response?.data?.message
       ) {
-        throw new Error(error?.response?.data?.status?.message);
+        throw new Error(error?.response?.data?.message);
       } else {
         throw new Error("An error occurred while updating.");
       }
@@ -94,9 +94,9 @@ export default {
       if (
         error.response &&
         error?.response?.data &&
-        error?.response?.data?.status?.message
+        error?.response?.data?.message
       ) {
-        throw new Error(error?.response?.data?.status?.message);
+        throw new Error(error?.response?.data?.message);
       } else {
         throw new Error("An error occurred while deleting.");
       }

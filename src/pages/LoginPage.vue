@@ -85,7 +85,7 @@ const onSubmit = handleSubmit(async (values) => {
 
     const response = await requestService.create("auth/login", payload);
 
-    showSuccess(response?.status?.message || t("otp.sent_successfully"));
+    showSuccess(response?.message || t("otp.sent_successfully"));
 
     router.push({
       path: "/verify-otp",
@@ -115,27 +115,28 @@ const loginWithGoogle = () => {
         </h1>
 
         <!-- Toggle Buttons -->
-        <div class="flex justify-center mb-6 gap-4">
+        <div class="flex mb-6 gap-4">
           <button
             type="button"
             @click="loginMethod = 'email'"
             :class="[
-              'px-4 py-2 rounded-md border',
+              'px-4 py-2 rounded-md border transition-colors',
               loginMethod === 'email'
-                ? 'bg-blue-500 text-white border-blue-500'
-                : 'bg-white text-gray-700 border-gray-300',
+                ? 'border-blue-500 text-blue-500 bg-white hover:border-blue-600 hover:text-blue-600'
+                : 'border-gray-300 text-gray-700 bg-white hover:border-blue-400 hover:text-blue-400',
             ]"
           >
             {{ $t("register.email") }}
           </button>
+
           <button
             type="button"
             @click="loginMethod = 'phone'"
             :class="[
-              'px-4 py-2 rounded-md border',
+              'px-4 py-2 rounded-md border transition-colors',
               loginMethod === 'phone'
-                ? 'bg-blue-500 text-white border-blue-500'
-                : 'bg-white text-gray-700 border-gray-300',
+                ? 'border-blue-500 text-blue-500 bg-white hover:border-blue-600 hover:text-blue-600'
+                : 'border-gray-300 text-gray-700 bg-white hover:border-blue-400 hover:text-blue-400',
             ]"
           >
             {{ $t("register.phone") }}

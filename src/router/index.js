@@ -122,6 +122,41 @@ const routes = [
           ],
         },
       },
+
+      {
+        name: "support",
+        path: "support",
+        component: () => import("../dashboard/support/ChatPage.vue"),
+        meta: {
+          requiresAuth: true,
+          permissions: ["dashboard.support.read", "dashboard.support.write"],
+        },
+      },
+
+      {
+        name: "settings",
+        path: "settings",
+        component: () => import("../dashboard/SettingsPage.vue"),
+        meta: {
+          requiresAuth: true,
+          permissions: ["dashboard.settings.read", "dashboard.settings.write"],
+        },
+      },
+
+      {
+        path: "/dashboard/categories/:parentId",
+        name: "subcategories",
+        component: () => import("../dashboard/categories/CategoriesPage.vue"),
+        meta: {
+          requiresAuth: true,
+          permissions: [
+            "dashboard.categories.read",
+            "dashboard.categories.write",
+          ],
+        },
+        props: true,
+      },
+
       {
         name: "banners",
         path: "banners",
@@ -207,14 +242,17 @@ const routes = [
       },
 
       // add and edit
+
       {
-        name: "add-category",
-        path: "categories/add-category",
+        path: "/dashboard/categories/add",
+        name: "addCategory",
         component: () => import("../dashboard/categories/add/index.vue"),
-        meta: {
-          requiresAuth: true,
-          permissions: ["dashboard.categories.write"],
-        },
+      },
+      {
+        path: "/dashboard/categories/add/:parentId",
+        name: "addSubCategory",
+        component: () => import("../dashboard/categories/add/index.vue"),
+        props: true,
       },
       {
         path: "/categories/edit-category/:categoryId",
@@ -226,13 +264,27 @@ const routes = [
         },
       },
       {
-        path: "/categories/attributes/:categoryId",
+        path: "/dashboard/categories/attributes/:categoryId",
         name: "category-attributes",
         component: () =>
           import("../dashboard/categories/attributes/CategoryAttributes.vue"),
         meta: {
           requiresAuth: true,
-          permissions: ["dashboard.categories.write"],
+          permissions: [
+            "dashboard.categories.read",
+            "dashboard.categories.write",
+          ],
+        },
+        props: true,
+      },
+
+      {
+        path: "/ads/admin-ad-details/:adId",
+        name: "admin-ad-details",
+        component: () => import("../dashboard/ads/AdDetails.vue"),
+        meta: {
+          requiresAuth: true,
+          permissions: ["dashboard.ads.read"],
         },
       },
 

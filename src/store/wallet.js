@@ -36,7 +36,8 @@ export const useWalletStore = defineStore("wallet", {
       } catch (error) {
         console.error("Failed to fetch transactions:", error);
         showError(
-          error?.response?.data?.status?.message ||
+          error ||
+            error?.response?.data?.message ||
             t("transaction.fetch_one.error")
         );
       } finally {
@@ -58,7 +59,8 @@ export const useWalletStore = defineStore("wallet", {
         console.error("Failed to fetch transaction details:", error);
         this.transactionDetails = null;
         showError(
-          error?.response?.data?.status?.message ||
+          error ||
+            error?.response?.data?.message ||
             t("transaction.fetch_one.error")
         );
       } finally {

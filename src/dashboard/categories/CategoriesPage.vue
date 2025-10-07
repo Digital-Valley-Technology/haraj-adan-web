@@ -9,32 +9,68 @@ import { useCategoriesStore } from "../../store/category";
 import { useDebounceFn } from "@vueuse/core";
 import { showError, showSuccess } from "../../utils/notifications";
 import requestService from "../../services/api/requestService";
+import { useRoute } from "vue-router";
+import { decode } from "js-base64";
 
+const route = useRoute();
 const categoryStore = useCategoriesStore();
 
+const breadcrumb = ref([]);
 const isSubmitting = ref(false);
-const selectedCategoryId = ref(null); // or passed as a prop if used inside a row
-
-// Delete dialog state
+const selectedCategoryId = ref(null);
 const isDeleteDialogOpen = ref(false);
 
-// Local search/filter state
+// Search/filter state
 const searchText = ref("");
-const selectedFilter = ref({ name: "name" }); //  default filter set
+const selectedFilter = ref({ name: "name" });
 
-// Fetch categories from store
+// parentId is Base64 string in route → decode only for API calls
+const parentId = computed(() => route.params.parentId || null);
+
+const addPageLink = computed(() => {
+  return parentId.value
+    ? `/dashboard/categories/add/${parentId.value}`
+    : "/dashboard/categories/add";
+});
+
+const fetchBreadcrumb = async () => {
+  try {
+    const baseBreadcrumb = [
+      { id: null, name_en: "Categories", name: "الأصناف" },
+    ];
+
+    if (!parentId.value) {
+      breadcrumb.value = baseBreadcrumb;
+      return;
+    }
+
+    const decodedId = decode(parentId.value);
+    const res = await requestService.getAll(
+      `/categories/${decodedId}/breadcrumb`
+    );
+
+    const apiBreadcrumb = Array.isArray(res.data) ? res.data : [];
+    breadcrumb.value = [baseBreadcrumb[0], ...apiBreadcrumb];
+  } catch (error) {
+    console.error("Failed to fetch breadcrumb:", error);
+    breadcrumb.value = [{ id: null, name_en: "Categories", name: "الأصناف" }];
+  }
+};
+
 const fetchData = () => {
+  const decodedId = parentId.value ? Number(decode(parentId.value)) : null;
+
   categoryStore.fetchCategories({
     page: categoryStore.page,
     limit: categoryStore.limit,
     search: searchText.value,
     filterBy: selectedFilter.value?.name,
+    parentId: decodedId,
   });
 };
 
 const handleDelete = async () => {
   if (!selectedCategoryId.value) return;
-
   isSubmitting.value = true;
 
   try {
@@ -42,17 +78,14 @@ const handleDelete = async () => {
       "/categories",
       selectedCategoryId.value
     );
-
     showSuccess(
-      response?.status?.message ||
-        t("dashboard.categories.form.deleted_successfully")
+      response?.message || t("dashboard.categories.form.deleted_successfully")
     );
-
-    fetchData(); // Fetch updated categories after delete
+    fetchData();
   } catch (error) {
     showError(error || t("dashboard.categories.form.delete_failed"));
   } finally {
-    isDeleteDialogOpen.value = false; // Close dialog
+    isDeleteDialogOpen.value = false;
     isSubmitting.value = false;
   }
 };
@@ -62,20 +95,29 @@ const processDelete = (cat) => {
   isDeleteDialogOpen.value = true;
 };
 
-onMounted(fetchData);
+onMounted(() => {
+  fetchData();
+  fetchBreadcrumb();
+});
 
-// Debounced fetch on search/filter change
+// Refetch on search/filter
 watch(
   [searchText, selectedFilter],
   useDebounceFn(() => {
-    categoryStore.page = 1; // reset to page 1 on filter/search change
+    categoryStore.page = 1;
     fetchData();
   }, 500)
 );
 
-// Computed values
+// Refetch on parentId change (drill down categories)
+watch(parentId, () => {
+  categoryStore.page = 1;
+  fetchData();
+  fetchBreadcrumb();
+});
+
 const categories = computed(() => categoryStore.getCategories);
-const total = computed(() => categoryStore.getTotal); // use total from store
+const total = computed(() => categoryStore.getTotal);
 </script>
 
 <template>
@@ -88,22 +130,26 @@ const total = computed(() => categoryStore.getTotal); // use total from store
           :total="total"
           v-model:modelValue="searchText"
           v-model:selectedFilter="selectedFilter"
+          :addPageLink="addPageLink"
         />
+
         <categories-table
           v-if="categories?.length > 0"
           :categories="categories"
           @delete="(cat) => processDelete(cat)"
           @fetch-categories="fetchData()"
         />
+
         <no-data
           v-else
           class="mt-12"
           :content="$t('dashboard.categories.no-data')"
           :button-text="$t('dashboard.categories.create-category')"
-          button-link="/dashboard/new-category"
+          :button-link="addPageLink"
         />
       </div>
     </main>
+
     <DeleteDialog
       v-model="isDeleteDialogOpen"
       :content="$t('generic.delete_confirmation')"

@@ -55,8 +55,7 @@ const handleDelete = async () => {
     );
 
     showSuccess(
-      response?.status?.message ||
-        t("dashboard.banners.form.deleted_successfully")
+      response?.message || t("dashboard.banners.form.deleted_successfully")
     );
 
     fetchData(); // Fetch updated banners after delete
@@ -77,7 +76,7 @@ const handleImageUpdate = async ({ id, image }) => {
   isSubmitting.value = true;
   try {
     const res = await requestService.update("/banners", id, formData);
-    showSuccess(res?.status?.message || t("dashboard.banners.image_updated"));
+    showSuccess(res?.message || t("dashboard.banners.image_updated"));
     await fetchData();
   } catch (error) {
     showError(error || t("dashboard.banners.update_failed"));
@@ -90,7 +89,7 @@ const handleSaveOrder = async (orderedPayload) => {
   isReordering.value = true;
   try {
     const res = await requestService.create("/banners/reorder", orderedPayload);
-    showSuccess(res?.status?.message || t("dashboard.banners.success"));
+    showSuccess(res?.message || t("dashboard.banners.success"));
     await fetchData(); // refresh after saving order
   } catch (error) {
     showError(error || t("dashboard.banners.error"));
