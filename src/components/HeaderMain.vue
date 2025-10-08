@@ -87,13 +87,13 @@
               />
             </svg>
 
-            <!-- Post Ad -->
-            <button
-              class="ms-2 bg-yellow-400 hover:bg-yellow-300 text-black font-semibold py-2 px-4 rounded flex items-center space-x-2 rtl:space-x-reverse transition"
+            <RouterLink
+              to="/post-ad"
+              class="bg-yellow-300 text-black font-semibold px-4 py-2 rounded hover:bg-yellow-400 transition"
             >
               <i class="pi pi-plus text-sm me-2"></i>
               <span>{{ $t("ads.post_ad") }}</span>
-            </button>
+            </RouterLink>
           </div>
         </div>
       </div>
@@ -102,32 +102,32 @@
 </template>
 
 <script setup>
-import { useI18n } from "vue-i18n";
-import { computed, ref, onMounted, onBeforeUnmount } from "vue";
-import { useAuthStore } from "../store/auth";
-import AppProfileIcon from "./AppProfileIcon.vue";
+  import { useI18n } from "vue-i18n";
+  import { computed, ref, onMounted, onBeforeUnmount } from "vue";
+  import { useAuthStore } from "../store/auth";
+  import AppProfileIcon from "./AppProfileIcon.vue";
 
-const authStore = useAuthStore();
+  const authStore = useAuthStore();
 
-const { locale } = useI18n();
-const dir = computed(() =>
-  ["ar", "he"].includes(locale.value) ? "rtl" : "ltr"
-);
+  const { locale } = useI18n();
+  const dir = computed(() =>
+    ["ar", "he"].includes(locale.value) ? "rtl" : "ltr"
+  );
 
-const isMenuOpen = ref(false);
-const isMobile = ref(false);
+  const isMenuOpen = ref(false);
+  const isMobile = ref(false);
 
-function updateSize() {
-  isMobile.value = window.innerWidth < 768;
-  isMenuOpen.value = !isMobile.value;
-}
+  function updateSize() {
+    isMobile.value = window.innerWidth < 768;
+    isMenuOpen.value = !isMobile.value;
+  }
 
-onMounted(() => {
-  updateSize();
-  window.addEventListener("resize", updateSize);
-});
+  onMounted(() => {
+    updateSize();
+    window.addEventListener("resize", updateSize);
+  });
 
-onBeforeUnmount(() => {
-  window.removeEventListener("resize", updateSize);
-});
+  onBeforeUnmount(() => {
+    window.removeEventListener("resize", updateSize);
+  });
 </script>
