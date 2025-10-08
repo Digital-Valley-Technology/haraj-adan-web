@@ -7,6 +7,7 @@ import ToastService from "primevue/toastservice";
 import Aura from "@primevue/themes/aura";
 import "./style.css";
 import "primeicons/primeicons.css";
+import Paginator from "primevue/paginator";
 
 import "viewerjs/dist/viewer.css";
 import VueViewer from "v-viewer";
@@ -33,4 +34,5 @@ createApp(App)
   .use(i18n)
   .use(ToastService)
   .use(VueViewer)
+  .component("Paginator", Paginator)
   .mount("#app");
