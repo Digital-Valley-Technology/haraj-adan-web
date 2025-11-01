@@ -28,6 +28,60 @@
     "ar": "ع",
     "ksa-delivery": "توصيل إلى المملكة العربية"
   },
+  "profile": {
+    "payment": {
+      "account_transfer_label": "تفاصيل التحويل البنكي",
+      "bank_alomqy": "بنك العمقي",
+      "bank_albosaery": "بنك البوصيري",
+      "bank_kuraimimibank": "بنك الكريمي للتمويل الأصغر",
+      "download_receipt_label": "تحميل إيصال الدفع",
+      "click_to_download": "اضغط هنا لتحميل الإيصال",
+      "amount": "المبلغ",
+      "save": "حفظ",
+      "saving": "جارٍ الحفظ...",
+      "success_title": "تم إرسال إيصال الدفع بنجاح.",
+      "success_details": "سيتم مراجعة إيصال الدفع الخاص بك في غضون 24 ساعة وسيتم تحديث رصيدك بعد الموافقة.",
+      "home_button": "الصفحة الرئيسية",
+      "fail_title": "فشل إرسال إيصال الدفع.",
+      "fail_details": "حدث خطأ أثناء محاولة إرسال الإيصال. يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.",
+      "retry_button": "أعد المحاولة"
+    },
+    "validation": {
+      "contact_required": "رقم الهاتف أو البريد الإلكتروني مطلوب.",
+      "amount": {
+        "required": "المبلغ مطلوب.",
+        "positive": "يجب أن يكون المبلغ أكبر من صفر.",
+        "invalid_number": "يجب أن يكون المبلغ رقماً صالحاً."
+      },
+      "receipt": {
+        "required": "إيصال الدفع مطلوب."
+      }
+    },
+    "wallet": {
+      "balance_label": "الرصيد",
+      "available_balance": "الرصيد المتاح",
+      "currency": "ريال سعودي",
+      "deposit_button": "إيداع",
+      "history_title": "تاريخ المعاملات",
+      "no_transactions": "لم يتم العثور على معاملات حديثة.",
+      "status": {
+        "completed": "مكتمل",
+        "pending": "معلق",
+        "cancelled": "ملغى"
+      },
+      "transaction_type": {
+        "received": "تم استلام العربون",
+        "purchased": "المنتج المشتراة"
+      }
+    },
+    "favoured_ads": {
+      "title": "الإعلانات المفضلة",
+      "no_favoured_ads": "ليس لديك أي إعلانات مفضلة."
+    },
+    "no_featured_ads": {
+      "no_featured_ads": "ليس لديك أي إعلانات مميزة."
+    }
+  },
   "footer": {
     "brand": "حراج عدن",
     "product": {
@@ -87,11 +141,13 @@
       "required": "كلمة المرور مطلوبة."
     },
     "fill-all-fields": "يرجى ملء جميع الحقول المطلوبة.",
-    "required": "هذا الحقل مطلوب."
+    "required": "هذا الحقل مطلوب.",
+    "all_fields_required": "جميع الحقول مطلوبة."
   },
   "ads": {
     "post_ad": "نشر إعلان",
     "search_placeholder": "المكان، الموقع",
+    "featured":"مميز",
     "table": {
       "title": "العنوان",
       "price": "السعر",
@@ -243,8 +299,8 @@
     },
     "ads": {
       "title": "الإعلانات",
-      "wallet_balance":"رصيد المحفظة",
-      "featured":"مميز",
+      "wallet_balance": "رصيد المحفظة",
+      "featured": "مميز",
       "table": {
         "title": "العنوان",
         "title_en": "العنوان (بالإنجليزية)",
@@ -526,6 +582,45 @@
     "contact-support": "تواصل مع الدعم الفني",
     "manage-invitation-msg": "لا توجد دعوات مسجلة في حسابك حاليًا. ابدأ بإنشاء دعوتك الأولى لتشارك ضيوفك تفاصيل مناسبتك بأسلوب مميز!",
     "create-invitation": "إنشاء دعوة جديدة"
+  },
+  "postAdd": {
+    "detailsTitle": "تفاصيل الإعلان",
+    "titleLabel": "عنوان الإعلان (عربي)",
+    "titleLabelEn": "عنوان الإعلان (إنجليزي)",
+    "titlePlaceholder": "اكتب العنوان بالعربية",
+    "titlePlaceholderEn": "اكتب العنوان بالإنجليزية",
+    "descriptionLabel": "الوصف",
+    "descriptionPlaceholder": "اكتب وصف الإعلان",
+    "search_place": "ابحث عن موقع",
+    "no_address": "لم يتم تحديد عنوان",
+    "address": "العنوان",
+    "use_my_location": "استخدم موقعي الحالي",
+    "geo_not_supported": "المتصفح لا يدعم تحديد الموقع الجغرافي.",
+    "geo_denied": "تم رفض إذن الموقع. الرجاء تفعيله في إعدادات المتصفح.",
+    "locationLabel": "الموقع",
+    "locationPlaceholder": "حدد الموقع",
+    "priceLabel": "السعر",
+    "pricePlaceholder": "أدخل السعر",
+    "adTypeLabel": "نوع الإعلان",
+    "currencyLabel": "العملة",
+    "currencyPlaceholder": "اختر العملة",
+    "next": "التالي",
+    "previous": "السابق",
+    "uploadTitle": "رفع الصور",
+    "chooseFile": "اختر ملف للتحميل",
+    "submit": "إرسال",
+    "thankYou": "شكرًا لك!",
+    "underReview": "إعلانك قيد المراجعة",
+    "home": "الرئيسية"
+  },
+  "adTypes": {
+    "sell": "بيع",
+    "rent": "إيجار",
+    "exchange": "بدل"
+  },
+  "steps": {
+    "details": "التفاصيل",
+    "images": "الصور"
   },
   "generic": {
     "403-title": "غير مصرح",

@@ -7,7 +7,7 @@
     :totalRecords="totalRecords"
     :first="(currentPage - 1) * rowsPerPage"
     @page="onPageChange"
-    :rowsPerPageOptions="[5, 10, 20]"
+    :rowsPerPageOptions="[2, 5, 10, 20]"
     tableStyle="min-width: 60rem"
     stripedRows
     emptyMessage="No attributes found"
@@ -54,7 +54,8 @@
 <script setup>
 import { useI18n } from "vue-i18n";
 
-defineProps({
+// Access props using the returned object from defineProps
+const props = defineProps({
   attributes: Array,
   loading: Boolean,
   rowsPerPage: Number,
@@ -65,9 +66,22 @@ defineProps({
 const emit = defineEmits(["page-change", "edit", "delete"]);
 
 const onPageChange = (event) => {
+  // Determine the correct new page number
+  let newPage;
+
+  // 1. Check if the rows per page (limit) has changed
+  if (event.rows !== props.rowsPerPage) {
+    // If the limit changed, always go back to the first page (page: 1)
+    newPage = 1;
+  } else {
+    // If only the page number was clicked, use the new page index (+1 for 1-based)
+    newPage = event.page + 1;
+  }
+
+  // 2. Emit the updated page and limit (rows) back to the parent
   emit("page-change", {
-    page: event.page + 1,
-    rows: event.rows,
+    page: newPage,
+    rows: event.rows, // Send the new limit regardless
   });
 };
 

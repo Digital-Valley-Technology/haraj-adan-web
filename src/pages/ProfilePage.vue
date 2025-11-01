@@ -1,19 +1,26 @@
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { useAuthStore } from "../store/auth";
-import { useGeneralStore } from "../store/general";
 import requestService from "../services/api/requestService";
 import { showError, showSuccess } from "../utils/notifications";
 import person from "../assets/person.png";
-import { InputText, FloatLabel, Select, Button, Avatar } from "primevue";
+import { Avatar } from "primevue";
 import AppLayout from "../Layout/AppLayout.vue";
-import { BASE_URL } from "../services/axios";
 import ToggleSwitch from "primevue/toggleswitch";
+import PaymentForm from "../components/Profile/PaymentForm.vue";
+import PaymentSuccess from "../components/Profile/PaymentSuccess.vue";
+import PaymentFaild from "../components/Profile/PaymentFaild.vue";
+import { computed } from "vue";
+import WalletSummary from "../components/Profile/WalletSummary.vue";
+import UserFeaturedAds from "../components/Profile/UserFeaturedAds.vue";
+import FavoriteAdItem from "../components/Profile/FavoriteAdItem.vue";
+import RejectedAdItem from "../components/Profile/RejectedAdItem.vue";
+import OnAirAdItem from "../components/Profile/OnAirAdItem.vue";
+import UserInfo from "../components/Profile/UserInfo.vue";
 
 const { t, locale } = useI18n();
 const authStore = useAuthStore();
-const generalStore = useGeneralStore();
 const i18 = useI18n();
 
 const name = ref("");
@@ -21,31 +28,181 @@ const email = ref("");
 const phone = ref("");
 const originalPhone = ref("");
 const originalName = ref("");
-const editingAccount = ref(false);
-const editingProfile = ref(false);
-const nameError = ref("");
-const phoneError = ref("");
 const activeTab = ref("My Account Information");
 const permission = ref(false);
 const permission2 = ref(false);
 
-const languages = ref([
-  { name: "اللغة العربية", code: "ar" },
-  { name: "English", code: "en" },
+const isLoading = ref(false);
+
+const currentView = ref("form");
+const isPaymentLoading = ref(false); // To show a loading state during the API call
+
+const rejectedAds = [
+  {
+    id: 1,
+    title_en: "Gajah Mada Billboard (Rejected)",
+    title: "لوحة إعلانات جاجاه مادا (مرفوض)",
+    price: 10000,
+    status: "Rejected",
+    status_ar: "مرفوض",
+    ads_images: [
+      { image: "https://placehold.co/80x72/D81515/FFFFFF?text=Ad1" },
+    ],
+    ad_attributes: [
+      {
+        address: "Surakarta, Central Java, Indonesia",
+        address_ar: "سوراكارتا، جاوة تينغاه، إندونيسيا",
+      },
+    ],
+  },
+  {
+    id: 2,
+    title_en: "Premium City Center Ad Space (Pending)",
+    title: "مساحة إعلانات ممتازة وسط المدينة (قيد الانتظار)",
+    price: 15500,
+    status: "Pending",
+    status_ar: "قيد الانتظار",
+    ads_images: [
+      { image: "https://placehold.co/80x72/F59E0B/FFFFFF?text=Ad2" },
+    ],
+    ad_attributes: [
+      {
+        address: "Bandung, West Java, Indonesia",
+        address_ar: "باندونج، جاوة الغربية، إندونيسيا",
+      },
+    ],
+  },
+  {
+    id: 3,
+    title_en: "Highway Entrance Display (Rejected)",
+    title: "شاشة عرض مدخل الطريق السريع (مرفوض)",
+    price: 20250,
+    status: "Rejected",
+    status_ar: "مرفوض",
+    ads_images: [
+      { image: "https://placehold.co/80x72/D81515/FFFFFF?text=Ad3" },
+    ],
+    ad_attributes: [
+      {
+        address: "Jakarta, DKI Jakarta, Indonesia",
+        address_ar: "جاكرتا، جاكرتا العاصمة، إندونيسيا",
+      },
+    ],
+  },
+  {
+    id: 4,
+    title_en: "Coastal View Billboard (Completed)",
+    title: "لوحة إعلانات بإطلالة ساحلية (مكتمل)",
+    price: 8900,
+    status: "Completed",
+    status_ar: "مكتمل",
+    ads_images: [
+      { image: "https://placehold.co/80x72/10B981/FFFFFF?text=Ad4" },
+    ],
+    ad_attributes: [
+      {
+        address: "Denpasar, Bali, Indonesia",
+        address_ar: "دنpasar، بالي، إندونيسيا",
+      },
+    ],
+  },
+  {
+    id: 5,
+    title_en: "Retail Storefront LED (Rejected)",
+    title: "شاشة LED واجهة متجر بيع بالتجزئة (مرفوض)",
+    price: 12100,
+    status: "Rejected",
+    status_ar: "مرفوض",
+    ads_images: [
+      { image: "https://placehold.co/80x72/D81515/FFFFFF?text=Ad5" },
+    ],
+    ad_attributes: [
+      {
+        address: "Surabaya, East Java, Indonesia",
+        address_ar: "سورابايا، جاوة الشرقية، إندونيسيا",
+      },
+    ],
+  },
+];
+const onAirItems = rejectedAds;
+const notPublishedAds = rejectedAds;
+
+const featuredAds = ref([]);
+
+const STORAGE_KEY = "AD_FAVORITES_LIST";
+
+const favoritesAds = ref([]);
+
+// --- METHODS ---
+
+/**
+ * Loads all favorite ads from localStorage.
+ */
+const loadFavoritesFromLocalStorage = () => {
+  isLoading.value = true;
+  try {
+    const storedData = localStorage.getItem(STORAGE_KEY);
+    if (storedData) {
+      favoritesAds.value = JSON.parse(storedData);
+    } else {
+      favoritesAds.value = [];
+    }
+  } catch (error) {
+    console.error("Error reading or parsing localStorage:", error);
+    favoritesAds.value = [];
+  }
+};
+
+const walletBalance = ref(150.75);
+const transactionsData = ref([
+  {
+    type: "received",
+    description_key: "profile.wallet.deposit_received",
+    date: "2025-12-12",
+    time: "02:40 pm",
+    amount: 234,
+    status: "completed",
+  },
+  {
+    type: "purchased",
+    description_key: "profile.wallet.product_purchased",
+    date: "2025-12-10",
+    time: "11:00 am",
+    amount: 50,
+    status: "pending",
+  },
+  {
+    type: "purchased",
+    description_key: "profile.wallet.product_purchased",
+    date: "2025-12-05",
+    time: "09:15 am",
+    amount: 80,
+    status: "cancelled",
+  },
 ]);
 
-const selectedLang = ref(
-  languages.value.find((x) => x.code === generalStore?.lang) ||
-    languages.value[0]
-);
+const currentUser = computed(() => authStore?.getUser);
 
-const isGoogleLinked = computed(
-  () => authStore.user?.provider === "google" || authStore.user?.googleId
-);
+const handleSaveUser = async (validatedData) => {
+  // Pass the validated data directly to your Pinia update action
+  try {
+    const res = await requestService.patch("/auth/profile", validatedData);
+    showSuccess(res?.message);
+  } catch (error) {
+    console.log(error);
+    showError(error);
+  }
+};
 
-const savingProfile = ref(false);
-const savingAccount = ref(false);
-const linkingGoogle = ref(false);
+const handleTabClick = (tabName) => {
+  activeTab.value = tabName;
+  if (tabName === "wallet") {
+    fetchWalletSummary();
+  }
+  if (tabName === "featured") {
+    fetchFeaturedAds();
+  }
+};
 
 const formatPhone = (value) => {
   // Remove non-digits and limit to 10 digits
@@ -57,31 +214,93 @@ const formatPhone = (value) => {
   return cleaned;
 };
 
-const validateName = (value) => {
-  if (!value.trim()) {
-    return t("dashboard.profile.name-required");
+const fetchWalletSummary = async () => {
+  try {
+    const res = await requestService.getAll(
+      "wallet-transactions/wallet-summary/" + currentUser.value?.id
+    );
+    walletBalance.value = res?.data?.balance || 0;
+    transactionsData.value = res?.data?.lastTransactions || [];
+  } catch (error) {
+    console.log(error);
   }
-  if (value.length < 2) {
-    return t("dashboard.profile.name-too-short");
-  }
-  return "";
 };
 
-const validatePhone = (value) => {
-  const cleaned = value.replace(/\D/g, "");
-  if (!cleaned) {
-    return t("dashboard.profile.phone-required");
+const fetchFeaturedAds = async () => {
+  try {
+    const res = await requestService.getAll(
+      "ads/user-featured-ads/" + currentUser.value?.id
+    );
+    featuredAds.value = res?.data || [];
+  } catch (error) {
+    console.log(error);
   }
-  if (cleaned.length < 8) {
-    return t("dashboard.profile.invalid-phone");
-  }
-  return "";
 };
 
-const toggleLang = () => {
-  if (selectedLang.value?.code) {
-    generalStore.toggleLang(locale, selectedLang.value.code);
+const handleDepositClick = () => {
+  activeTab.value = "deposit";
+};
+
+// 2. Handle the submission event from the PaymentForm
+const handleSubmitPayment = async (payload) => {
+  // Ensure loading is set at the start
+  isPaymentLoading.value = true;
+  console.log("Starting API call with payload:", payload);
+
+  const formData = new FormData();
+  formData.append("amount", payload?.amount);
+  // Key name for the file should match backend expectation
+  formData.append("proof_image", payload?.receiptFile);
+  // Ensure authStore and user data are defined
+  formData.append("user_id", authStore?.user?.id);
+
+  // Optional: Keep a short delay for better UX transition
+
+  try {
+    // 1. Execute the actual API call
+    const res = await requestService.create(
+      "wallet-deposits-requests",
+      formData
+    );
+
+    // 2. Success path: Show success toast and switch view
+    showSuccess(res?.message || t("profile.payment.success_title"));
+
+    currentView.value = "success";
+    console.log("API Success! Showing success message.");
+  } catch (error) {
+    // 3. Failure path: Show error toast and switch view
+    console.error("Payment API failed:", error);
+    // Assuming 'showError' is available and handles toast display
+    showError(error || t("profile.payment.fail_title"));
+
+    currentView.value = "failed";
+    console.log("API Failure! Showing failure message.");
+  } finally {
+    // 4. Ensure loading is always false, regardless of outcome
+    isPaymentLoading.value = false;
   }
+};
+
+// 4. Handles 'Home' clicks from Success or Failed components
+const handleGoToHome = () => {
+  console.log("Navigating to Home/Dashboard.");
+  // In a real app, you would use a router here: router.push('/') or emit a global event.
+  currentView.value = "form"; // For this example, we just show the form again
+};
+
+// 5. Handles 'Retry' click from the Failed component
+const handleRetryPayment = () => {
+  console.log("Retrying payment. Returning to form.");
+  currentView.value = "form";
+};
+
+// 6. Utility to render the correct component
+const componentMap = {
+  form: PaymentForm,
+  success: PaymentSuccess,
+  failed: PaymentFaild,
+  summary: WalletSummary,
 };
 
 onMounted(async () => {
@@ -93,87 +312,16 @@ onMounted(async () => {
     email.value = user.email || "";
     phone.value = formatPhone(user.phone || "");
     originalPhone.value = phone.value;
+
+    fetchWalletSummary();
+    fetchFeaturedAds();
+    loadFavoritesFromLocalStorage();
   } catch (err) {
+    console.log(err);
+
     showError(t("dashboard.profile.load-error"));
   }
 });
-
-const saveProfileInfo = async () => {
-  const error = validateName(name.value);
-  if (error) {
-    nameError.value = error;
-    return;
-  }
-
-  savingProfile.value = true;
-  try {
-    await requestService.update("auth/update", authStore.user?.id, {
-      name: name.value.trim(),
-    });
-    await authStore.fetchUser();
-    showSuccess(t("dashboard.profile.profile-updated"));
-    originalName.value = name.value;
-    editingProfile.value = false;
-    nameError.value = "";
-  } catch (err) {
-    showError(
-      err?.response?.data?.message || t("dashboard.profile.update-error")
-    );
-  } finally {
-    savingProfile.value = false;
-  }
-};
-
-const saveAccountSettings = async () => {
-  const error = validatePhone(phone.value);
-  if (error) {
-    phoneError.value = error;
-    return;
-  }
-
-  savingAccount.value = true;
-  try {
-    await requestService.update("auth/update", authStore.user?.id, {
-      phone: phone.value.replace(/\D/g, ""),
-    });
-    await authStore.fetchUser();
-    showSuccess(t("dashboard.profile.account-updated"));
-    originalPhone.value = phone.value;
-    editingAccount.value = false;
-    phoneError.value = "";
-  } catch (err) {
-    showError(
-      err?.response?.data?.message || t("dashboard.profile.update-error")
-    );
-  } finally {
-    savingAccount.value = false;
-  }
-};
-
-const cancelEdit = () => {
-  phone.value = originalPhone.value;
-  editingAccount.value = false;
-  phoneError.value = "";
-};
-
-const cancelProfileEdit = () => {
-  name.value = originalName.value;
-  editingProfile.value = false;
-  nameError.value = "";
-};
-
-const linkWithGoogle = async () => {
-  window.location.href = `${BASE_URL}/auth/google`;
-};
-
-const handlePhoneInput = (event) => {
-  phone.value = formatPhone(event.target.value);
-  phoneError.value = validatePhone(phone.value);
-};
-
-const handleNameInput = () => {
-  nameError.value = validateName(name.value);
-};
 </script>
 
 <template>
@@ -251,7 +399,7 @@ const handleNameInput = () => {
 
             <!-- Wallet -->
             <button
-              @click="activeTab = 'wallet'"
+              @click="handleTabClick('wallet')"
               :class="[
                 'flex justify-between items-center px-2 py-2  hover:text-[#146AAB] cursor-pointer group border-1 border-solid border-[#EEEEEEEE] rounded-lg',
                 activeTab === 'wallet'
@@ -454,7 +602,7 @@ const handleNameInput = () => {
               >
                 {{ i18.locale.value == "ar" ? "إعلانات مميزة" : "Featured" }}
               </span>
-              <span> (0) </span>
+              <span> ({{ featuredAds?.length || 0 }}) </span>
             </button>
 
             <h3 class="uppercase text-xs">
@@ -479,7 +627,7 @@ const handleNameInput = () => {
               >
                 {{ i18.locale.value == "ar" ? "المفضلة" : "Favorites" }}
               </span>
-              <span> (0) </span>
+              <span> ({{ favoritesAds?.length || 0 }}) </span>
             </button>
 
             <h3 class="uppercase text-xs">
@@ -517,31 +665,6 @@ const handleNameInput = () => {
                 ></i>
               </span>
             </button>
-            <!-- Other Pages -->
-            <!-- <button
-              @click="activeTab = 'other pages'"
-              :class="[
-                'flex justify-between items-center px-2 py-2  hover:text-[#146AAB] cursor-pointer group border-1 border-solid border-[#EEEEEEEE] rounded-lg',
-                activeTab === 'other pages'
-                  ? 'bg-[#EEEEEEEE] text-[#146AAB]'
-                  : 'text-black',
-              ]"
-            >
-              <span
-                :class="[
-                  'text-xs font-normal group-hover:text-[#146AAB] uppercase',
-                  activeTab === 'other pages' ? 'text-[#146AAB]' : 'text-black',
-                ]"
-              >
-                {{ i18.locale.value == "ar" ? "صفحات أخرى" : "other pages" }}
-              </span>
-              <span>
-                <i
-                  class="pi pi-chevron-left group-hover:text-[#146AAB]"
-                  style="font-size: 0.9rem"
-                ></i>
-              </span>
-            </button> -->
             <!-- Logout -->
             <button
               class="flex items-center justify-center gap-2 cursor-pointer group text-[#FE3333]"
@@ -570,378 +693,32 @@ const handleNameInput = () => {
             />
             <div class="flex flex-col items-center">
               <h2 class="text-sm font-semibold">
-                {{ i18.locale.value == "ar" ? "اسم المستخدم" : "User Name" }}
+                {{ currentUser?.name }}
               </h2>
               <p class="text-[#9CA3AF] text-xs">
-                {{ authStore.user?.email || "gmail@gmail.com" }}
+                {{ currentUser?.email || currentUser?.phone }}
               </p>
             </div>
           </div>
           <!-- User Information -->
-          <div class="flex flex-col gap-1 bg-white rounded-lg py-2 px-4">
-            <p class="text-sm font-semibold mb-4">
-              {{
-                i18.locale.value == "ar"
-                  ? "معلومات المستخدم"
-                  : "User information"
-              }}
-            </p>
-            <div class="space-y-4">
-              <!-- Name -->
-              <div class="flex flex-col">
-                <label
-                  for="name"
-                  class="mb-1 text-xs font-medium text-[#030712]"
-                >
-                  {{ i18.locale.value == "ar" ? "اسم" : "Name" }}
-                </label>
-                <input
-                  id="name"
-                  type="text"
-                  :placeholder="i18.locale.value == 'ar' ? 'اسمك' : 'Your Name'"
-                  class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <!-- Email -->
-              <div class="flex flex-col">
-                <label
-                  for="email"
-                  class="mb-1 text-xs font-medium text-[#030712]"
-                >
-                  {{ i18.locale.value == "ar" ? "البريد الإلكتروني" : "Email" }}
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  :placeholder="
-                    i18.locale.value == 'ar' ? 'بريدك الإلكتروني' : 'Your Email'
-                  "
-                  class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <hr class="my-6 text-gray-200" />
-            </div>
-            <!-- Reset password -->
-            <p class="text-sm font-semibold mb-4">
-              {{
-                i18.locale.value == "ar"
-                  ? "إعادة تعيين كلمة المرور"
-                  : "Reset Password"
-              }}
-            </p>
-            <div class="space-y-4 mb-4">
-              <!-- old password -->
-              <div class="flex flex-col">
-                <label
-                  for="password"
-                  class="mb-1 text-xs font-medium text-[#030712]"
-                >
-                  {{
-                    i18.locale.value == "ar"
-                      ? "كلمة المرور القديمة"
-                      : " old password"
-                  }}
-                </label>
-                <input
-                  id="oldPassword"
-                  type="password"
-                  :placeholder="
-                    i18.locale.value == 'ar'
-                      ? 'كلمة المرور القديمة'
-                      : ' old password'
-                  "
-                  class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <!-- New password -->
-              <div class="flex flex-col">
-                <label
-                  for="password"
-                  class="mb-1 text-xs font-medium text-[#030712]"
-                >
-                  {{
-                    i18.locale.value == "ar"
-                      ? "كلمة المرور الجديدة"
-                      : " New password"
-                  }}
-                </label>
-                <input
-                  id="newPassword"
-                  type="password"
-                  :placeholder="
-                    i18.locale.value == 'ar'
-                      ? 'كلمة المرور الجديدة'
-                      : ' New password'
-                  "
-                  class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <!-- Confirm new password -->
-              <div class="flex flex-col">
-                <label
-                  for="password"
-                  class="mb-1 text-xs font-medium text-[#030712]"
-                >
-                  {{
-                    i18.locale.value == "ar"
-                      ? "تأكيد كلمة المرور الجديدة"
-                      : " Confirm new password"
-                  }}
-                </label>
-                <input
-                  id="confirmNewPassword"
-                  type="password"
-                  :placeholder="
-                    i18.locale.value == 'ar'
-                      ? 'تأكيد كلمة المرور الجديدة'
-                      : ' Confirm new password'
-                  "
-                  class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            </div>
-            <button
-              class="bg-[#FFE800] text-black px-4 py-2 rounded-lg hover:bg-[#f5e103] transition mb-4"
-            >
-              {{ i18.locale.value == "ar" ? "حفظ" : " save" }}
-            </button>
-          </div>
+          <UserInfo :initial-user="currentUser" @saveUser="handleSaveUser" />
         </div>
         <!-- Wallet Details -->
         <div v-if="activeTab === 'wallet'" class="flex-1 h-fit">
-          <div class="flex flex-col bg-white px-4 rounded-lg py-10">
-            <div
-              class="bg-linear-to-r from-[#146AAB] to-[#0E5082] rounded-lg p-4 mb-4"
-            >
-              <div class="flex justify-between items-start">
-                <div class="flex flex-col">
-                  <div class="flex items-center gap-2">
-                    <i class="pi pi-bitcoin text-yellow-400"></i>
-                    <p class="text-[#EEEEEEEE]">
-                      {{ i18.locale.value == "ar" ? "الرصيد" : "Balance" }}
-                    </p>
-                  </div>
-                  <div>
-                    <span class="text-lg text-[#EEEEEEEE]">30,00 </span>
-                    <span class="text-xs text-[#EEEEEEEE]">{{
-                      i18.locale.value == "ar" ? "ريال سعودي" : "SAR"
-                    }}</span>
-                  </div>
-                  <div>
-                    <span class="text-[#EEEEEEEE] text-xs">{{
-                      i18.locale.value == "ar"
-                        ? "الرصيد المتاح"
-                        : "Available Balance"
-                    }}</span>
-                  </div>
-                </div>
-                <div>
-                  <img src="/images/visa.png" alt="visa" />
-                </div>
-              </div>
-            </div>
-            <div class="mb-4">
-              <button
-                class="flex justify-between items-center w-full px-2 py-2 text-black hover:text-[#146AAB] cursor-pointer group border-1 border-solid border-[#EEEEEEEE] rounded-lg"
-                active-class="bg-[#EEEEEEEE] text-[#146AAB]"
-              >
-                <span
-                  class="text-xs font-normal group-hover:text-[#146AAB] uppercase"
-                >
-                  {{ i18.locale.value == "ar" ? "إيداع" : "Deposit" }}
-                </span>
-                <span>
-                  <i
-                    class="pi pi-chevron-right text-[#146AAB]"
-                    style="font-size: 0.9rem"
-                  ></i>
-                </span>
-              </button>
-            </div>
-            <!-- Transaction History -->
-            <div
-              class="border border-x-gray-200 border-y-0 rounded-lg shadow-xs p-2"
-            >
-              <h3 class="text-xs mb-4">
-                {{
-                  i18.locale.value == "ar"
-                    ? "تاريخ المعاملات"
-                    : "Transaction History"
-                }}
-              </h3>
-              <!-- success -->
-              <div class="flex flex-col items-center gap-1 mb-4">
-                <div class="flex justify-between items-center w-full">
-                  <p class="text-xs">
-                    {{
-                      i18.locale.value == "ar"
-                        ? "تم استلام العربون"
-                        : "Deposit received"
-                    }}
-                  </p>
-                  <p
-                    class="uppercase py-0.5 px-1 text-[8px] bg-[#5CCC3733] rounded-lg text-[#5CCC37]"
-                  >
-                    {{ i18.locale.value == "ar" ? "مكتمل" : "completed" }}
-                  </p>
-                </div>
-                <div class="flex justify-between items-center w-full">
-                  <p class="text-[8px] text-[#525252]">12/12/2025 | 02:40 pm</p>
-                  <p class="uppercase px-1 text-xs">
-                    234 {{ i18.locale.value == "ar" ? "ريال سعودي" : "SAR" }}
-                  </p>
-                </div>
-              </div>
-
-              <!-- pending -->
-              <div class="flex flex-col items-center gap-1 mb-4">
-                <div class="flex justify-between items-center w-full">
-                  <p class="text-xs">
-                    {{
-                      i18.locale.value == "ar"
-                        ? "المنتج المشتراة"
-                        : "Product Purchased"
-                    }}
-                  </p>
-                  <p
-                    class="uppercase py-0.5 px-1 text-[8px] bg-[#FBC97433] rounded-lg text-[#FBC974]"
-                  >
-                    {{ i18.locale.value == "ar" ? "معلق" : "Pending" }}
-                  </p>
-                </div>
-                <div class="flex justify-between items-center w-full">
-                  <p class="text-[8px] text-[#525252]">12/12/2025 | 02:40 pm</p>
-                  <p class="uppercase px-1 text-xs">
-                    234 {{ i18.locale.value == "ar" ? "ريال سعودي" : "SAR" }}
-                  </p>
-                </div>
-              </div>
-
-              <!-- cancelled -->
-              <div class="flex flex-col items-center gap-1 mb-4">
-                <div class="flex justify-between items-center w-full">
-                  <p class="text-xs">
-                    {{
-                      i18.locale.value == "ar"
-                        ? "المنتج المشتراة"
-                        : "Product Purchased"
-                    }}
-                  </p>
-                  <p
-                    class="uppercase py-0.5 px-1 text-[8px] bg-[#EF667633] rounded-lg text-[#EF6676]"
-                  >
-                    {{ i18.locale.value == "ar" ? "ملغى" : "Cancelled" }}
-                  </p>
-                </div>
-                <div class="flex justify-between items-center w-full">
-                  <p class="text-[8px] text-[#525252]">12/12/2025 | 02:40 pm</p>
-                  <p class="uppercase px-1 text-xs">
-                    234 {{ i18.locale.value == "ar" ? "ريال سعودي" : "SAR" }}
-                  </p>
-                </div>
-              </div>
-
-              <!-- cancelled -->
-              <div class="flex flex-col items-center gap-1 mb-4">
-                <div class="flex justify-between items-center w-full">
-                  <p class="text-xs">
-                    {{
-                      i18.locale.value == "ar"
-                        ? "المنتج المشتراة"
-                        : "Product Purchased"
-                    }}
-                  </p>
-                  <p
-                    class="uppercase py-0.5 px-1 text-[8px] bg-[#EF667633] rounded-lg text-[#EF6676]"
-                  >
-                    {{ i18.locale.value == "ar" ? "ملغى" : "Cancelled" }}
-                  </p>
-                </div>
-                <div class="flex justify-between items-center w-full">
-                  <p class="text-[8px] text-[#525252]">12/12/2025 | 02:40 pm</p>
-                  <p class="uppercase px-1 text-xs">
-                    234 {{ i18.locale.value == "ar" ? "ريال سعودي" : "SAR" }}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+          <WalletSummary
+            :balance="walletBalance"
+            :last-transactions="transactionsData"
+            @depositClick="handleDepositClick"
+          />
         </div>
         <!-- Deposit Details -->
-        <div v-if="activeTab === 'deposit'" class="flex-1 h-fit">
-          <div class="bg-white p-4 rounded-lg">
-            <p class="text-xs mb-2">
-              {{
-                i18.locale.value == "ar"
-                  ? "أرقام الحسابات لتحويل المبلغ"
-                  : "Account numbers for transferring the amount"
-              }}
-            </p>
-            <div class="bg-[#F5F6F7] py-4 px-2 rounded-lg mb-4">
-              <div class="flex gap-2 items-center mb-4">
-                <p>
-                  {{ i18.locale.value == "ar" ? "العمقي" : "alomqy" }}:
-                  3453453435
-                </p>
-                <span>
-                  <i class="pi pi-clone text-[#146AAB]"></i>
-                </span>
-              </div>
-              <div class="flex gap-2 items-center mb-4">
-                <p>
-                  {{ i18.locale.value == "ar" ? "البوسري" : "Albosaery" }}:
-                  3453453435
-                </p>
-                <span>
-                  <i class="pi pi-clone text-[#146AAB]"></i>
-                </span>
-              </div>
-              <div class="flex gap-2 items-center">
-                <p>
-                  {{
-                    i18.locale.value == "ar" ? "كورايميمبانك" : "Kuraimimibank"
-                  }}: 3453453435
-                </p>
-                <span>
-                  <i class="pi pi-clone text-[#146AAB]"></i>
-                </span>
-              </div>
-            </div>
-            <!-- download -->
-            <p class="text-xs mb-2">
-              {{
-                i18.locale.value == "ar"
-                  ? "تحميل إيصال الدفع"
-                  : "Download Payment Receipt"
-              }}
-            </p>
-            <div
-              class="flex flex-col justify-center items-center gap-1 border-2 border-dashed rounded-lg py-20 text-[#146AAB] mb-4"
-            >
-              <i class="pi pi-cloud-upload text-2xl"></i>
-              <div class="ml-2 text-xs">
-                {{
-                  i18.locale.value == "ar" ? "انقر لتحميل" : "Click to Download"
-                }}
-              </div>
-            </div>
-            <p class="text-xs mb-1">
-              {{ i18.locale.value == "ar" ? "المبلغ" : "Amount" }}
-            </p>
-            <input
-              type="text"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
-            />
-            <button
-              class="w-full bg-[#FFE800] text-black px-4 py-2 rounded-lg hover:bg-[#f5e103] transition mb-4 cursor-pointer"
-              @click="activeTab = 'save'"
-            >
-              {{ i18.locale.value == "ar" ? "حفظ" : " Save" }}
-            </button>
-          </div>
+        <div class="flex-1 h-fit" v-if="activeTab == 'deposit'">
+          <component
+            :is="componentMap[currentView]"
+            @submitPayment="handleSubmitPayment"
+            @goToHome="handleGoToHome"
+            @retryPayment="handleRetryPayment"
+          />
         </div>
         <!-- Success Deposit -->
         <div v-if="activeTab === 'save'" class="flex-1 h-fit">
@@ -1353,1023 +1130,57 @@ const handleNameInput = () => {
         </div>
         <!-- On Air -->
         <div v-if="activeTab === 'on air'" class="flex-1 h-fit">
-          <div class="flex flex-col gap-2 bg-white p-4 rounded-lg">
-            <!-- item1 -->
-            <div class="flex justify-between items-center">
-              <div class="flex gap-2 items-center">
-                <div class="max-w-[80px] h-18">
-                  <img
-                    src="/images/room1.jpg"
-                    alt="room1"
-                    class="w-full h-full object-cover rounded-lg"
-                  />
-                </div>
-                <div>
-                  <h3 class="text-xs font-semibold mb-1">
-                    {{
-                      i18.locale.value == "ar"
-                        ? "لوحة إعلانات جاجاه مادا"
-                        : "Gajah Mada Billboard"
-                    }}
-                  </h3>
-                  <div class="flex items-center gap-2">
-                    <i class="pi pi-map-marker text-[9px] text-[#6B7280]"></i>
-                    <p class="text-[9px] text-[#6B7280]">
-                      {{
-                        i18.locale.value == "ar"
-                          ? "سوراكارتا، جاوة تينغاه"
-                          : "Surakarta, Jawa Tengah"
-                      }}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div class="flex flex-col items-center gap-1">
-                <p class="bg-[#26A69A] p-1 text-white rounded-sm text-[9px]">
-                  {{ i18.locale.value == "ar" ? "منشور" : "Published" }}
-                </p>
-                <p class="text-sm text-[#146AAB]">
-                  {{ i18.locale.value == "ar" ? "10.000$" : "$ 10.000" }}
-                </p>
-              </div>
-            </div>
-            <hr class="my-4 text-gray-200" />
-            <!-- item2 -->
-            <div class="flex justify-between items-center">
-              <div class="flex gap-2 items-center">
-                <div class="max-w-[80px] h-18">
-                  <img
-                    src="/images/room1.jpg"
-                    alt="room1"
-                    class="w-full h-full object-cover rounded-lg"
-                  />
-                </div>
-                <div>
-                  <h3 class="text-xs font-semibold mb-1">
-                    {{
-                      i18.locale.value == "ar"
-                        ? "لوحة إعلانات جاجاه مادا"
-                        : "Gajah Mada Billboard"
-                    }}
-                  </h3>
-                  <div class="flex items-center gap-2">
-                    <i class="pi pi-map-marker text-[9px] text-[#6B7280]"></i>
-                    <p class="text-[9px] text-[#6B7280]">
-                      {{
-                        i18.locale.value == "ar"
-                          ? "سوراكارتا، جاوة تينغاه"
-                          : "Surakarta, Jawa Tengah"
-                      }}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div class="flex flex-col items-center gap-1">
-                <p class="bg-[#26A69A] p-1 text-white rounded-sm text-[9px]">
-                  {{ i18.locale.value == "ar" ? "منشور" : "Published" }}
-                </p>
-                <p class="text-sm text-[#146AAB]">
-                  {{ i18.locale.value == "ar" ? "10.000$" : "$ 10.000" }}
-                </p>
-              </div>
-            </div>
-            <hr class="my-4 text-gray-200" />
-            <!-- item3 -->
-            <div class="flex justify-between items-center">
-              <div class="flex gap-2 items-center">
-                <div class="max-w-[80px] h-18">
-                  <img
-                    src="/images/room1.jpg"
-                    alt="room1"
-                    class="w-full h-full object-cover rounded-lg"
-                  />
-                </div>
-                <div>
-                  <h3 class="text-xs font-semibold mb-1">
-                    {{
-                      i18.locale.value == "ar"
-                        ? "لوحة إعلانات جاجاه مادا"
-                        : "Gajah Mada Billboard"
-                    }}
-                  </h3>
-                  <div class="flex items-center gap-2">
-                    <i class="pi pi-map-marker text-[9px] text-[#6B7280]"></i>
-                    <p class="text-[9px] text-[#6B7280]">
-                      {{
-                        i18.locale.value == "ar"
-                          ? "سوراكارتا، جاوة تينغاه"
-                          : "Surakarta, Jawa Tengah"
-                      }}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div class="flex flex-col items-center gap-1">
-                <p class="bg-[#26A69A] p-1 text-white rounded-sm text-[9px]">
-                  {{ i18.locale.value == "ar" ? "منشور" : "Published" }}
-                </p>
-                <p class="text-sm text-[#146AAB]">
-                  {{ i18.locale.value == "ar" ? "10.000$" : "$ 10.000" }}
-                </p>
-              </div>
-            </div>
-            <hr class="my-4 text-gray-200" />
-            <!-- item4 -->
-            <div class="flex justify-between items-center">
-              <div class="flex gap-2 items-center">
-                <div class="max-w-[80px] h-18">
-                  <img
-                    src="/images/room1.jpg"
-                    alt="room1"
-                    class="w-full h-full object-cover rounded-lg"
-                  />
-                </div>
-                <div>
-                  <h3 class="text-xs font-semibold mb-1">
-                    {{
-                      i18.locale.value == "ar"
-                        ? "لوحة إعلانات جاجاه مادا"
-                        : "Gajah Mada Billboard"
-                    }}
-                  </h3>
-                  <div class="flex items-center gap-2">
-                    <i class="pi pi-map-marker text-[9px] text-[#6B7280]"></i>
-                    <p class="text-[9px] text-[#6B7280]">
-                      {{
-                        i18.locale.value == "ar"
-                          ? "سوراكارتا، جاوة تينغاه"
-                          : "Surakarta, Jawa Tengah"
-                      }}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div class="flex flex-col items-center gap-1">
-                <p class="bg-[#26A69A] p-1 text-white rounded-sm text-[9px]">
-                  {{ i18.locale.value == "ar" ? "منشور" : "Published" }}
-                </p>
-                <p class="text-sm text-[#146AAB]">
-                  {{ i18.locale.value == "ar" ? "10.000$" : "$ 10.000" }}
-                </p>
-              </div>
-            </div>
-            <hr class="my-4 text-gray-200" />
-            <!-- item5 -->
-            <div class="flex justify-between items-center">
-              <div class="flex gap-2 items-center">
-                <div class="max-w-[80px] h-18">
-                  <img
-                    src="/images/room1.jpg"
-                    alt="room1"
-                    class="w-full h-full object-cover rounded-lg"
-                  />
-                </div>
-                <div>
-                  <h3 class="text-xs font-semibold mb-1">
-                    {{
-                      i18.locale.value == "ar"
-                        ? "لوحة إعلانات جاجاه مادا"
-                        : "Gajah Mada Billboard"
-                    }}
-                  </h3>
-                  <div class="flex items-center gap-2">
-                    <i class="pi pi-map-marker text-[9px] text-[#6B7280]"></i>
-                    <p class="text-[9px] text-[#6B7280]">
-                      {{
-                        i18.locale.value == "ar"
-                          ? "سوراكارتا، جاوة تينغاه"
-                          : "Surakarta, Jawa Tengah"
-                      }}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div class="flex flex-col items-center gap-1">
-                <p class="bg-[#26A69A] p-1 text-white rounded-sm text-[9px]">
-                  {{ i18.locale.value == "ar" ? "منشور" : "Published" }}
-                </p>
-                <p class="text-sm text-[#146AAB]">
-                  {{ i18.locale.value == "ar" ? "10.000$" : "$ 10.000" }}
-                </p>
-              </div>
-            </div>
-          </div>
+          <OnAirAdItem v-for="item in onAirItems" :key="item.id" :item="item" />
         </div>
         <!-- Not Published -->
         <div v-if="activeTab === 'not published'" class="flex-1 h-fit">
-          <div class="flex flex-col gap-2 bg-white p-4 rounded-lg">
-            <!-- item1 -->
-            <div class="flex justify-between items-center">
-              <div class="flex gap-2 items-center">
-                <div class="max-w-[80px] h-18">
-                  <img
-                    src="/images/room1.jpg"
-                    alt="room1"
-                    class="w-full h-full object-cover rounded-lg"
-                  />
-                </div>
-                <div>
-                  <h3 class="text-xs font-semibold mb-1">
-                    {{
-                      i18.locale.value == "ar"
-                        ? "لوحة إعلانات جاجاه مادا"
-                        : "Gajah Mada Billboard"
-                    }}
-                  </h3>
-                  <div class="flex items-center gap-2">
-                    <i class="pi pi-map-marker text-[9px] text-[#6B7280]"></i>
-                    <p class="text-[9px] text-[#6B7280]">
-                      {{
-                        i18.locale.value == "ar"
-                          ? "سوراكارتا، جاوة تينغاه"
-                          : "Surakarta, Jawa Tengah"
-                      }}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div class="flex flex-col items-center gap-1">
-                <p class="bg-[#9CA3AF] p-1 text-white rounded-sm text-[9px]">
-                  {{ i18.locale.value == "ar" ? "غير منشور" : "Not Published" }}
-                </p>
-                <p class="text-sm text-[#146AAB]">
-                  {{ i18.locale.value == "ar" ? "10.000$" : "$ 10.000" }}
-                </p>
-              </div>
-            </div>
-            <hr class="my-4 text-gray-200" />
-            <!-- item2 -->
-            <div class="flex justify-between items-center">
-              <div class="flex gap-2 items-center">
-                <div class="max-w-[80px] h-18">
-                  <img
-                    src="/images/room1.jpg"
-                    alt="room1"
-                    class="w-full h-full object-cover rounded-lg"
-                  />
-                </div>
-                <div>
-                  <h3 class="text-xs font-semibold mb-1">
-                    {{
-                      i18.locale.value == "ar"
-                        ? "لوحة إعلانات جاجاه مادا"
-                        : "Gajah Mada Billboard"
-                    }}
-                  </h3>
-                  <div class="flex items-center gap-2">
-                    <i class="pi pi-map-marker text-[9px] text-[#6B7280]"></i>
-                    <p class="text-[9px] text-[#6B7280]">
-                      {{
-                        i18.locale.value == "ar"
-                          ? "سوراكارتا، جاوة تينغاه"
-                          : "Surakarta, Jawa Tengah"
-                      }}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div class="flex flex-col items-center gap-1">
-                <p class="bg-[#9CA3AF] p-1 text-white rounded-sm text-[9px]">
-                  {{ i18.locale.value == "ar" ? "غير منشور" : "Not Published" }}
-                </p>
-                <p class="text-sm text-[#146AAB]">
-                  {{ i18.locale.value == "ar" ? "10.000$" : "$ 10.000" }}
-                </p>
-              </div>
-            </div>
-            <hr class="my-4 text-gray-200" />
-            <!-- item3 -->
-            <div class="flex justify-between items-center">
-              <div class="flex gap-2 items-center">
-                <div class="max-w-[80px] h-18">
-                  <img
-                    src="/images/room1.jpg"
-                    alt="room1"
-                    class="w-full h-full object-cover rounded-lg"
-                  />
-                </div>
-                <div>
-                  <h3 class="text-xs font-semibold mb-1">
-                    {{
-                      i18.locale.value == "ar"
-                        ? "لوحة إعلانات جاجاه مادا"
-                        : "Gajah Mada Billboard"
-                    }}
-                  </h3>
-                  <div class="flex items-center gap-2">
-                    <i class="pi pi-map-marker text-[9px] text-[#6B7280]"></i>
-                    <p class="text-[9px] text-[#6B7280]">
-                      {{
-                        i18.locale.value == "ar"
-                          ? "سوراكارتا، جاوة تينغاه"
-                          : "Surakarta, Jawa Tengah"
-                      }}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div class="flex flex-col items-center gap-1">
-                <p class="bg-[#9CA3AF] p-1 text-white rounded-sm text-[9px]">
-                  {{ i18.locale.value == "ar" ? "غير منشور" : "Not Published" }}
-                </p>
-                <p class="text-sm text-[#146AAB]">
-                  {{ i18.locale.value == "ar" ? "10.000$" : "$ 10.000" }}
-                </p>
-              </div>
-            </div>
-            <hr class="my-4 text-gray-200" />
-            <!-- item4 -->
-            <div class="flex justify-between items-center">
-              <div class="flex gap-2 items-center">
-                <div class="max-w-[80px] h-18">
-                  <img
-                    src="/images/room1.jpg"
-                    alt="room1"
-                    class="w-full h-full object-cover rounded-lg"
-                  />
-                </div>
-                <div>
-                  <h3 class="text-xs font-semibold mb-1">
-                    {{
-                      i18.locale.value == "ar"
-                        ? "لوحة إعلانات جاجاه مادا"
-                        : "Gajah Mada Billboard"
-                    }}
-                  </h3>
-                  <div class="flex items-center gap-2">
-                    <i class="pi pi-map-marker text-[9px] text-[#6B7280]"></i>
-                    <p class="text-[9px] text-[#6B7280]">
-                      {{
-                        i18.locale.value == "ar"
-                          ? "سوراكارتا، جاوة تينغاه"
-                          : "Surakarta, Jawa Tengah"
-                      }}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div class="flex flex-col items-center gap-1">
-                <p class="bg-[#9CA3AF] p-1 text-white rounded-sm text-[9px]">
-                  {{ i18.locale.value == "ar" ? "غير منشور" : "Not Published" }}
-                </p>
-                <p class="text-sm text-[#146AAB]">
-                  {{ i18.locale.value == "ar" ? "10.000$" : "$ 10.000" }}
-                </p>
-              </div>
-            </div>
-            <hr class="my-4 text-gray-200" />
-            <!-- item5 -->
-            <div class="flex justify-between items-center">
-              <div class="flex gap-2 items-center">
-                <div class="max-w-[80px] h-18">
-                  <img
-                    src="/images/room1.jpg"
-                    alt="room1"
-                    class="w-full h-full object-cover rounded-lg"
-                  />
-                </div>
-                <div>
-                  <h3 class="text-xs font-semibold mb-1">
-                    {{
-                      i18.locale.value == "ar"
-                        ? "لوحة إعلانات جاجاه مادا"
-                        : "Gajah Mada Billboard"
-                    }}
-                  </h3>
-                  <div class="flex items-center gap-2">
-                    <i class="pi pi-map-marker text-[9px] text-[#6B7280]"></i>
-                    <p class="text-[9px] text-[#6B7280]">
-                      {{
-                        i18.locale.value == "ar"
-                          ? "سوراكارتا، جاوة تينغاه"
-                          : "Surakarta, Jawa Tengah"
-                      }}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div class="flex flex-col items-center gap-1">
-                <p class="bg-[#9CA3AF] p-1 text-white rounded-sm text-[9px]">
-                  {{ i18.locale.value == "ar" ? "غير منشور" : "Not Published" }}
-                </p>
-                <p class="text-sm text-[#146AAB]">
-                  {{ i18.locale.value == "ar" ? "10.000$" : "$ 10.000" }}
-                </p>
-              </div>
-            </div>
-          </div>
+          <NotPublishedAdItem
+            v-for="item in notPublishedAds"
+            :key="item.id"
+            :item="item"
+          />
         </div>
         <!-- Rejected -->
         <div v-if="activeTab === 'Rejected'" class="flex-1 h-fit">
-          <div class="flex flex-col gap-2 bg-white p-4 rounded-lg">
-            <!-- item1 -->
-            <div class="flex justify-between items-center">
-              <div class="flex gap-2 items-center">
-                <div class="max-w-[80px] h-18">
-                  <img
-                    src="/images/room1.jpg"
-                    alt="room1"
-                    class="w-full h-full object-cover rounded-lg"
-                  />
-                </div>
-                <div>
-                  <h3 class="text-xs font-semibold mb-1">
-                    {{
-                      i18.locale.value == "ar"
-                        ? "لوحة إعلانات جاجاه مادا"
-                        : "Gajah Mada Billboard"
-                    }}
-                  </h3>
-                  <div class="flex items-center gap-2">
-                    <i class="pi pi-map-marker text-[9px] text-[#6B7280]"></i>
-                    <p class="text-[9px] text-[#6B7280]">
-                      {{
-                        i18.locale.value == "ar"
-                          ? "سوراكارتا، جاوة تينغاه"
-                          : "Surakarta, Jawa Tengah"
-                      }}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div class="flex flex-col items-center gap-1">
-                <p class="bg-[#D81515] p-1 text-white rounded-sm text-[9px]">
-                  {{ i18.locale.value == "ar" ? "مرفوض" : "Rejected" }}
-                </p>
-                <p class="text-sm text-[#146AAB]">
-                  {{ i18.locale.value == "ar" ? "10.000$" : "$ 10.000" }}
-                </p>
-              </div>
-            </div>
-            <hr class="my-4 text-gray-200" />
-            <!-- item2 -->
-            <div class="flex justify-between items-center">
-              <div class="flex gap-2 items-center">
-                <div class="max-w-[80px] h-18">
-                  <img
-                    src="/images/room1.jpg"
-                    alt="room1"
-                    class="w-full h-full object-cover rounded-lg"
-                  />
-                </div>
-                <div>
-                  <h3 class="text-xs font-semibold mb-1">
-                    {{
-                      i18.locale.value == "ar"
-                        ? "لوحة إعلانات جاجاه مادا"
-                        : "Gajah Mada Billboard"
-                    }}
-                  </h3>
-                  <div class="flex items-center gap-2">
-                    <i class="pi pi-map-marker text-[9px] text-[#6B7280]"></i>
-                    <p class="text-[9px] text-[#6B7280]">
-                      {{
-                        i18.locale.value == "ar"
-                          ? "سوراكارتا، جاوة تينغاه"
-                          : "Surakarta, Jawa Tengah"
-                      }}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div class="flex flex-col items-center gap-1">
-                <p class="bg-[#D81515] p-1 text-white rounded-sm text-[9px]">
-                  {{ i18.locale.value == "ar" ? "مرفوض" : "Rejected" }}
-                </p>
-                <p class="text-sm text-[#146AAB]">
-                  {{ i18.locale.value == "ar" ? "10.000$" : "$ 10.000" }}
-                </p>
-              </div>
-            </div>
-            <hr class="my-4 text-gray-200" />
-            <!-- item3 -->
-            <div class="flex justify-between items-center">
-              <div class="flex gap-2 items-center">
-                <div class="max-w-[80px] h-18">
-                  <img
-                    src="/images/room1.jpg"
-                    alt="room1"
-                    class="w-full h-full object-cover rounded-lg"
-                  />
-                </div>
-                <div>
-                  <h3 class="text-xs font-semibold mb-1">
-                    {{
-                      i18.locale.value == "ar"
-                        ? "لوحة إعلانات جاجاه مادا"
-                        : "Gajah Mada Billboard"
-                    }}
-                  </h3>
-                  <div class="flex items-center gap-2">
-                    <i class="pi pi-map-marker text-[9px] text-[#6B7280]"></i>
-                    <p class="text-[9px] text-[#6B7280]">
-                      {{
-                        i18.locale.value == "ar"
-                          ? "سوراكارتا، جاوة تينغاه"
-                          : "Surakarta, Jawa Tengah"
-                      }}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div class="flex flex-col items-center gap-1">
-                <p class="bg-[#D81515] p-1 text-white rounded-sm text-[9px]">
-                  {{ i18.locale.value == "ar" ? "مرفوض" : "Rejected" }}
-                </p>
-                <p class="text-sm text-[#146AAB]">
-                  {{ i18.locale.value == "ar" ? "10.000$" : "$ 10.000" }}
-                </p>
-              </div>
-            </div>
-            <hr class="my-4 text-gray-200" />
-            <!-- item4 -->
-            <div class="flex justify-between items-center">
-              <div class="flex gap-2 items-center">
-                <div class="max-w-[80px] h-18">
-                  <img
-                    src="/images/room1.jpg"
-                    alt="room1"
-                    class="w-full h-full object-cover rounded-lg"
-                  />
-                </div>
-                <div>
-                  <h3 class="text-xs font-semibold mb-1">
-                    {{
-                      i18.locale.value == "ar"
-                        ? "لوحة إعلانات جاجاه مادا"
-                        : "Gajah Mada Billboard"
-                    }}
-                  </h3>
-                  <div class="flex items-center gap-2">
-                    <i class="pi pi-map-marker text-[9px] text-[#6B7280]"></i>
-                    <p class="text-[9px] text-[#6B7280]">
-                      {{
-                        i18.locale.value == "ar"
-                          ? "سوراكارتا، جاوة تينغاه"
-                          : "Surakarta, Jawa Tengah"
-                      }}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div class="flex flex-col items-center gap-1">
-                <p class="bg-[#D81515] p-1 text-white rounded-sm text-[9px]">
-                  {{ i18.locale.value == "ar" ? "مرفوض" : "Rejected" }}
-                </p>
-                <p class="text-sm text-[#146AAB]">
-                  {{ i18.locale.value == "ar" ? "10.000$" : "$ 10.000" }}
-                </p>
-              </div>
-            </div>
-            <hr class="my-4 text-gray-200" />
-            <!-- item5 -->
-            <div class="flex justify-between items-center">
-              <div class="flex gap-2 items-center">
-                <div class="max-w-[80px] h-18">
-                  <img
-                    src="/images/room1.jpg"
-                    alt="room1"
-                    class="w-full h-full object-cover rounded-lg"
-                  />
-                </div>
-                <div>
-                  <h3 class="text-xs font-semibold mb-1">
-                    {{
-                      i18.locale.value == "ar"
-                        ? "لوحة إعلانات جاجاه مادا"
-                        : "Gajah Mada Billboard"
-                    }}
-                  </h3>
-                  <div class="flex items-center gap-2">
-                    <i class="pi pi-map-marker text-[9px] text-[#6B7280]"></i>
-                    <p class="text-[9px] text-[#6B7280]">
-                      {{
-                        i18.locale.value == "ar"
-                          ? "سوراكارتا، جاوة تينغاه"
-                          : "Surakarta, Jawa Tengah"
-                      }}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div class="flex flex-col items-center gap-1">
-                <p class="bg-[#D81515] p-1 text-white rounded-sm text-[9px]">
-                  {{ i18.locale.value == "ar" ? "مرفوض" : "Rejected" }}
-                </p>
-                <p class="text-sm text-[#146AAB]">
-                  {{ i18.locale.value == "ar" ? "10.000$" : "$ 10.000" }}
-                </p>
-              </div>
-            </div>
-          </div>
+          <RejectedAdItem
+            v-for="item in rejectedAds"
+            :key="item.id"
+            :item="item"
+          />
         </div>
         <!-- Featured -->
         <div v-if="activeTab === 'Featured'" class="flex-1 h-fit">
-          <div class="bg-white p-4 rounded-lg">
-            <div class="flex flex-col gap-2 bg-[#FEFFEB] p-4 rounded-lg">
-              <!-- item1 -->
-              <div class="flex justify-between items-center">
-                <div class="flex gap-2 items-center">
-                  <div class="max-w-[80px] h-18">
-                    <img
-                      src="/images/room1.jpg"
-                      alt="room1"
-                      class="w-full h-full object-cover rounded-lg"
-                    />
-                  </div>
-                  <div>
-                    <p
-                      class="bg-[#FFE800] p-1 text-black rounded-sm text-[9px] w-fit mb-2"
-                    >
-                      {{ i18.locale.value == "ar" ? "مميز" : "Featured" }}
-                    </p>
-
-                    <h3 class="text-xs font-semibold mb-1">
-                      {{
-                        i18.locale.value == "ar"
-                          ? "لوحة إعلانات جاجاه مادا"
-                          : "Gajah Mada Billboard"
-                      }}
-                    </h3>
-                    <div class="flex items-center gap-2">
-                      <i class="pi pi-map-marker text-[9px] text-[#6B7280]"></i>
-                      <p class="text-[9px] text-[#6B7280]">
-                        {{
-                          i18.locale.value == "ar"
-                            ? "سوراكارتا، جاوة تينغاه"
-                            : "Surakarta, Jawa Tengah"
-                        }}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div class="flex items-end gap-1">
-                  <p class="text-sm text-[#146AAB]">
-                    {{ i18.locale.value == "ar" ? "10.000$" : "$ 10.000" }}
-                  </p>
-                </div>
-              </div>
-              <hr class="my-4 text-gray-200" />
-              <!-- item2 -->
-              <div class="flex justify-between items-center">
-                <div class="flex gap-2 items-center">
-                  <div class="max-w-[80px] h-18">
-                    <img
-                      src="/images/room1.jpg"
-                      alt="room1"
-                      class="w-full h-full object-cover rounded-lg"
-                    />
-                  </div>
-                  <div>
-                    <p
-                      class="bg-[#FFE800] p-1 text-black rounded-sm text-[9px] w-fit mb-2"
-                    >
-                      {{ i18.locale.value == "ar" ? "مميز" : "Featured" }}
-                    </p>
-
-                    <h3 class="text-xs font-semibold mb-1">
-                      {{
-                        i18.locale.value == "ar"
-                          ? "لوحة إعلانات جاجاه مادا"
-                          : "Gajah Mada Billboard"
-                      }}
-                    </h3>
-                    <div class="flex items-center gap-2">
-                      <i class="pi pi-map-marker text-[9px] text-[#6B7280]"></i>
-                      <p class="text-[9px] text-[#6B7280]">
-                        {{
-                          i18.locale.value == "ar"
-                            ? "سوراكارتا، جاوة تينغاه"
-                            : "Surakarta, Jawa Tengah"
-                        }}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div class="flex items-end gap-1">
-                  <p class="text-sm text-[#146AAB]">
-                    {{ i18.locale.value == "ar" ? "10.000$" : "$ 10.000" }}
-                  </p>
-                </div>
-              </div>
-              <hr class="my-4 text-gray-200" />
-              <!-- item3 -->
-              <div class="flex justify-between items-center">
-                <div class="flex gap-2 items-center">
-                  <div class="max-w-[80px] h-18">
-                    <img
-                      src="/images/room1.jpg"
-                      alt="room1"
-                      class="w-full h-full object-cover rounded-lg"
-                    />
-                  </div>
-                  <div>
-                    <p
-                      class="bg-[#FFE800] p-1 text-black rounded-sm text-[9px] w-fit mb-2"
-                    >
-                      {{ i18.locale.value == "ar" ? "مميز" : "Featured" }}
-                    </p>
-
-                    <h3 class="text-xs font-semibold mb-1">
-                      {{
-                        i18.locale.value == "ar"
-                          ? "لوحة إعلانات جاجاه مادا"
-                          : "Gajah Mada Billboard"
-                      }}
-                    </h3>
-                    <div class="flex items-center gap-2">
-                      <i class="pi pi-map-marker text-[9px] text-[#6B7280]"></i>
-                      <p class="text-[9px] text-[#6B7280]">
-                        {{
-                          i18.locale.value == "ar"
-                            ? "سوراكارتا، جاوة تينغاه"
-                            : "Surakarta, Jawa Tengah"
-                        }}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div class="flex items-end gap-1">
-                  <p class="text-sm text-[#146AAB]">
-                    {{ i18.locale.value == "ar" ? "10.000$" : "$ 10.000" }}
-                  </p>
-                </div>
-              </div>
-              <hr class="my-4 text-gray-200" />
-              <!-- item4 -->
-              <div class="flex justify-between items-center">
-                <div class="flex gap-2 items-center">
-                  <div class="max-w-[80px] h-18">
-                    <img
-                      src="/images/room1.jpg"
-                      alt="room1"
-                      class="w-full h-full object-cover rounded-lg"
-                    />
-                  </div>
-                  <div>
-                    <p
-                      class="bg-[#FFE800] p-1 text-black rounded-sm text-[9px] w-fit mb-2"
-                    >
-                      {{ i18.locale.value == "ar" ? "مميز" : "Featured" }}
-                    </p>
-
-                    <h3 class="text-xs font-semibold mb-1">
-                      {{
-                        i18.locale.value == "ar"
-                          ? "لوحة إعلانات جاجاه مادا"
-                          : "Gajah Mada Billboard"
-                      }}
-                    </h3>
-                    <div class="flex items-center gap-2">
-                      <i class="pi pi-map-marker text-[9px] text-[#6B7280]"></i>
-                      <p class="text-[9px] text-[#6B7280]">
-                        {{
-                          i18.locale.value == "ar"
-                            ? "سوراكارتا، جاوة تينغاه"
-                            : "Surakarta, Jawa Tengah"
-                        }}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div class="flex items-end gap-1">
-                  <p class="text-sm text-[#146AAB]">
-                    {{ i18.locale.value == "ar" ? "10.000$" : "$ 10.000" }}
-                  </p>
-                </div>
-              </div>
-              <hr class="my-4 text-gray-200" />
-              <!-- item5 -->
-              <div class="flex justify-between items-center">
-                <div class="flex gap-2 items-center">
-                  <div class="max-w-[80px] h-18">
-                    <img
-                      src="/images/room1.jpg"
-                      alt="room1"
-                      class="w-full h-full object-cover rounded-lg"
-                    />
-                  </div>
-                  <div>
-                    <p
-                      class="bg-[#FFE800] p-1 text-black rounded-sm text-[9px] w-fit mb-2"
-                    >
-                      {{ i18.locale.value == "ar" ? "مميز" : "Featured" }}
-                    </p>
-
-                    <h3 class="text-xs font-semibold mb-1">
-                      {{
-                        i18.locale.value == "ar"
-                          ? "لوحة إعلانات جاجاه مادا"
-                          : "Gajah Mada Billboard"
-                      }}
-                    </h3>
-                    <div class="flex items-center gap-2">
-                      <i class="pi pi-map-marker text-[9px] text-[#6B7280]"></i>
-                      <p class="text-[9px] text-[#6B7280]">
-                        {{
-                          i18.locale.value == "ar"
-                            ? "سوراكارتا، جاوة تينغاه"
-                            : "Surakarta, Jawa Tengah"
-                        }}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div class="flex items-end gap-1">
-                  <p class="text-sm text-[#146AAB]">
-                    {{ i18.locale.value == "ar" ? "10.000$" : "$ 10.000" }}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+          <UserFeaturedAds :items="featuredAds" />
         </div>
         <!-- Favorites -->
         <div v-if="activeTab === 'favorites'" class="flex-1 h-fit">
-          <div class="flex flex-col gap-2 bg-white p-4 rounded-lg">
-            <!-- item1 -->
-            <div class="flex justify-between items-center">
-              <div class="flex gap-2 items-center">
-                <div class="max-w-[80px] h-18">
-                  <img
-                    src="/images/room1.jpg"
-                    alt="room1"
-                    class="w-full h-full object-cover rounded-lg"
-                  />
-                </div>
-                <div>
-                  <h3 class="text-xs font-semibold mb-1">
-                    {{
-                      i18.locale.value == "ar"
-                        ? "لوحة إعلانات جاجاه مادا"
-                        : "Gajah Mada Billboard"
-                    }}
-                  </h3>
-                  <div class="flex items-center gap-2">
-                    <i class="pi pi-map-marker text-[9px] text-[#6B7280]"></i>
-                    <p class="text-[9px] text-[#6B7280]">
-                      {{
-                        i18.locale.value == "ar"
-                          ? "سوراكارتا، جاوة تينغاه"
-                          : "Surakarta, Jawa Tengah"
-                      }}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div class="flex items-end gap-1">
-                <p class="text-sm text-[#146AAB]">
-                  {{ i18.locale.value == "ar" ? "10.000$" : "$ 10.000" }}
-                </p>
-              </div>
+          <!-- Scrollable container must have a fixed height and overflow set. 
+             This element is the 'root' for the Intersection Observer when root: null is used. -->
+          <div
+            class="h-[calc(100vh-150px)] overflow-y-auto rounded-lg shadow-xl bg-white"
+          >
+            <div
+              v-if="favoritesAds?.length === 0"
+              class="text-center flex-col py-10"
+            >
+              <p class="text-gray-500">
+                {{ $t("profile.favoured_ads.no_favoured_ads") }}
+              </p>
             </div>
-            <hr class="my-4 text-gray-200" />
-            <!-- item2 -->
-            <div class="flex justify-between items-center">
-              <div class="flex gap-2 items-center">
-                <div class="max-w-[80px] h-18">
-                  <img
-                    src="/images/room1.jpg"
-                    alt="room1"
-                    class="w-full h-full object-cover rounded-lg"
-                  />
-                </div>
-                <div>
-                  <h3 class="text-xs font-semibold mb-1">
-                    {{
-                      i18.locale.value == "ar"
-                        ? "لوحة إعلانات جاجاه مادا"
-                        : "Gajah Mada Billboard"
-                    }}
-                  </h3>
-                  <div class="flex items-center gap-2">
-                    <i class="pi pi-map-marker text-[9px] text-[#6B7280]"></i>
-                    <p class="text-[9px] text-[#6B7280]">
-                      {{
-                        i18.locale.value == "ar"
-                          ? "سوراكارتا، جاوة تينغاه"
-                          : "Surakarta, Jawa Tengah"
-                      }}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div class="flex items-end gap-1">
-                <p class="text-sm text-[#146AAB]">
-                  {{ i18.locale.value == "ar" ? "10.000$" : "$ 10.000" }}
-                </p>
-              </div>
-            </div>
-            <hr class="my-4 text-gray-200" />
-            <!-- item3 -->
-            <div class="flex justify-between items-center">
-              <div class="flex gap-2 items-center">
-                <div class="max-w-[80px] h-18">
-                  <img
-                    src="/images/room1.jpg"
-                    alt="room1"
-                    class="w-full h-full object-cover rounded-lg"
-                  />
-                </div>
-                <div>
-                  <h3 class="text-xs font-semibold mb-1">
-                    {{
-                      i18.locale.value == "ar"
-                        ? "لوحة إعلانات جاجاه مادا"
-                        : "Gajah Mada Billboard"
-                    }}
-                  </h3>
-                  <div class="flex items-center gap-2">
-                    <i class="pi pi-map-marker text-[9px] text-[#6B7280]"></i>
-                    <p class="text-[9px] text-[#6B7280]">
-                      {{
-                        i18.locale.value == "ar"
-                          ? "سوراكارتا، جاوة تينغاه"
-                          : "Surakarta, Jawa Tengah"
-                      }}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div class="flex items-end gap-1">
-                <p class="text-sm text-[#146AAB]">
-                  {{ i18.locale.value == "ar" ? "10.000$" : "$ 10.000" }}
-                </p>
-              </div>
-            </div>
-            <hr class="my-4 text-gray-200" />
-            <!-- item4 -->
-            <div class="flex justify-between items-center">
-              <div class="flex gap-2 items-center">
-                <div class="max-w-[80px] h-18">
-                  <img
-                    src="/images/room1.jpg"
-                    alt="room1"
-                    class="w-full h-full object-cover rounded-lg"
-                  />
-                </div>
-                <div>
-                  <h3 class="text-xs font-semibold mb-1">
-                    {{
-                      i18.locale.value == "ar"
-                        ? "لوحة إعلانات جاجاه مادا"
-                        : "Gajah Mada Billboard"
-                    }}
-                  </h3>
-                  <div class="flex items-center gap-2">
-                    <i class="pi pi-map-marker text-[9px] text-[#6B7280]"></i>
-                    <p class="text-[9px] text-[#6B7280]">
-                      {{
-                        i18.locale.value == "ar"
-                          ? "سوراكارتا، جاوة تينغاه"
-                          : "Surakarta, Jawa Tengah"
-                      }}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div class="flex items-end gap-1">
-                <p class="text-sm text-[#146AAB]">
-                  {{ i18.locale.value == "ar" ? "10.000$" : "$ 10.000" }}
-                </p>
-              </div>
-            </div>
-            <hr class="my-4 text-gray-200" />
-            <!-- item5 -->
-            <div class="flex justify-between items-center">
-              <div class="flex gap-2 items-center">
-                <div class="max-w-[80px] h-18">
-                  <img
-                    src="/images/room1.jpg"
-                    alt="room1"
-                    class="w-full h-full object-cover rounded-lg"
-                  />
-                </div>
-                <div>
-                  <h3 class="text-xs font-semibold mb-1">
-                    {{
-                      i18.locale.value == "ar"
-                        ? "لوحة إعلانات جاجاه مادا"
-                        : "Gajah Mada Billboard"
-                    }}
-                  </h3>
-                  <div class="flex items-center gap-2">
-                    <i class="pi pi-map-marker text-[9px] text-[#6B7280]"></i>
-                    <p class="text-[9px] text-[#6B7280]">
-                      {{
-                        i18.locale.value == "ar"
-                          ? "سوراكارتا، جاوة تينغاه"
-                          : "Surakarta, Jawa Tengah"
-                      }}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div class="flex items-end gap-1">
-                <p class="text-sm text-[#146AAB]">
-                  {{ i18.locale.value == "ar" ? "10.000$" : "$ 10.000" }}
-                </p>
-              </div>
+
+            <!-- List Container: Apply the main list styling here -->
+            <div v-else class="flex flex-col gap-2 p-4">
+              <!-- Loop over the CURRENTLY DISPLAYED items -->
+              <template v-for="(item, index) in favoritesAds" :key="item.id">
+                <!-- The single item component -->
+                <FavoriteAdItem :item="item" />
+
+                <!-- Divider: only display if it is NOT the last item -->
+                <hr
+                  v-if="index < favoritesAds.length - 1"
+                  class="my-2 border-gray-200"
+                />
+              </template>
             </div>
           </div>
         </div>

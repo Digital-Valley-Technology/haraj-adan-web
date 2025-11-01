@@ -28,6 +28,60 @@
     "ar": "ع",
     "ksa-delivery": "Delivery to KSA"
   },
+  "profile": {
+    "payment": {
+      "account_transfer_label": "Bank Account Transfer Details",
+      "bank_alomqy": "Alomqy Bank",
+      "bank_albosaery": "Albosaery Bank",
+      "bank_kuraimimibank": "Kuraimi Microfinance Bank",
+      "download_receipt_label": "Upload Payment Receipt",
+      "click_to_download": "Click here to upload your receipt",
+      "amount": "Amount",
+      "save": "Save",
+      "saving": "Saving...",
+      "success_title": "Payment receipt sent successfully.",
+      "success_details": "Your payment receipt will be reviewed within 24 hours and your balance will be updated upon approval.",
+      "home_button": "Home",
+      "fail_title": "Payment Receipt Submission Failed.",
+      "fail_details": "An error occurred while attempting to send the receipt. Please check your internet connection and try again.",
+      "retry_button": "Try Again"
+    },
+    "validation": {
+      "contact_required": "Either phone or email is required",
+      "amount": {
+        "required": "Amount is required.",
+        "positive": "Amount must be greater than zero.",
+        "invalid_number": "The amount must be a valid number."
+      },
+      "receipt": {
+        "required": "A payment receipt file is required."
+      }
+    },
+    "wallet": {
+      "balance_label": "Balance",
+      "available_balance": "Available Balance",
+      "currency": "SAR",
+      "deposit_button": "Deposit",
+      "history_title": "Transaction History",
+      "no_transactions": "No recent transactions found.",
+      "status": {
+        "completed": "completed",
+        "pending": "pending",
+        "cancelled": "cancelled"
+      },
+      "transaction_type": {
+        "received": "Deposit received",
+        "purchased": "Product Purchased"
+      }
+    },
+    "favoured_ads": {
+      "title": "Favoured Ads",
+      "no_favoured_ads": "You have no favoured ads."
+    },
+    "no_featured_ads": {
+      "no_featured_ads": "You have no featured ads."
+    }
+  },
   "footer": {
     "brand": "Haraj Aden",
     "product": {
@@ -87,7 +141,8 @@
       "required": "Password is required."
     },
     "fill-all-fields": "Please fill in all required fields.",
-    "required": "This Field is required."
+    "required": "This Field is required.",
+    "all_fields_required": "All fields are required."
   },
   "login": {
     "login": "Login",
@@ -96,7 +151,8 @@
   },
   "ads": {
     "post_ad": "Post Ad",
-    "search_placeholder": "Place, Location"
+    "search_placeholder": "Place, Location",
+    "featured": "Featured"
   },
   "otp": {
     "send_code": "Send OTP",
@@ -230,7 +286,7 @@
     },
     "ads": {
       "title": "Advertisements",
-      "wallet_balance":"Wallet Balance",
+      "wallet_balance": "Wallet Balance",
       "featured": "Featured",
       "table": {
         "title": "Title",
@@ -508,6 +564,45 @@
     "contact-support": "Contact Technical Support",
     "manage-invitation-msg": "There are no invitations registered in your account currently. Start by creating your first invitation to share your event details with your guests in a unique way!",
     "create-invitation": "Create New Invitation"
+  },
+  "postAdd": {
+    "detailsTitle": "Ad Details",
+    "titleLabel": "Ad Title (AR)",
+    "titleLabelEn": "Ad Title (EN)",
+    "titlePlaceholder": "Your title (AR)",
+    "titlePlaceholderEn": "Your title (EN)",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Description",
+    "search_place": "Search place",
+    "no_address": "No address selected",
+    "address": "Address",
+    "use_my_location": "Use My Location",
+    "geo_not_supported": "Geolocation is not supported by your browser.",
+    "geo_denied": "Location access denied. Please enable it in your browser.",
+    "locationLabel": "Location",
+    "locationPlaceholder": "Select location",
+    "priceLabel": "Price",
+    "pricePlaceholder": "Enter price",
+    "adTypeLabel": "Ad Type",
+    "currencyLabel": "Currency",
+    "currencyPlaceholder": "Currency",
+    "next": "Next",
+    "previous": "Previous",
+    "uploadTitle": "Upload Photos",
+    "chooseFile": "Choose file to upload",
+    "submit": "Submit",
+    "thankYou": "Thank you!",
+    "underReview": "Your ad is under review",
+    "home": "Home"
+  },
+  "adTypes": {
+    "sell": "Sell",
+    "rent": "Rent",
+    "exchange": "Exchange"
+  },
+  "steps": {
+    "details": "Details",
+    "images": "Images"
   },
   "generic": {
     "403-title": "Unauthorized",

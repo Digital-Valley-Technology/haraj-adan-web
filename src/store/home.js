@@ -1,0 +1,51 @@
+import { defineStore } from "pinia";
+import requestService from "../services/api/requestService";
+import { get } from "@vueuse/core";
+
+export const useHomeStore = defineStore("home", {
+  state: () => ({
+    ads: [],
+    sidMenuCategories: [],
+    adsLoading: false,
+    sideMenuCategoriesLoading: false,
+  }),
+
+  getters: {
+    getAds: (state) => state.ads,
+    getSideMenuCategories: (state) => state.sidMenuCategories,
+    getAdsLoading: (state) => state.adsLoading,
+    getSideMenuCategoriesLoading: (state) => state.sideMenuCategoriesLoading,
+  },
+
+  actions: {
+    async fetchAds() {
+      if (this.ads?.length > 0) return;
+      try {
+        this.adsLoading = true;
+
+        const response = await requestService.getAll(`/ads/home`);
+
+        this.ads = response?.data;
+      } catch (err) {
+        console.error("Failed to fetch ads:", err);
+      } finally {
+        this.adsLoading = false;
+      }
+    },
+
+    async fetchSideMenuCategories() {
+      if (this.sidMenuCategories?.length > 0) return;
+      try {
+        this.sideMenuCategoriesLoading = true;
+        const response = await requestService.getAll(
+          "/categories/home-page-menu"
+        );
+        this.sidMenuCategories = response.data;
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      } finally {
+        this.sideMenuCategoriesLoading = false;
+      }
+    },
+  },
+});

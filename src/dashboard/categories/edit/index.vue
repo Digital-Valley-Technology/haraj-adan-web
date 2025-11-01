@@ -188,7 +188,7 @@ const onSubmit = handleSubmit(async (values) => {
     );
 
     showSuccess(
-      response?.message || t("dashboard.categories.form.category_updated")
+      response?.message || t("dashboard.categories.form.category_added")
     );
     if (values.parent_id) {
       // Navigate to the parent category

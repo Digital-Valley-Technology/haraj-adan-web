@@ -68,6 +68,11 @@ const routes = [
     component: () => import("../pages/TermsPage.vue"),
   },
   {
+    name: "customer-support",
+    path: "/customer-support",
+    component: () => import("../pages/SupportPage.vue"),
+  },
+  {
     name: "faq",
     path: "/faq",
     component: () => import("../pages/FAQPage.vue"),
@@ -89,7 +94,7 @@ const routes = [
   },
   {
     name: "ad-details",
-    path: "/ad-details/:id",
+    path: "/ad-details/:adId",
     component: () => import("../pages/AdDetailsPage.vue"),
   },
   {
@@ -103,9 +108,15 @@ const routes = [
     component: () => import("../pages/SearchPage.vue"),
   },
   {
+    path: "/post-add/:categoryId",
     name: "post-ad",
-    path: "/post-ad",
     component: () => import("../pages/PostAdPage.vue"),
+    props: true,
+  },
+  {
+    name: "post-ad-categories",
+    path: "/post-ad-categories",
+    component: () => import("../pages/PostAdCategoriesPage.vue"),
   },
   {
     name: "dashboard",

@@ -3,49 +3,6 @@
     <main class="page-wrapper custom-container min-h-screen my-4">
       <div class="flex flex-col lg:flex-row gap-4 mx-8">
         <div class="w-full lg:w-80">
-          <!-- categories -->
-          <div class="flex gap-2 items-start bg-white p-4 rounded-lg">
-            <i class="icon pi pi-home"></i>
-            <div class="flex flex-col items-center gap-2">
-              <p class="text-sm font-medium">
-                {{ i18?.locale?.value == "ar" ? "المركبات" : "Vehicles" }}
-              </p>
-              <ul>
-                <li>
-                  <a href="#" class="text-xs text-[#146AAB] hover:underline">{{
-                    i18?.locale?.value == "ar" ? "سيارات" : "Car"
-                  }}</a>
-                  <span class="text-[10px] ms-2 text-[#A1A1A1]">(401,915)</span>
-                </li>
-                <li>
-                  <a href="#" class="text-xs text-[#146AAB] hover:underline">{{
-                    i18?.locale?.value == "ar" ? "دراجات" : "Bikes"
-                  }}</a>
-                  <span class="text-[10px] ms-2 text-[#A1A1A1]">(150,200)</span>
-                </li>
-                <li>
-                  <a href="#" class="text-xs text-[#146AAB] hover:underline">{{
-                    i18?.locale?.value == "ar" ? "شاحنات" : "Trucks"
-                  }}</a>
-                  <span class="text-[10px] ms-2 text-[#A1A1A1]">(50,000)</span>
-                </li>
-                <li>
-                  <a href="#" class="text-xs text-[#146AAB] hover:underline">{{
-                    i18?.locale?.value == "ar" ? "حافلات" : "Buses"
-                  }}</a>
-                  <span class="text-[10px] ms-2 text-[#A1A1A1]">(20,000)</span>
-                </li>
-                <li>
-                  <a href="#" class="text-xs text-[#146AAB] hover:underline">{{
-                    i18?.locale?.value == "ar"
-                      ? "مركبات أخرى"
-                      : "Other Vehicles"
-                  }}</a>
-                  <span class="text-[10px] ms-2 text-[#A1A1A1]">(10,000)</span>
-                </li>
-              </ul>
-            </div>
-          </div>
           <!-- map view -->
           <div class="p-4">
             <div
@@ -55,7 +12,7 @@
                 @click="toggleView"
                 :class="[
                   'flex gap-4 items-center justify-center hover:bg-[#146AAB] hover:text-white transition-colors py-2 px-4 rounded-lg cursor-pointer w-full',
-                  showMap
+                  activeButtonList === 'map'
                     ? 'bg-[#F5F6F7] text-black'
                     : 'bg-[#EDEFF2] text-black',
                 ]"
@@ -66,19 +23,18 @@
                   <i
                     :class="[
                       'pi',
-                      showMap ? 'pi-list' : 'pi-map-marker',
-                      showMap ? 'text-black' : 'text-black',
+                      activeButtonList === 'map' ? 'pi-list' : 'pi-map-marker',
+                      activeButtonList === 'map' ? 'text-black' : 'text-black',
                     ]"
                   ></i>
                 </span>
-
                 <span class="text-sm font-medium">
                   {{
-                    showMap
-                      ? i18?.locale?.value == "ar"
+                    activeButtonList === "map"
+                      ? currentLocale == "ar"
                         ? "عرض القائمة"
                         : "List View"
-                      : i18?.locale?.value == "ar"
+                      : currentLocale == "ar"
                       ? "عرض الخريطة"
                       : "Map View"
                   }}
@@ -86,692 +42,440 @@
               </button>
             </div>
           </div>
-          <!-- small size Filter -->
-          <div class="card flex justify-center lg:hidden">
-            <Drawer
-              v-model:visible="visible"
-              :header="i18.locale.value == 'ar' ? 'تصفية' : 'Filter'"
-            >
-              <!-- Filter -->
-              <div class="p-4 bg-white rounded-lg mb-2">
-                <h6 class="text-xs font-medium mb-2">
-                  {{ i18?.locale?.value == "ar" ? "الفئة" : "Category" }}
-                </h6>
-                <select
-                  name="category"
-                  id="category"
-                  class="border rounded-md p-2 w-full border-[#cdced1] mb-4"
-                >
-                  <option value="real-estate">
-                    {{ i18.locale.value === "ar" ? "عقارات" : "Real Estate" }}
-                  </option>
-                  <option value="cars">
-                    {{ i18.locale.value === "ar" ? "سيارات" : "Vehicles" }}
-                  </option>
-                  <option value="electronics">
-                    {{
-                      i18.locale.value === "ar" ? "إلكترونيات" : "Electronics"
-                    }}
-                  </option>
-                  <option value="services">
-                    {{ i18.locale.value === "ar" ? "خدمات" : "Services" }}
-                  </option>
-                  <option value="other">
-                    {{ i18.locale.value === "ar" ? " أخرى" : "Other" }}
-                  </option>
-                </select>
-                <h6 class="text-xs font-medium mb-4">
-                  {{
-                    i18?.locale?.value == "ar"
-                      ? "بحث بالقرب مني"
-                      : "Search Near Me"
-                  }}
-                </h6>
-                <div class="flex justify-between items-center text-[9px] mb-4">
-                  <span>{{
-                    i18?.locale?.value == "ar" ? "0.1 كم" : "0.1 km"
-                  }}</span>
-                  <span>-</span>
-                  <span>{{
-                    i18?.locale?.value == "ar"
-                      ? "جميع المسافات"
-                      : "All Distances"
-                  }}</span>
-                </div>
-                <div class="card flex justify-center mb-4">
-                  <Slider v-model="value" range class="w-full" />
-                </div>
 
-                <h6 class="text-xs font-medium mb-2">
-                  {{ i18?.locale?.value == "ar" ? "السعر" : "Price" }}
-                </h6>
-                <div>
-                  <div class="flex items-center justify-between w-full mb-4">
-                    <input
-                      type="text"
-                      :placeholder="
-                        i18?.locale?.value == 'ar' ? 'على الأقل' : 'At least'
-                      "
-                      class="py-2 px-2 border border-[#cdced1] text-xs rounded-md text-center w-30"
-                    />
-                    <span>-</span>
-                    <input
-                      type="text"
-                      :placeholder="
-                        i18?.locale?.value == 'ar' ? 'على الأكثر' : 'At most'
-                      "
-                      class="py-2 px-2 border border-[#cdced1] text-xs rounded-md text-center w-30"
-                    />
-                  </div>
-                </div>
-                <select
-                  name="category"
-                  id="category"
-                  class="border rounded-md p-2 w-full border-[#cdced1] mb-4"
+          <!-- Filter (large Screen) -->
+          <div class="hidden lg:block">
+            <div class="p-4 bg-white rounded-lg mb-2">
+              <h6 class="text-sm font-medium mb-2">
+                {{ currentLocale == "ar" ? "تصفية" : "Filter" }}
+              </h6>
+              <h6 class="text-xs font-medium mb-2">
+                {{ currentLocale == "ar" ? "الفئة" : "Category" }}
+              </h6>
+              <select
+                class="border rounded-md p-2 w-full border-[#cdced1] mb-4"
+                v-model="filtersStore.selectedCategory"
+                @change="handleUpdateSelectedCategory"
+              >
+                <option
+                  v-for="cat in categoriesFilter"
+                  :key="cat.id"
+                  :value="cat"
                 >
-                  <option value="USD">
-                    {{ i18.locale.value === "ar" ? "دولار أمريكي" : "USD" }}
-                  </option>
-                  <option value="SAR">
-                    {{ i18.locale.value === "ar" ? "ريال سعودي" : "SAR" }}
-                  </option>
-                </select>
-                <h6 class="text-xs font-medium mb-4">
-                  {{
-                    i18?.locale?.value == "ar" ? "عدد الملاك" : "No. of owners"
-                  }}
-                </h6>
-                <!-- Owner buttons -->
-                <div class="flex flex-wrap gap-2 mb-4">
-                  <button
-                    v-for="btn in ownersButtons"
-                    :key="btn.id"
-                    @click="activeButton = btn.id"
-                    :class="[
-                      'text-xs capitalize py-2 px-4 rounded-md cursor-pointer transition-colors',
-                      activeButton === btn.id
-                        ? 'bg-[#146AAB] text-white'
-                        : 'bg-[#EDEFF2] text-black hover:bg-[#0f76c5] hover:text-white',
-                    ]"
-                  >
-                    {{ i18.locale.value === "ar" ? btn.labelAr : btn.labelEn }}
-                  </button>
-                </div>
-                <h6 class="text-xs font-medium mb-4">
-                  {{
-                    i18?.locale?.value == "ar"
-                      ? "بواسطة الكيلومترات المقطوعة"
-                      : "by km driven"
-                  }}
-                </h6>
-                <!-- Driven buttons -->
-                <div class="flex flex-wrap gap-2 mb-4">
-                  <button
-                    v-for="btn in drivenButtons"
-                    :key="btn.id"
-                    @click="activeButton2 = btn.id"
-                    :class="[
-                      'text-xs capitalize py-2 px-4 rounded-md cursor-pointer transition-colors',
-                      activeButton2 === btn.id
-                        ? 'bg-[#146AAB] text-white'
-                        : 'bg-[#EDEFF2] text-black hover:bg-[#0f76c5] hover:text-white',
-                    ]"
-                  >
-                    {{ i18.locale.value === "ar" ? btn.labelAr : btn.labelEn }}
-                  </button>
-                </div>
-                <h6 class="text-xs font-medium mb-4">
-                  {{ i18?.locale?.value == "ar" ? "بالوقود" : "by fuel" }}
-                </h6>
-                <!-- Fuel buttons -->
-                <div class="flex flex-wrap gap-2 mb-4">
-                  <button
-                    v-for="btn in fuelButtons"
-                    :key="btn.id"
-                    @click="activeButton3 = btn.id"
-                    :class="[
-                      'text-xs capitalize py-2 px-4 rounded-md cursor-pointer transition-colors',
-                      activeButton3 === btn.id
-                        ? 'bg-[#146AAB] text-white'
-                        : 'bg-[#EDEFF2] text-black hover:bg-[#0f76c5] hover:text-white',
-                    ]"
-                  >
-                    {{ i18.locale.value === "ar" ? btn.labelAr : btn.labelEn }}
-                  </button>
-                </div>
-                <h6 class="text-xs font-medium mb-4">
-                  {{ i18?.locale?.value == "ar" ? "الحالة" : "condition" }}
-                </h6>
-                <!-- condition buttons -->
-                <div class="flex flex-wrap gap-2 mb-4">
-                  <button
-                    v-for="btn in conditionButton"
-                    :key="btn.id"
-                    @click="activeButton4 = btn.id"
-                    :class="[
-                      'text-xs capitalize py-2 px-4 rounded-md cursor-pointer transition-colors',
-                      activeButton4 === btn.id
-                        ? 'bg-[#146AAB] text-white'
-                        : 'bg-[#EDEFF2] text-black hover:bg-[#0f76c5] hover:text-white',
-                    ]"
-                  >
-                    {{ i18.locale.value === "ar" ? btn.labelAr : btn.labelEn }}
-                  </button>
-                </div>
-                <h6 class="text-xs font-medium mb-4">
-                  {{ i18?.locale?.value == "ar" ? "التاريخ" : "date" }}
-                </h6>
-                <!-- date buttons -->
-                <div class="flex flex-wrap gap-2 mb-4">
-                  <button
-                    v-for="btn in dateButton"
-                    :key="btn.id"
-                    @click="activeButton5 = btn.id"
-                    :class="[
-                      'text-xs capitalize py-2 px-4 rounded-md cursor-pointer transition-colors',
-                      activeButton5 === btn.id
-                        ? 'bg-[#146AAB] text-white'
-                        : 'bg-[#EDEFF2] text-black hover:bg-[#0f76c5] hover:text-white',
-                    ]"
-                  >
-                    {{ i18.locale.value === "ar" ? btn.labelAr : btn.labelEn }}
-                  </button>
-                </div>
-                <h6 class="text-xs font-medium mb-4">
-                  {{ i18?.locale?.value == "ar" ? "الموقع" : "Location" }}
-                </h6>
-                <!-- Locations -->
+                  {{ currentLocale === "ar" ? cat?.name : cat?.name_en }}
+                </option>
+              </select>
+
+              <!-- Price -->
+              <h6 class="text-xs font-medium mb-2">
+                {{ currentLocale == "ar" ? "السعر" : "Price" }}
+              </h6>
+              <div class="flex items-center justify-between w-full mb-4">
+                <input
+                  type="number"
+                  v-model="filtersStore.minPrice"
+                  :placeholder="
+                    currentLocale == 'ar' ? 'على الأقل' : 'At least'
+                  "
+                  class="py-2 px-2 border border-[#cdced1] text-xs rounded-md text-center w-30"
+                />
+                <span>-</span>
+                <input
+                  type="number"
+                  v-model="filtersStore.maxPrice"
+                  :placeholder="
+                    currentLocale == 'ar' ? 'على الأكثر' : 'At most'
+                  "
+                  class="py-2 px-2 border border-[#cdced1] text-xs rounded-md text-center w-30"
+                />
+              </div>
+
+              <!-- Dynamic Filters (Radio Logic) -->
+              <div
+                v-for="item in selectedCategory?.category_attributes"
+                :key="item.id"
+              >
                 <div
-                  v-for="location in locations"
-                  class="flex flex-col gap-2 mb-4"
+                  v-if="
+                    item?.category_attributes_types?.code !== 'location' &&
+                    item?.category_attributes_types?.code !== 'textarea' &&
+                    item?.category_attributes_types?.code !== 'checkbox' &&
+                    item?.category_attributes_types?.code !== 'number'
+                  "
                 >
-                  <div class="flex justify-between">
-                    <p class="text-xs">
-                      {{
-                        i18?.locale?.value == "ar"
-                          ? location.labelAr
-                          : location.labelEn
-                      }}
-                    </p>
+                  <h6 class="text-xs font-medium mb-2">
+                    {{ currentLocale == "ar" ? item?.name : item?.name_en }}
+                  </h6>
+                  <div class="flex flex-wrap gap-2 mb-4">
                     <button
-                      @click="location.checked = !location.checked"
-                      class="cursor-pointer"
+                      v-for="val in item?.category_attributes_values"
+                      :key="val.id"
+                      @click="
+                        filtersStore.toggleAttributeValue(item.id, val.id)
+                      "
+                      :class="[
+                        'text-xs capitalize py-2 px-4 rounded-md cursor-pointer transition-colors',
+                        filtersStore.isAttributeActive(item.id, val.id)
+                          ? 'bg-[#146AAB] text-white'
+                          : 'bg-[#EDEFF2] text-black hover:bg-[#0f76c5] hover:text-white',
+                      ]"
                     >
-                      <i
-                        :class="[
-                          'pi',
-                          location.checked ? 'pi-check-square' : 'pi-stop',
-                        ]"
-                      ></i>
+                      {{ currentLocale === "ar" ? val.name : val.name_en }}
                     </button>
                   </div>
                 </div>
-                <h6 class="text-xs font-medium mb-4">
-                  {{ i18?.locale?.value == "ar" ? "آخرى" : "Others" }}
-                </h6>
-                <!-- others -->
-                <div v-for="other in others" class="flex flex-col gap-2 mb-4">
-                  <div class="flex justify-between">
+              </div>
+
+              <!-- Checkbox Filters -->
+              <div
+                v-for="item in selectedCategory?.category_attributes"
+                :key="item.id"
+              >
+                <div
+                  v-if="item?.category_attributes_types?.code === 'checkbox'"
+                >
+                  <h6 class="text-xs font-medium mb-2">
+                    {{ currentLocale == "ar" ? item?.name : item?.name_en }}
+                  </h6>
+                  <div
+                    v-for="val in item?.category_attributes_values"
+                    :key="val.id"
+                    class="flex justify-between items-center mb-2"
+                  >
                     <p class="text-xs">
-                      {{
-                        i18?.locale?.value == "ar"
-                          ? other.labelAr
-                          : other.labelEn
-                      }}
+                      {{ currentLocale == "ar" ? val.name : val.name_en }}
                     </p>
                     <button
-                      @click="other.checked = !other.checked"
+                      @click="filtersStore.toggleCheckboxValue(item.id, val.id)"
                       class="cursor-pointer"
                     >
                       <i
                         :class="[
                           'pi',
-                          other.checked ? 'pi-check-square' : 'pi-stop',
+                          filtersStore.isCheckboxActive(item.id, val.id)
+                            ? 'pi-check-square'
+                            : 'pi-stop',
                         ]"
                       ></i>
                     </button>
                   </div>
                 </div>
               </div>
+            </div>
+
+            <!-- Filter Buttons -->
+            <div class="bg-white rounded-lg mb-4 p-4">
+              <div class="flex gap-2 items-center">
+                <button
+                  @click="filtersStore.clearFilters"
+                  class="flex-1 text-sm bg-[#EDEFF2] py-2 px-4 rounded-md hover:bg-[#c0c3c6]"
+                >
+                  {{ currentLocale == "ar" ? "مسح التصفية" : "Clear Filter" }}
+                </button>
+                <button
+                  @click="applyFilters"
+                  class="flex-1 text-sm bg-[#FFE800] py-2 px-4 rounded-md hover:bg-[#f5e427]"
+                >
+                  {{ currentLocale == "ar" ? "تطبيق الفلتر" : "Apply Filter" }}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filter (small Screen) -->
+          <div class="card flex justify-center lg:hidden">
+            <Drawer
+              v-model:visible="visible"
+              :header="currentLocale == 'ar' ? 'تصفية' : 'Filter'"
+            >
+              <div class="p-4 bg-white rounded-lg mb-2">
+                <h6 class="text-sm font-medium mb-2">
+                  {{ currentLocale == "ar" ? "تصفية" : "Filter" }}
+                </h6>
+                <h6 class="text-xs font-medium mb-2">
+                  {{ currentLocale == "ar" ? "الفئة" : "Category" }}
+                </h6>
+                <select
+                  class="border rounded-md p-2 w-full border-[#cdced1] mb-4"
+                  v-model="filtersStore.selectedCategory"
+                  @change="handleUpdateSelectedCategory"
+                >
+                  <option
+                    v-for="cat in categoriesFilter"
+                    :key="cat.id"
+                    :value="cat"
+                  >
+                    {{ currentLocale === "ar" ? cat?.name : cat?.name_en }}
+                  </option>
+                </select>
+
+                <!-- Price -->
+                <h6 class="text-xs font-medium mb-2">
+                  {{ currentLocale == "ar" ? "السعر" : "Price" }}
+                </h6>
+                <div class="flex items-center justify-between w-full mb-4">
+                  <input
+                    type="number"
+                    v-model="filtersStore.minPrice"
+                    :placeholder="
+                      currentLocale == 'ar' ? 'على الأقل' : 'At least'
+                    "
+                    class="py-2 px-2 border border-[#cdced1] text-xs rounded-md text-center w-30"
+                  />
+                  <span>-</span>
+                  <input
+                    type="number"
+                    v-model="filtersStore.maxPrice"
+                    :placeholder="
+                      currentLocale == 'ar' ? 'على الأكثر' : 'At most'
+                    "
+                    class="py-2 px-2 border border-[#cdced1] text-xs rounded-md text-center w-30"
+                  />
+                </div>
+
+                <!-- Dynamic Filters (Radio Logic) -->
+                <div
+                  v-for="item in selectedCategory?.category_attributes"
+                  :key="item.id"
+                >
+                  <div
+                    v-if="
+                      item?.category_attributes_types?.code !== 'location' &&
+                      item?.category_attributes_types?.code !== 'textarea' &&
+                      item?.category_attributes_types?.code !== 'checkbox' &&
+                      item?.category_attributes_types?.code !== 'number'
+                    "
+                  >
+                    <h6 class="text-xs font-medium mb-2">
+                      {{ currentLocale == "ar" ? item?.name : item?.name_en }}
+                    </h6>
+                    <div class="flex flex-wrap gap-2 mb-4">
+                      <button
+                        v-for="val in item?.category_attributes_values"
+                        :key="val.id"
+                        @click="
+                          filtersStore.toggleAttributeValue(item.id, val.id)
+                        "
+                        :class="[
+                          'text-xs capitalize py-2 px-4 rounded-md cursor-pointer transition-colors',
+                          filtersStore.isAttributeActive(item.id, val.id)
+                            ? 'bg-[#146AAB] text-white'
+                            : 'bg-[#EDEFF2] text-black hover:bg-[#0f76c5] hover:text-white',
+                        ]"
+                      >
+                        {{ currentLocale === "ar" ? val.name : val.name_en }}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Checkbox Filters -->
+                <div
+                  v-for="item in selectedCategory?.category_attributes"
+                  :key="item.id"
+                >
+                  <div
+                    v-if="item?.category_attributes_types?.code === 'checkbox'"
+                  >
+                    <h6 class="text-xs font-medium mb-2">
+                      {{ currentLocale == "ar" ? item?.name : item?.name_en }}
+                    </h6>
+                    <div
+                      v-for="val in item?.category_attributes_values"
+                      :key="val.id"
+                      class="flex justify-between items-center mb-2"
+                    >
+                      <p class="text-xs">
+                        {{ currentLocale == "ar" ? val.name : val.name_en }}
+                      </p>
+                      <button
+                        @click="
+                          filtersStore.toggleCheckboxValue(item.id, val.id)
+                        "
+                        class="cursor-pointer"
+                      >
+                        <i
+                          :class="[
+                            'pi',
+                            filtersStore.isCheckboxActive(item.id, val.id)
+                              ? 'pi-check-square'
+                              : 'pi-stop',
+                          ]"
+                        ></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <!-- Filter Buttons -->
               <div class="bg-white rounded-lg mb-4 p-4">
                 <div class="flex gap-2 items-center">
                   <button
-                    class="flex-1 text-sm bg-[#EDEFF2] py-2 px-4 rounded-md text-center cursor-pointer hover:bg-[#c0c3c6]"
+                    @click="filtersStore.clearFilters"
+                    class="flex-1 text-sm bg-[#EDEFF2] py-2 px-4 rounded-md hover:bg-[#c0c3c6]"
                   >
-                    {{
-                      i18.locale.value == "ar" ? "مسح التصفية" : "Clear Filter"
-                    }}
+                    {{ currentLocale == "ar" ? "مسح التصفية" : "Clear Filter" }}
                   </button>
                   <button
-                    class="flex-1 text-sm bg-[#FFE800] py-2 px-4 rounded-md text-center cursor-pointer hover:bg-[#f5e427]"
+                    @click="applyFilters"
+                    class="flex-1 text-sm bg-[#FFE800] py-2 px-4 rounded-md hover:bg-[#f5e427]"
                   >
                     {{
-                      i18.locale.value == "ar" ? "تطبيق الفلتر" : "Apply Filter"
+                      currentLocale == "ar" ? "تطبيق الفلتر" : "Apply Filter"
                     }}
                   </button>
                 </div>
               </div>
             </Drawer>
+
             <div class="bg-white p-2 w-full rounded-lg">
               <button
                 @click="visible = true"
                 class="bg-white w-full py-2 text-sm rounded-lg hover:bg-[#F5F6F7]"
                 active-class="bg-[#F5F6F7]"
               >
-                {{ i18.locale.value == "ar" ? "تصفية" : "Filter" }}
+                {{ currentLocale == "ar" ? "تصفية" : "Filter" }}
               </button>
             </div>
           </div>
-          <!-- Meduim and Large Size Filter -->
-          <div class="hidden lg:block">
-            <!-- Filter -->
-            <div class="p-4 bg-white rounded-lg mb-2">
-              <h6 class="text-sm font-medium mb-2">
-                {{ i18.locale.value == "ar" ? "تصفية" : "Filter" }}
-              </h6>
-              <h6 class="text-xs font-medium mb-2">
-                {{ i18?.locale?.value == "ar" ? "الفئة" : "Category" }}
-              </h6>
-              <select
-                name="category"
-                id="category"
-                class="border rounded-md p-2 w-full border-[#cdced1] mb-4"
-              >
-                <option value="real-estate">
-                  {{ i18.locale.value === "ar" ? "عقارات" : "Real Estate" }}
-                </option>
-                <option value="cars">
-                  {{ i18.locale.value === "ar" ? "سيارات" : "Vehicles" }}
-                </option>
-                <option value="electronics">
-                  {{ i18.locale.value === "ar" ? "إلكترونيات" : "Electronics" }}
-                </option>
-                <option value="services">
-                  {{ i18.locale.value === "ar" ? "خدمات" : "Services" }}
-                </option>
-                <option value="other">
-                  {{ i18.locale.value === "ar" ? " أخرى" : "Other" }}
-                </option>
-              </select>
-              <h6 class="text-xs font-medium mb-4">
-                {{
-                  i18?.locale?.value == "ar"
-                    ? "بحث بالقرب مني"
-                    : "Search Near Me"
-                }}
-              </h6>
-              <div class="flex justify-between items-center text-[9px] mb-4">
-                <span>{{
-                  i18?.locale?.value == "ar" ? "0.1 كم" : "0.1 km"
-                }}</span>
-                <span>-</span>
-                <span>{{
-                  i18?.locale?.value == "ar" ? "جميع المسافات" : "All Distances"
-                }}</span>
-              </div>
-              <div class="card flex justify-center mb-4">
-                <Slider v-model="value" range class="w-full" />
-              </div>
-
-              <h6 class="text-xs font-medium mb-2">
-                {{ i18?.locale?.value == "ar" ? "السعر" : "Price" }}
-              </h6>
-              <div>
-                <div class="flex items-center justify-between w-full mb-4">
-                  <input
-                    type="text"
-                    :placeholder="
-                      i18?.locale?.value == 'ar' ? 'على الأقل' : 'At least'
-                    "
-                    class="py-2 px-2 border border-[#cdced1] text-xs rounded-md text-center w-30"
-                  />
-                  <span>-</span>
-                  <input
-                    type="text"
-                    :placeholder="
-                      i18?.locale?.value == 'ar' ? 'على الأكثر' : 'At most'
-                    "
-                    class="py-2 px-2 border border-[#cdced1] text-xs rounded-md text-center w-30"
-                  />
-                </div>
-              </div>
-              <select
-                name="category"
-                id="category"
-                class="border rounded-md p-2 w-full border-[#cdced1] mb-4"
-              >
-                <option value="USD">
-                  {{ i18.locale.value === "ar" ? "دولار أمريكي" : "USD" }}
-                </option>
-                <option value="SAR">
-                  {{ i18.locale.value === "ar" ? "ريال سعودي" : "SAR" }}
-                </option>
-              </select>
-              <h6 class="text-xs font-medium mb-4">
-                {{
-                  i18?.locale?.value == "ar" ? "عدد الملاك" : "No. of owners"
-                }}
-              </h6>
-              <!-- Owner buttons -->
-              <div class="flex flex-wrap gap-2 mb-4">
-                <button
-                  v-for="btn in ownersButtons"
-                  :key="btn.id"
-                  @click="activeButton = btn.id"
-                  :class="[
-                    'text-xs capitalize py-2 px-4 rounded-md cursor-pointer transition-colors',
-                    activeButton === btn.id
-                      ? 'bg-[#146AAB] text-white'
-                      : 'bg-[#EDEFF2] text-black hover:bg-[#0f76c5] hover:text-white',
-                  ]"
-                >
-                  {{ i18.locale.value === "ar" ? btn.labelAr : btn.labelEn }}
-                </button>
-              </div>
-              <h6 class="text-xs font-medium mb-4">
-                {{
-                  i18?.locale?.value == "ar"
-                    ? "بواسطة الكيلومترات المقطوعة"
-                    : "by km driven"
-                }}
-              </h6>
-              <!-- Driven buttons -->
-              <div class="flex flex-wrap gap-2 mb-4">
-                <button
-                  v-for="btn in drivenButtons"
-                  :key="btn.id"
-                  @click="activeButton2 = btn.id"
-                  :class="[
-                    'text-xs capitalize py-2 px-4 rounded-md cursor-pointer transition-colors',
-                    activeButton2 === btn.id
-                      ? 'bg-[#146AAB] text-white'
-                      : 'bg-[#EDEFF2] text-black hover:bg-[#0f76c5] hover:text-white',
-                  ]"
-                >
-                  {{ i18.locale.value === "ar" ? btn.labelAr : btn.labelEn }}
-                </button>
-              </div>
-              <h6 class="text-xs font-medium mb-4">
-                {{ i18?.locale?.value == "ar" ? "بالوقود" : "by fuel" }}
-              </h6>
-              <!-- Fuel buttons -->
-              <div class="flex flex-wrap gap-2 mb-4">
-                <button
-                  v-for="btn in fuelButtons"
-                  :key="btn.id"
-                  @click="activeButton3 = btn.id"
-                  :class="[
-                    'text-xs capitalize py-2 px-4 rounded-md cursor-pointer transition-colors',
-                    activeButton3 === btn.id
-                      ? 'bg-[#146AAB] text-white'
-                      : 'bg-[#EDEFF2] text-black hover:bg-[#0f76c5] hover:text-white',
-                  ]"
-                >
-                  {{ i18.locale.value === "ar" ? btn.labelAr : btn.labelEn }}
-                </button>
-              </div>
-              <h6 class="text-xs font-medium mb-4">
-                {{ i18?.locale?.value == "ar" ? "الحالة" : "condition" }}
-              </h6>
-              <!-- condition buttons -->
-              <div class="flex flex-wrap gap-2 mb-4">
-                <button
-                  v-for="btn in conditionButton"
-                  :key="btn.id"
-                  @click="activeButton4 = btn.id"
-                  :class="[
-                    'text-xs capitalize py-2 px-4 rounded-md cursor-pointer transition-colors',
-                    activeButton4 === btn.id
-                      ? 'bg-[#146AAB] text-white'
-                      : 'bg-[#EDEFF2] text-black hover:bg-[#0f76c5] hover:text-white',
-                  ]"
-                >
-                  {{ i18.locale.value === "ar" ? btn.labelAr : btn.labelEn }}
-                </button>
-              </div>
-              <h6 class="text-xs font-medium mb-4">
-                {{ i18?.locale?.value == "ar" ? "التاريخ" : "date" }}
-              </h6>
-              <!-- date buttons -->
-              <div class="flex flex-wrap gap-2 mb-4">
-                <button
-                  v-for="btn in dateButton"
-                  :key="btn.id"
-                  @click="activeButton5 = btn.id"
-                  :class="[
-                    'text-xs capitalize py-2 px-4 rounded-md cursor-pointer transition-colors',
-                    activeButton5 === btn.id
-                      ? 'bg-[#146AAB] text-white'
-                      : 'bg-[#EDEFF2] text-black hover:bg-[#0f76c5] hover:text-white',
-                  ]"
-                >
-                  {{ i18.locale.value === "ar" ? btn.labelAr : btn.labelEn }}
-                </button>
-              </div>
-              <h6 class="text-xs font-medium mb-4">
-                {{ i18?.locale?.value == "ar" ? "الموقع" : "Location" }}
-              </h6>
-              <!-- Locations -->
-              <div
-                v-for="location in locations"
-                class="flex flex-col gap-2 mb-4"
-              >
-                <div class="flex justify-between">
-                  <p class="text-xs">
-                    {{
-                      i18?.locale?.value == "ar"
-                        ? location.labelAr
-                        : location.labelEn
-                    }}
-                  </p>
-                  <button
-                    @click="location.checked = !location.checked"
-                    class="cursor-pointer"
-                  >
-                    <i
-                      :class="[
-                        'pi',
-                        location.checked ? 'pi-check-square' : 'pi-stop',
-                      ]"
-                    ></i>
-                  </button>
-                </div>
-              </div>
-              <h6 class="text-xs font-medium mb-4">
-                {{ i18?.locale?.value == "ar" ? "آخرى" : "Others" }}
-              </h6>
-              <!-- others -->
-              <div v-for="other in others" class="flex flex-col gap-2 mb-4">
-                <div class="flex justify-between">
-                  <p class="text-xs">
-                    {{
-                      i18?.locale?.value == "ar" ? other.labelAr : other.labelEn
-                    }}
-                  </p>
-                  <button
-                    @click="other.checked = !other.checked"
-                    class="cursor-pointer"
-                  >
-                    <i
-                      :class="[
-                        'pi',
-                        other.checked ? 'pi-check-square' : 'pi-stop',
-                      ]"
-                    ></i>
-                  </button>
-                </div>
-              </div>
-            </div>
-            <!-- Filter Buttons -->
-            <div class="bg-white rounded-lg mb-4 p-4">
-              <div class="flex gap-2 items-center">
-                <button
-                  class="flex-1 text-sm bg-[#EDEFF2] py-2 px-4 rounded-md text-center cursor-pointer hover:bg-[#c0c3c6]"
-                >
-                  {{
-                    i18.locale.value == "ar" ? "مسح التصفية" : "Clear Filter"
-                  }}
-                </button>
-                <button
-                  class="flex-1 text-sm bg-[#FFE800] py-2 px-4 rounded-md text-center cursor-pointer hover:bg-[#f5e427]"
-                >
-                  {{
-                    i18.locale.value == "ar" ? "تطبيق الفلتر" : "Apply Filter"
-                  }}
-                </button>
-              </div>
-            </div>
-          </div>
         </div>
+
         <!-- Main Content -->
         <div class="lg:flex-1">
-          <!-- Results and Sort by -->
+          <!-- Results + Sort -->
+
           <div
-            class="bg-white p-4 rounded-lg shadow flex gap-2 md:justify-between items-center mb-4"
+            class="bg-white p-4 rounded-lg flex justify-between items-center mb-4"
           >
-            <span class="text-xs md:text-sm font-semibold">{{
-              i18.locale.value == "ar"
-                ? "426 نتيجة متاحة"
-                : "426 result available"
-            }}</span>
-            <div class="flex gap-2 items-center">
-              <div class="text-xs text-gray-500 flex items-center">
-                <button
-                  @click="activeButtonList = 'list'"
-                  :class="[
-                    'border border-gray-200  p-1 rounded-r-sm ',
-                    activeButtonList === 'list'
-                      ? 'bg-[#146AAB] text-white'
-                      : 'bg-[#EDEFF2] text-black hover:bg-[#0f76c5] hover:text-white',
-                  ]"
-                >
-                  <i class="pi pi-list"></i>
-                </button>
-                <button
-                  @click="activeButtonList = 'table'"
-                  :class="[
-                    'border border-gray-200  p-1 rounded-l-sm ',
-                    activeButtonList === 'table'
-                      ? 'bg-[#146AAB] text-white'
-                      : 'bg-[#EDEFF2] text-black hover:bg-[#0f76c5] hover:text-white',
-                  ]"
-                >
-                  <i class="pi pi-table"></i>
-                </button>
-              </div>
-              <select
-                name="category"
-                id="category"
-                class="border rounded-md p-1 w-full border-[#cdced1]"
+            <span class="text-xs md:text-sm font-semibold">
+              {{ filtersStore.total }}
+              {{ currentLocale == "ar" ? "نتيجة" : "results" }}
+            </span>
+
+            <div>
+              <button
+                @click="activeButtonList = 'list'"
+                :class="[
+                  'border border-gray-200  p-1 rounded-r-sm ',
+                  activeButtonList === 'list'
+                    ? 'bg-[#146AAB] text-white'
+                    : 'bg-[#EDEFF2] text-black hover:bg-[#0f76c5] hover:text-white',
+                ]"
               >
-                <option value="sort by">
-                  {{ i18.locale.value === "ar" ? "ترتيب حسب" : "Sort By" }}
+                <i class="pi pi-list"></i>
+              </button>
+              <button
+                @click="activeButtonList = 'table'"
+                :class="[
+                  'border border-gray-200  p-1 rounded-l-sm ',
+                  activeButtonList === 'table'
+                    ? 'bg-[#146AAB] text-white'
+                    : 'bg-[#EDEFF2] text-black hover:bg-[#0f76c5] hover:text-white',
+                ]"
+              >
+                <i class="pi pi-table"></i>
+              </button>
+
+              <select
+                v-model="filtersStore.sortBy"
+                class="border rounded-md p-1 w-40 border-[#cdced1] ms-2"
+              >
+                <option disabled value="">
+                  {{ currentLocale === "ar" ? "ترتيب حسب" : "Sort By" }}
+                </option>
+                <!-- <option value="newest">
+                {{ currentLocale === "ar" ? "الأحدث" : "Newest" }}
+              </option>
+              <option value="oldest">
+                {{ currentLocale === "ar" ? "الأقدم" : "Oldest" }}
+              </option> -->
+                <option value="price_asc">
+                  {{
+                    currentLocale === "ar"
+                      ? "السعر: من الأقل"
+                      : "Price: Low to High"
+                  }}
+                </option>
+                <option value="price_desc">
+                  {{
+                    currentLocale === "ar"
+                      ? "السعر: من الأعلى"
+                      : "Price: High to Low"
+                  }}
                 </option>
               </select>
             </div>
           </div>
-          <!-- Map Section -->
-          <div v-if="showMap" class="p-4 mb-4">
-            <iframe
-              class="w-full h-[150vh] rounded-lg"
-              src="https://www.google.com/maps/embed?pb=..."
-              allowfullscreen=""
-              loading="lazy"
-            ></iframe>
-          </div>
-          <!-- Ads -->
-          <div v-else>
-            <!-- titles -->
-            <div
-              v-if="activeButtonList === 'list'"
-              class="hidden md:flex divide-x bg-[#146AAB] text-white rounded-lg divide-white border border-white mb-4"
-            >
-              <div class="px-15 py-2"></div>
-              <div class="px-4 py-2 flex-1 text-center text-xs">
-                {{ i18.locale.value === "ar" ? "عنوان الإعلان" : "Ad Title" }}
-              </div>
-              <div class="px-4 py-2 text-center text-xs">
-                {{ i18.locale.value === "ar" ? "السعر" : "Price" }}
-              </div>
-              <div class="px-4 py-2 text-center text-xs">
-                {{
-                  i18.locale.value === "ar"
-                    ? "تاريخ الإعلان"
-                    : "Announcement Date"
-                }}
-              </div>
-              <div class="px-4 py-2 text-center text-xs">
-                {{
-                  i18.locale.value === "ar"
-                    ? "المحافظة / المنطقة"
-                    : "Province / District"
-                }}
-              </div>
+
+          <!-- Map -->
+          <div v-if="activeButtonList === 'map'" class="p-4 mb-4">
+            <div class="w-full h-[150vh] rounded-lg">
+              <AdsMapPins :ads="filtersStore.ads" :zoom="8" />
             </div>
-            <!-- Listing cars -->
+          </div>
+
+          <!-- Ads (List or Grid) -->
+          <div v-else>
             <div v-if="activeButtonList === 'list'">
               <div
-                v-for="car in cars"
-                :key="car.id"
+                v-for="ad in filtersStore.ads"
+                :key="ad?.id"
                 :class="[
-                  'flex justify-between items-start sm:items-center bg-[#FFFEF0] rounded-lg cursor-pointer p-2 hover:bg-[#FFFACD] mb-4',
-                  car.featured ? 'bg-[#FFFACD] ' : ' bg-white ',
+                  'flex items-center p-3 mb-1 min-h-[100px]',
+                  ad?.featured ? 'bg-[#FFFEF0]' : 'bg-white',
                 ]"
               >
-                <!-- Left side: image + title -->
-
-                <div class="w-20 h-15">
+                <!-- Image -->
+                <div role="button" class="w-[120px] h-[80px] flex-shrink-0">
                   <img
-                    :src="car.image"
-                    class="w-full h-full object-cover rounded"
+                    @click="goToAdDetails(ad?.id)"
+                    :src="mainImage(ad?.ads_images?.[0]?.image)"
+                    class="w-full h-full object-cover rounded-md cursor-pointer"
                   />
                 </div>
-                <div class="flex flex-col sm:items-center sm:flex-row">
-                  <!-- title + featured -->
-                  <div class="px-4 flex gap-2 flex-col">
-                    <span
-                      v-if="car.featured"
-                      class="bg-yellow-300 text-[9px] px-2 py-1 rounded w-fit"
-                    >
-                      Featured
-                    </span>
-                    <p class="w-40 text-xs">
-                      {{
-                        i18.locale.value == "ar" ? car.title_ar : car.title_en
-                      }}
-                    </p>
-                  </div>
 
-                  <!-- Price -->
-                  <div class="px-4 py-2 text-blue-600 font-bold text-xs">
-                    {{
-                      i18.locale.value == "ar"
-                        ? car.price + " $"
-                        : "$ " + car.price
-                    }}
-                  </div>
+                <!-- Title + Featured -->
+                <div class="flex flex-col ms-4 flex-1">
+                  <span
+                    v-if="isFeatured(ad)"
+                    class="bg-yellow-400 text-xs font-semibold text-gray-800 px-2 py-0.5 rounded w-fit mb-1"
+                  >
+                    {{ t("ads.featured") }}
+                  </span>
 
-                  <!-- Date -->
-                  <div class="px-4 py-2 text-xs">
-                    {{ i18.locale.value == "ar" ? car.date_ar : car.date }}
-                  </div>
+                  <p class="text-sm font-medium text-gray-900 leading-snug">
+                    {{ currentLocale == "ar" ? ad?.title : ad?.title_en }}
+                  </p>
+                </div>
 
-                  <!-- City -->
-                  <div class="px-4 py-2">
-                    {{ i18.locale.value == "ar" ? car.city_ar : car.city }}
-                  </div>
+                <!-- Price -->
+                <div
+                  class="w-[100px] text-center text-blue-700 font-bold text-base px-2"
+                >
+                  {{
+                    currentLocale == "ar" ? ad?.price + " $" : "$ " + ad?.price
+                  }}
+                </div>
+
+                <!-- Date -->
+                <div class="w-[140px] text-center text-sm text-gray-700 px-2">
+                  {{ formatedDate(ad?.created) }}
+                </div>
+
+                <!-- Address -->
+                <div class="w-[100px] text-right text-sm text-gray-700 px-2">
+                  {{ getAdAddress(ad) }}
                 </div>
               </div>
             </div>
-            <!-- Tables Cars -->
             <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div
-                v-for="car in cars"
-                :key="car.id"
+                v-for="ad in filtersStore.ads"
+                :key="ad?.id"
                 :class="[
                   ' bg-[#FFFEF0] rounded-lg cursor-pointer hover:bg-[#FFFACD] mb-4',
-                  car.featured ? 'bg-[#FFFACD] ' : ' bg-white ',
+                  isFeatured(ad) ? 'bg-[#FFFACD] ' : ' bg-white ',
                 ]"
               >
                 <div
@@ -779,76 +483,68 @@
                 >
                   <div>
                     <img
-                      :src="car.image"
-                      class="w-20 h-16 object-cover rounded"
+                      :src="mainImage(ad?.ads_images?.[0]?.image)"
+                      class="w-20 h-16 object-cover rounded cursor-pointer"
+                      role="button"
+                      @click="goToAdDetails(ad?.id)"
                     />
                   </div>
                   <div class="flex flex-col gap-1 items-start">
                     <span
-                      v-if="car.featured"
+                      v-if="isFeatured(ad)"
                       class="bg-yellow-300 text-[9px] px-2 py-1 rounded w-fit"
-                      >{{
-                        i18.locale.value == "ar" ? "مميز" : "Featured"
-                      }}</span
+                      >{{ t("ads.featured") }}</span
                     >
-                    <p class="text-[9px] text-[#A1A1A1]">{{ car.number }}</p>
+                    <p class="text-[9px] text-[#A1A1A1]">{{ ad.id }}</p>
                     <p class="text-sm w-48 uppercase">
-                      {{
-                        i18.locale.value == "ar" ? car.title_ar : car.title_en
-                      }}
+                      {{ currentLocale == "ar" ? ad.title : ad.title_en }}
                     </p>
                     <p class="text-xs text-[#146AAB]">
                       {{
-                        i18.locale.value == "ar"
-                          ? "$" + car.price
-                          : "$ " + car.price
+                        currentLocale == "ar" ? "$" + ad.price : "$ " + ad.price
                       }}
                     </p>
                     <p class="text-xs text-[#A1A1A1]">
                       {{
-                        i18.locale.value == "ar"
+                        currentLocale == "ar"
                           ? "المدينة / المنطقة:"
                           : "City / District:"
                       }}
                       <span class="text-[#146AAB] text-xs capitalize">{{
-                        i18.locale.value == "ar" ? car.city_ar : car.city
+                        getAdAddress(ad)
                       }}</span>
                     </p>
                     <p class="text-xs text-[#A1A1A1]">
                       {{
-                        i18.locale.value == "ar"
-                          ? "عدد الغرف:"
-                          : "Number of Rooms:"
-                      }}
-                      <span class="text-[#146AAB] text-xs capitalize">{{
-                        i18.locale.value == "ar" ? car.rooms : car.rooms
-                      }}</span>
-                    </p>
-                    <p class="text-xs text-[#A1A1A1]">
-                      {{
-                        i18.locale.value == "ar"
+                        currentLocale == "ar"
                           ? "تاريخ الإعلان:"
                           : "Announcement Date:"
                       }}
                       <span class="text-[#146AAB] text-xs capitalize">{{
-                        i18.locale.value == "ar" ? car.date_ar : car.date
+                        formatedDate(ad?.created)
                       }}</span>
                     </p>
                   </div>
                 </div>
               </div>
             </div>
+
+            <!-- Pagination -->
+            <div
+              class="flex justify-center mt-6"
+              v-if="filtersStore.meta?.total > 0"
+            >
+              <Paginator
+                :rows="filtersStore.meta.limit"
+                :totalRecords="filtersStore.meta.total"
+                :first="(filtersStore.meta.page - 1) * filtersStore.meta.limit"
+                @page="onPageChange"
+                template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+                :rowsPerPageOptions="[2, 5, 10, 20, 30, 50]"
+              />
+            </div>
           </div>
         </div>
-      </div>
-      <!-- Pagination -->
-      <div class="bg-white p-2 rounded-lg">
-        <Paginator
-          :rows="10"
-          :totalRecords="120"
-          :rowsPerPageOptions="[5, 10, 15]"
-        >
-        </Paginator>
       </div>
     </main>
   </app-layout>
@@ -857,87 +553,157 @@
 <script setup>
 import AppLayout from "../Layout/AppLayout.vue";
 import { useI18n } from "vue-i18n";
-import { ref } from "vue";
-import { cars } from "../data";
+import { ref, computed, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { useFiltersStore } from "../store/filters";
+import { MEDIA_URL } from "../services/axios";
+import dayjs from "dayjs";
+import AdsMapPins from "../components/AdsMapPins.vue";
 
-import Drawer from "primevue/drawer";
+const { t, locale } = useI18n();
+const router = useRouter();
 
-import Slider from "primevue/slider";
+const filtersStore = useFiltersStore();
+
+const activeButtonList = ref("list");
+
+const currentLocale = computed(() => locale.value || "ar");
+const routeQuery = computed(() => router.currentRoute.value?.query?.q || "");
 
 const visible = ref(false);
-const i18 = useI18n();
-const activeButton = ref("first");
-const activeButton2 = ref(1);
-const activeButton3 = ref(1);
-const activeButton4 = ref(1);
-const activeButton5 = ref(1);
-const activeButtonList = ref("list");
-const showMap = ref(false);
-const value = ref([0, 80]);
 
 const toggleView = () => {
-  showMap.value = !showMap.value;
+  activeButtonList.value !== "map"
+    ? (activeButtonList.value = "map")
+    : (activeButtonList.value = "list");
 };
 
-const ownersButtons = [
-  { id: "first", labelEn: "First", labelAr: "الأول" },
-  { id: "second", labelEn: "Second", labelAr: "الثاني" },
-  { id: "third", labelEn: "Third", labelAr: "الثالث" },
-  { id: "fourth", labelEn: "Fourth", labelAr: "الرابع" },
-  { id: "moreThanFour", labelEn: "More than Four", labelAr: "أكثر من أربعة" },
-];
+const handleUpdateSelectedCategory = () => {
+  filtersStore.setSelectedCategory(filtersStore.selectedCategory);
+};
 
-const drivenButtons = [
-  { id: 1, labelEn: "Below 25000 km", labelAr: "أقل من 25000 كم" },
-  { id: 2, labelEn: "25000 km - 50000 km", labelAr: "25000 كم - 50000 كم" },
-  { id: 3, labelEn: "50000 km - 75000 km", labelAr: "50000 كم - 75000 كم" },
-  { id: 4, labelEn: "more than 75000 km", labelAr: "أكثر من 75000 كم" },
-];
+const goToAdDetails = (adId) => {
+  router.push({ name: "ad-details", params: { adId } });
+};
 
-const fuelButtons = [
-  { id: 1, labelEn: "Petrol", labelAr: "بنزين" },
-  { id: 2, labelEn: "Diesel", labelAr: "ديزل" },
-  { id: 3, labelEn: "Electric", labelAr: "كهربائي" },
-];
+const formatedDate = (date) => {
+  return dayjs(date).format("MMM D, YYYY");
+};
 
-const conditionButton = [
-  { id: 1, labelEn: "New", labelAr: "جديد" },
-  { id: 2, labelEn: "Used", labelAr: "مستعمل" },
-];
+const onPageChange = (event) => {
+  filtersStore.setPage(event.page + 1); // PrimeVue pages are 0-based
+  filtersStore.setLimit(event.rows);
+  filtersStore.fetchAds(routeQuery.value);
+};
 
-const dateButton = [
-  { id: 1, labelEn: "All", labelAr: "الكل" },
-  { id: 2, labelEn: "Last 24 Hours", labelAr: "آخر 24 ساعة" },
-  { id: 3, labelEn: "Last 3 Days", labelAr: "آخر 3 أيام" },
-  { id: 4, labelEn: "Last 7 Days", labelAr: "آخر 7 أيام" },
-  { id: 5, labelEn: "Last 30 Days", labelAr: "آخر 30 يوم" },
-];
+const applyFilters = () => {
+  filtersStore.fetchAds(routeQuery.value);
+};
 
-const locations = ref([
-  { id: 1, labelEn: "All Cities", labelAr: "جميع المدن", checked: false },
-  { id: 2, labelEn: "Bali", labelAr: "بالي", checked: false },
-  { id: 3, labelEn: "Banten", labelAr: "بانتن", checked: false },
-  { id: 4, labelEn: "Bengkulu", labelAr: "بنكولو", checked: false },
-]);
+const mainImage = (img) => {
+  return `${MEDIA_URL}/${img}`;
+};
 
-const others = ref([
-  {
-    id: 1,
-    labelEn: "Ads with Video",
-    labelAr: "إعلانات مع فيديو",
-    checked: false,
-  },
-  {
-    id: 2,
-    labelEn: "Ads with 360 degrees Photo",
-    labelAr: "إعلانات مع صورة بزاوية 360",
-    checked: false,
-  },
-  {
-    id: 3,
-    labelEn: "Ads with Map",
-    labelAr: "إعلانات مع خريطة",
-    checked: false,
-  },
-]);
+const isFeatured = (ad) => {
+  return ad?.ad_featured_history && ad.ad_featured_history.length > 0;
+};
+
+/**
+ * Helper function to extract the city and country from a comma-separated address string
+ * and return them as a formatted string (e.g., "Tanta, Egypt").
+ *
+ * @param {string} formattedAddress The full address string (e.g., 'شارع ...، طنطا 31516، مصر').
+ * @returns {string} A string containing the city and country, separated by a comma. Returns 'N/A' on failure.
+ */
+const extractAndFormatCityAndCountry = (formattedAddress) => {
+  if (
+    !formattedAddress ||
+    typeof formattedAddress !== "string" ||
+    formattedAddress === "N/A"
+  ) {
+    return "N/A";
+  }
+
+  // 1. Split the address by the Arabic comma (،)
+  const parts = formattedAddress.split("،").map((part) => part.trim());
+
+  // 2. Filter out any empty strings
+  const non_empty_parts = parts.filter((part) => part.length > 0);
+
+  // 3. Handle cases where there aren't enough parts
+  if (non_empty_parts.length < 2) {
+    // If only one part (e.g., just "مصر"), return it.
+    if (non_empty_parts.length === 1) {
+      return non_empty_parts[0];
+    }
+    return "N/A";
+  }
+
+  // 4. The country is the last element
+  const country = non_empty_parts[non_empty_parts.length - 1];
+
+  // 5. The city (which might include the zip code) is the second-to-last element
+  let cityAndZip = non_empty_parts[non_empty_parts.length - 2];
+
+  // 6. Clean up the city/zip part by removing digits (the zip code)
+  // Example: "طنطا 31516" becomes "طنطا"
+  const city = cityAndZip.replace(/[0-9]/g, "").trim();
+
+  // 7. Combine and return the formatted string
+  // Using the Arabic comma for consistency
+  return `${city}، ${country}`;
+};
+
+const getAdAddress = (ad) => {
+  // Find the attribute that has the full address
+  const fullAddress = ad.ad_attributes?.find((att) => att?.address)?.address;
+
+  if (!fullAddress) {
+    return "N/A";
+  }
+
+  // Call the helper function to parse and format the address as a string
+  return extractAndFormatCityAndCountry(fullAddress);
+};
+
+/**
+ * Finds the latitude and longitude for an ad from its attributes.
+ * It looks for an attribute that has both 'lat' and 'lng' properties.
+ *
+ * @param {Object} ad The ad object containing ad_attributes.
+ * @returns {{lat: number, lng: number} | null} An object with lat/lng as numbers, or null if coordinates are not found.
+ */
+const getAdCoordinates = (ad) => {
+  // Find the ad attribute that contains the coordinates.
+  const locationAttribute = ad.ad_attributes?.find(
+    (att) => att?.lat && att?.lng
+  );
+
+  if (locationAttribute) {
+    // Return the coordinates, ensuring they are treated as numbers.
+    return {
+      lat: +locationAttribute.lat,
+      lng: +locationAttribute.lng,
+    };
+  }
+
+  return null;
+};
+
+// 2. Computed property to gather all valid coordinates
+const adCoordinates = computed(() => {
+  if (!filtersStore.ads) return [];
+
+  return filtersStore.ads
+    .map((ad) => getAdCoordinates(ad))
+    .filter((coords) => coords !== null); // Filter out ads that didn't have coordinates
+});
+
+const categoriesFilter = computed(() => filtersStore.getCategories);
+const selectedCategory = computed(() => filtersStore.getSelectedCategory);
+
+onMounted(() => {
+  filtersStore.fetchCategories();
+  filtersStore.fetchAds(routeQuery.value);
+});
 </script>

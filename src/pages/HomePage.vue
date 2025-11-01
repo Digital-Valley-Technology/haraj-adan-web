@@ -3,10 +3,29 @@ import AppLayout from "../Layout/AppLayout.vue";
 import AdCard from "../components/AdCard.vue";
 import AdCardSpecial from "../components/AdCardSpecial.vue";
 import SideMenuClient from "../components/SideMenuClient.vue";
-import { specialAds, homeAds } from "../data";
+import { homeAds } from "../data";
 import { useI18n } from "vue-i18n";
+import { useHomeStore } from "../store/home";
+import { computed, onMounted } from "vue";
+import { useRouter } from "vue-router";
 
-const i18 = useI18n();
+const { locale } = useI18n();
+const homeStore = useHomeStore();
+const router = useRouter();
+
+const fetchHomePageAds = () => {
+  homeStore.fetchAds();
+};
+
+const ads = computed(() => homeStore.ads);
+const currentLocale = computed(() => locale.value);
+const loading = computed(() => homeStore.adsLoading);
+
+const handleNavigation = (routeName) => {
+  router.push({ name: routeName });
+};
+
+onMounted(() => fetchHomePageAds());
 </script>
 
 <template>
@@ -22,34 +41,62 @@ const i18 = useI18n();
           <div class="flex justify-between items-center mb-4">
             <span class="font-semibold text-base">
               {{
-                i18?.locale.value == "ar"
+                currentLocale == "ar"
                   ? "إعلانات الصفحة الرئيسية"
                   : "Home Page Ads"
               }}
             </span>
-            <a href="#" class="text-[#146AAB] text-xs font-medium">
-              {{ i18?.locale.value === "ar" ? "رؤية الكل >" : "See All" }}
-            </a>
+
+            <div class="flex items-center space-x-4">
+              <i
+                class="pi pi-filter cursor-pointer"
+                role="button"
+                @click="handleNavigation('search')"
+              ></i>
+
+              <a
+                @click="handleNavigation('search')"
+                role="button"
+                class="text-[#146AAB] text-xs font-medium cursor-pointer"
+              >
+                {{ currentLocale === "ar" ? "رؤية الكل >" : "See All" }}
+              </a>
+            </div>
           </div>
+          <!-- Ads Section -->
           <div
             class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3"
           >
-            <div v-for="add in specialAds" :key="add?.id">
-              <ad-card-special :item="add" />
-            </div>
+            <!-- Skeletons when loading -->
+            <template v-if="loading">
+              <div v-for="n in 8" :key="n" class="animate-pulse space-y-2">
+                <div class="bg-gray-300 h-48 rounded-md"></div>
+                <div class="bg-gray-300 h-3 w-3/4 rounded"></div>
+              </div>
+            </template>
+
+            <!-- Actual Ads when loaded -->
+            <template v-else>
+              <div v-for="ad in ads" :key="ad?.id">
+                <ad-card-special :item="ad" />
+              </div>
+            </template>
           </div>
 
           <div class="flex justify-between items-center mb-4 mt-12">
             <span class="font-semibold text-base">
               {{
-                i18?.locale.value == "ar"
+                currentLocale == "ar"
                   ? "قائمة التسوق من المالك القريب منك"
                   : "Shopping listing from the owner near you"
               }}
             </span>
-            <a href="#" class="text-[#146AAB] text-xs font-medium">{{
-              i18?.locale.value === "ar" ? "رؤية الكل >" : "See All"
-            }}</a>
+            <a
+              @click="handleNavigation('search')"
+              role="button"
+              class="text-[#146AAB] text-xs font-medium cursor-pointer"
+              >{{ currentLocale === "ar" ? "رؤية الكل >" : "See All" }}</a
+            >
           </div>
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <div v-for="add in homeAds" :key="add?.id">

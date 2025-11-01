@@ -11,7 +11,8 @@ export const socket =
       })
     : io(`${URL}`, {
         withCredentials: true,
-        path: "/haraj/socket.io/", // 👈 keep default unless you changed it server-side
+        // path: "/haraj/socket.io/", // for production
+        path: "/socket.io/", // for development
         withCredentials: true,
       });
 

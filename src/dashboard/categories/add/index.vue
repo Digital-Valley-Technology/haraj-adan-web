@@ -200,7 +200,7 @@ const onSubmit = handleSubmit(async (values) => {
 
     const response = await requestService.create("/categories", formData);
     showSuccess(
-      response?.status?.message ||
+      response?.message ||
         t("dashboard.categories.form.category_created")
     );
 

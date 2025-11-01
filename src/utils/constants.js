@@ -14,6 +14,11 @@ export const PROD_SOCKET_URL = "https://unityaid.net";
 
 export const COMPANY_EAMIL = "contact@company.com";
 
+export const MAP_ACCESS_TOKEN =
+  "pk.eyJ1Ijoic2VlZGFtYXAiLCJhIjoiY2t4MjdmNWF6MTh6MjJvbnlmZnVjZGhocSJ9.302b3-yN28PeK2nnfpDb0g";
+
+export const IP_INFO_TOKEN = "15f325f482f7d3";
+
 export const DashboardBreadCrumbBase = {
   icon: "pi pi-home",
   route: "/dashboard/analytics",

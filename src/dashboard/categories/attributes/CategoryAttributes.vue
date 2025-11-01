@@ -22,6 +22,7 @@
 
           <AttributeTable
             v-else
+            :key="tableKey"
             :attributes="attributes"
             :loading="loading"
             :rowsPerPage="rowsPerPage"
@@ -38,7 +39,6 @@
             @delete="processDelete"
           />
 
-          <!-- Dialog -->
           <Dialog
             v-model:visible="dialogVisible"
             modal
@@ -117,6 +117,10 @@ const dialogTitle = computed(() =>
     : t("dashboard.categories.attributes.add")
 );
 
+// NEW: Computed key to force the AttributeTable component to re-render
+// whenever the rowsPerPage changes. This fixes many PrimeVue internal state issues.
+const tableKey = computed(() => `attr-table-${rowsPerPage.value}-${categoryId}`);
+
 const fetchAttributes = async () => {
   loadingAttributes.value = true;
   try {
@@ -127,9 +131,9 @@ const fetchAttributes = async () => {
     );
     attributes.value = res.data || [];
     totalRecords.value = res.meta?.total || 0;
-  } catch (error) {
+  } catch (err) {
     console.error(err);
-    showError(error || t("dashboard.fetch_error"));
+    showError(err || t("dashboard.fetch_error"));
   } finally {
     loadingAttributes.value = false;
   }

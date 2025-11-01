@@ -48,7 +48,7 @@ export const useCategoriesStore = defineStore("categories", {
         const response = await requestService.getAll(
           `/categories/paginate?${query.toString()}`
         );
-
+        
         this.categories = response?.data;
         this.total = response.meta.total;
         this.page = response.meta.page;

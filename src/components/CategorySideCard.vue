@@ -23,7 +23,7 @@
         </button>
         <ul v-if="activeTab == category.id">
           <li
-            v-for="item in category?.subCategories"
+            v-for="item in category?.children"
             :key="item?.id"
             @click="goToCategoryListingPage"
           >
@@ -50,7 +50,8 @@
       <div
         class="flex items-center justify-center bg-gray-200 w-8 h-8 rounded-full"
       >
-        <i class="icon pi pi-home"></i>
+        <!-- <i class="icon pi pi-home"></i> -->
+        <img :src="`${MEDIA_URL}${category?.image}`" loading="lazy" alt="" />
       </div>
       <!-- links -->
       <div class="flex flex-col gap-2 items-start">
@@ -59,7 +60,7 @@
         </p>
         <ul>
           <li
-            v-for="item in category?.subCategories"
+            v-for="item in category?.children"
             :key="item?.id"
             @click="goToCategoryListingPage"
           >
@@ -88,6 +89,7 @@
 <script setup>
 import { useI18n } from "vue-i18n";
 import { ref } from "vue";
+import { MEDIA_URL } from "../services/axios";
 defineProps(["category"]);
 
 const activeTab = ref(null);

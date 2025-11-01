@@ -12,12 +12,6 @@ const categoryStore = useCategoriesStore();
 const localeText = useLocaleText();
 const router = useRouter();
 
-const handleEdit = (category) =>
-  router.push({
-    name: "edit-category",
-    params: { categoryId: encode(category?.id) },
-  });
-
 const handleNavigation = (param, routeName, paramName) =>
   router.push({
     name: routeName,
@@ -31,7 +25,7 @@ const handleDelete = (category) => emit("delete", category);
   <DataTable
     :value="categories"
     paginator
-    :rowsPerPageOptions="[5, 10, 20, 50]"
+    :rowsPerPageOptions="[2, 5, 10, 20, 50]"
     tableStyle="min-width: 50rem"
     :rows="categoryStore.limit"
     :totalRecords="categoryStore.total"

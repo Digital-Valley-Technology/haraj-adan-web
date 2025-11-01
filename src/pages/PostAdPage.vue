@@ -1,190 +1,451 @@
 <template>
   <app-layout>
-    <!-- <Breadcrumb :home="home" :model="breadcrumbItems" /> -->
-    <div class="custom-container page-wrapper mx-auto min-h-[500px] mb-4">
-      <!-- Categories List -->
-      <div
-        v-if="!activeCategory"
-        class="bg-white p-4 rounded-lg shadow-lg category-card"
+    <div
+      class="custom-container page-wrapper mx-auto min-h-[500px] mb-4 flex flex-col md:flex-row gap-4"
+      :class="{ 'text-right': isArabic, 'text-left': !isArabic }"
+      :dir="isArabic ? 'rtl' : 'ltr'"
+    >
+      <!-- SIDEBAR -->
+      <aside
+        class="w-full md:w-64 bg-white p-4 rounded-lg shadow-md h-fit"
+        :class="{ 'ml-auto': isArabic }"
       >
-        <div v-for="ad in postAdCategories" :key="ad.id">
-          <button
-            @click="activeTab = ad.id"
-            class="flex justify-between items-center w-full cursor-pointer hover:bg-[#F5F6F7] p-2 rounded-md"
-          >
-            <div class="flex items-center gap-4">
-              <span
-                class="bg-[#F5F6F7] flex items-center justify-center w-6 h-6 p-4 rounded-full"
-                ><i class="pi pi-car text-black"></i
-              ></span>
-              <h4 class="uppercase text-sm">
-                {{ i18.locale.value === "ar" ? ad?.name : ad?.name_en }}
-              </h4>
-            </div>
-            <i class="pi pi-angle-left"></i>
-          </button>
-          <hr class="my-4 text-gray-200" />
-        </div>
-      </div>
-
-      <div v-else>
-        <!-- Animals Details -->
-        <div v-if="activeTab == 1">
-          <div v-if="!detailsAnimals" class="flex flex-col md:flex-row gap-4">
-            <!-- Animals Categories -->
-            <div class="w-full md:w-64 bg-white p-4 rounded-lg h-fit">
-              <div
-                v-for="category in categories"
-                class="flex gap-4 items-center mb-2"
-              >
-                <span
-                  class="bg-[#146AAB] text-center p-1 text-white text-xs w-6 h-6 rounded-full"
-                  >{{ category.id }}</span
-                >
-                <p class="text-xs font-bold">
-                  {{
-                    i18.locale.value == "ar"
-                      ? category.label_ar
-                      : category.label_en
-                  }}
-                </p>
-              </div>
-            </div>
-            <!-- upload content -->
-            <div class="flex-1 bg-white p-6 rounded-lg shadow-md">
-              <label class="block mb-2 font-medium">{{
-                i18.locale.value === "ar" ? "تحميل الصور" : "Upload Photos"
-              }}</label>
-
-              <!-- Upload Box -->
-              <div
-                class="border-2 border-dashed border-[#146AAB] rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer mb-50"
-              >
-                <i class="pi pi-upload text-[#146AAB] text-3xl mb-2"></i>
-                <p class="text-sm text-gray-600">
-                  {{
-                    i18.locale.value === "ar"
-                      ? "اختر الملف الذي تريد تحميله"
-                      : "Choose File To Upload"
-                  }}
-                </p>
-                <input
-                  type="file"
-                  ref="fileInput"
-                  class="hidden"
-                  multiple
-                  accept="image/*"
-                  @change="handleFiles"
-                />
-              </div>
-
-              <!-- Navigation Buttons -->
-              <div class="flex gap-4 mt-6">
-                <button
-                  class="flex-1 bg-[#EDEFF2] text-gray-500 py-2 px-6 rounded-md cursor-pointer hover:bg-[#e2e3e4]"
-                >
-                  {{ i18.locale.value === "ar" ? "السابق" : "Previous" }}
-                </button>
-                <button
-                  @click="detailsAnimals = true"
-                  class="flex-1 bg-[#FFE800] text-black font-medium py-2 px-6 rounded-md cursor-pointer hover:bg-[#f2de04]"
-                >
-                  {{ i18.locale.value === "ar" ? "التالي" : "Next" }}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Successfully Post Ad -->
+        <div class="flex flex-col gap-3">
           <div
-            v-else
-            class="flex flex-col gap-1 items-center justify-center bg-white p-4 rounded-lg h-[50vh]"
+            v-for="item in steps"
+            :key="item.id"
+            class="flex justify-between items-center border rounded-md p-2 text-sm"
+            :class="{
+              'bg-[#146AAB] text-white': step === item.id,
+              'bg-gray-50 text-gray-600': step !== item.id,
+              'flex-row-reverse': isArabic,
+            }"
           >
-            <div class="w-30 h-30">
-              <img src="/images/success.png" alt="" />
-            </div>
-            <p>{{ i18.locale.value === "ar" ? "شكرًا لك" : "Thank you" }}</p>
-            <p class="text-xs">
-              {{
-                i18.locale.value === "ar"
-                  ? "إعلانك قيد المراجعة"
-                  : "Your ad under review"
-              }}
-            </p>
-            <a
-              href="#"
-              class="bg-[#FFE800] text-black font-medium py-2 px-6 rounded-md cursor-pointer hover:bg-[#f2de04]"
+            <span>{{ $t(item.labelKey) }}</span>
+            <span
+              class="bg-white text-[#146AAB] font-bold rounded-full w-5 h-5 flex items-center justify-center"
             >
-              {{ i18.locale.value === "ar" ? "الصفحة الرئيسية" : "Home " }}
-            </a>
+              {{ item.id }}
+            </span>
           </div>
         </div>
-      </div>
+      </aside>
+
+      <!-- MAIN CONTENT -->
+      <main
+        class="flex-1 bg-white p-6 rounded-lg shadow-md"
+        :class="{ 'text-right': isArabic, 'text-left': !isArabic }"
+      >
+        <!-- Step 1 -->
+        <div v-if="step === 1">
+          <h3 class="text-lg font-semibold mb-4">
+            {{ $t("postAdd.detailsTitle") }}
+          </h3>
+
+          <div class="flex flex-col gap-4">
+            <!-- Title -->
+            <div>
+              <label class="block mb-1 text-sm font-medium">
+                {{ $t("postAdd.titleLabel") }}
+              </label>
+              <input
+                v-model="form.title"
+                type="text"
+                class="w-full border border-gray-300 rounded-md p-2 text-sm"
+              />
+            </div>
+
+            <!-- Title English -->
+            <div>
+              <label class="block mb-1 text-sm font-medium">
+                {{ $t("postAdd.titleLabelEn") }}
+              </label>
+              <input
+                v-model="form.title_en"
+                type="text"
+                class="w-full border border-gray-300 rounded-md p-2 text-sm"
+              />
+            </div>
+
+            <!-- Price -->
+            <div>
+              <label class="block mb-1 text-sm font-medium">
+                {{ $t("postAdd.priceLabel") }}
+              </label>
+              <input
+                v-model="form.price"
+                type="number"
+                class="w-full border border-gray-300 rounded-md p-2 text-sm"
+              />
+            </div>
+
+            <!-- Dynamic Attributes -->
+            <div v-if="dynamicAttributes.length">
+              <div
+                v-for="attr in dynamicAttributes"
+                :key="attr.id"
+                class="mb-3"
+              >
+                <label class="block mb-1 text-sm font-medium">
+                  {{ isArabic ? attr.name : attr.name_en }}
+                  <span v-if="attr.is_required" class="text-red-500">*</span>
+                </label>
+
+                <!-- Select -->
+                <select
+                  v-if="attr.category_attributes_types?.code === 'select'"
+                  v-model="form[`attr_${attr.id}`]"
+                  class="w-full border border-gray-300 rounded-md p-2 text-sm"
+                >
+                  <option value="">{{ $t("validation.selectOption") }}</option>
+                  <option
+                    v-for="val in attr.category_attributes_values"
+                    :key="val.id"
+                    :value="val.id"
+                  >
+                    {{ isArabic ? val.name : val.name_en }}
+                  </option>
+                </select>
+
+                <!-- Text -->
+                <input
+                  v-else-if="attr.category_attributes_types?.code === 'text'"
+                  v-model="form[`attr_${attr.id}`]"
+                  type="text"
+                  class="w-full border border-gray-300 rounded-md p-2 text-sm"
+                />
+
+                <!-- Textarea -->
+                <textarea
+                  v-else-if="
+                    attr.category_attributes_types?.code === 'textarea'
+                  "
+                  v-model="form[`attr_${attr.id}`]"
+                  class="w-full border border-gray-300 rounded-md p-2 text-sm"
+                ></textarea>
+
+                <!-- Number -->
+                <input
+                  v-else-if="attr.category_attributes_types?.code === 'number'"
+                  v-model.number="form[`attr_${attr.id}`]"
+                  type="number"
+                  class="w-full border border-gray-300 rounded-md p-2 text-sm"
+                />
+
+                <!-- Checkbox -->
+                <div
+                  v-else-if="
+                    attr.category_attributes_types?.code === 'checkbox'
+                  "
+                  class="flex flex-wrap gap-2"
+                >
+                  <label
+                    v-for="val in attr.category_attributes_values"
+                    :key="val.id"
+                    class="flex items-center gap-2 text-sm"
+                  >
+                    <input
+                      type="checkbox"
+                      :value="val.id"
+                      v-model="form[`attr_${attr.id}`]"
+                    />
+                    {{ isArabic ? val.name : val.name_en }}
+                  </label>
+                </div>
+
+                <!-- Radio -->
+                <div
+                  v-else-if="attr.category_attributes_types?.code === 'radio'"
+                  class="flex flex-wrap gap-2"
+                >
+                  <label
+                    v-for="val in attr.category_attributes_values"
+                    :key="val.id"
+                    class="cursor-pointer border rounded-md px-4 py-2 text-sm flex items-center justify-center"
+                    :class="[
+                      form[`attr_${attr.id}`] === val.id
+                        ? 'bg-[#146AAB] text-white border-[#146AAB]'
+                        : 'bg-white text-gray-600 border-gray-300',
+                    ]"
+                  >
+                    <input
+                      type="radio"
+                      :value="val.id"
+                      v-model="form[`attr_${attr.id}`]"
+                      class="hidden"
+                    />
+                    {{ isArabic ? val.name : val.name_en }}
+                  </label>
+                </div>
+
+                <!-- Location -->
+                <div
+                  v-else-if="
+                    attr.category_attributes_types?.code === 'location'
+                  "
+                >
+                  <!-- <PickLocation
+                    v-model="form[`attr_location_${attr.id}`]"
+                    :map-id="`ad-map-${attr.id}`"
+                  /> -->
+                  <PickLocation
+                    v-model="form[`attr_location_${attr.id}`]"
+                    :map-id="`ad-map-${attr.id}`"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="flex mt-6"
+            :class="{ 'justify-start': isArabic, 'justify-end': !isArabic }"
+          >
+            <button
+              @click="validateStepOne"
+              class="bg-[#FFE800] text-black font-medium py-2 px-6 rounded-md hover:bg-[#f2de04]"
+            >
+              {{ $t("postAdd.next") }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div v-if="step === 2">
+          <h3 class="text-lg font-semibold mb-4">
+            {{ $t("postAdd.uploadTitle") }}
+          </h3>
+
+          <div
+            class="border-2 border-dashed border-[#146AAB] rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer"
+            @click="triggerFileUpload"
+          >
+            <i class="pi pi-upload text-[#146AAB] text-3xl mb-2"></i>
+            <p class="text-sm text-gray-600">{{ $t("postAdd.chooseFile") }}</p>
+            <input
+              type="file"
+              ref="fileInput"
+              class="hidden"
+              multiple
+              accept="image/*"
+              @change="handleFiles"
+            />
+          </div>
+
+          <div
+            v-if="uploadedFiles.length"
+            class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3"
+          >
+            <div
+              v-for="(file, index) in uploadedFiles"
+              :key="index"
+              class="border rounded-md overflow-hidden"
+            >
+              <img :src="file.preview" class="w-full h-24 object-cover" />
+            </div>
+          </div>
+
+          <div class="flex mt-6" :class="{ 'flex-row-reverse': isArabic }">
+            <button
+              @click="step = 1"
+              class="bg-[#EDEFF2] text-gray-600 py-2 px-6 rounded-md mr-2"
+            >
+              {{ $t("postAdd.previous") }}
+            </button>
+            <button
+              @click="submitAd"
+              class="bg-[#FFE800] text-black font-medium py-2 px-6 rounded-md"
+            >
+              {{ $t("postAdd.submit") }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div
+          v-if="step === 3"
+          class="flex flex-col items-center justify-center h-[50vh]"
+        >
+          <img src="/images/success.png" alt="success" class="w-24 mb-4" />
+          <p class="text-lg font-semibold">{{ $t("postAdd.thankYou") }}</p>
+          <p class="text-sm text-gray-600 mb-4">
+            {{ $t("postAdd.underReview") }}
+          </p>
+          <router-link
+            to="/"
+            class="bg-[#FFE800] text-black font-medium py-2 px-6 rounded-md"
+          >
+            {{ $t("postAdd.home") }}
+          </router-link>
+        </div>
+      </main>
     </div>
   </app-layout>
 </template>
 
 <script setup>
-import AppLayout from "../Layout/AppLayout.vue";
+import { ref, computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
-import { postAdCategories } from "../data";
-import { ref, computed } from "vue";
+import { useRoute } from "vue-router";
+import requestService from "../services/api/requestService";
+import AppLayout from "../Layout/AppLayout.vue";
+import PickLocation from "../components/PickLocation.vue";
+import { showError, showWarning, showSuccess } from "../utils/notifications";
 
-import Breadcrumb from "primevue/breadcrumb";
+const { locale, t } = useI18n();
+const isArabic = computed(() => locale.value === "ar");
+const route = useRoute();
+const categoryId = route.params.categoryId;
 
-const i18 = useI18n();
-const activeTab = ref(null);
-const detailsAnimals = ref(false);
-const home = ref({
-  icon: "pi pi-home",
+const step = ref(1);
+const fileInput = ref(null);
+const uploadedFiles = ref([]);
+const dynamicAttributes = ref([]);
+
+const form = ref({
+  title: "",
+  title_en: "",
+  price: "",
 });
 
-const breadcrumbItems = computed(() => {
-  const list = [
-    {
-      label: "Post Ad",
-      command: () => {
-        (activeTab.value = null), (detailsAnimals.value = false);
-      },
-    },
-  ];
+const location = ref({
+  lat: null,
+  lng: null,
+  address: "",
+});
 
-  if (activeTab.value) {
-    const cat = postAdCategories.find((c) => c.id === activeTab.value);
-    if (cat) {
-      list.push({
-        label: i18.locale.value === "ar" ? cat.name : cat.name_en,
-        command: () => {
-          detailsAnimals.value = false;
-        },
-      });
+const steps = [
+  { id: 1, labelKey: "steps.details" },
+  { id: 2, labelKey: "steps.images" },
+];
+
+const fetchCategoryAttributes = async () => {
+  try {
+    const res = await requestService.getAll(
+      `/categories/${categoryId}/attributes`
+    );
+    dynamicAttributes.value =
+      res.data?.category_attributes?.sort(
+        (a, b) => a.attribute_order - b.attribute_order
+      ) || [];
+  } catch (err) {
+    console.error("Error loading attributes:", err);
+  }
+};
+
+onMounted(fetchCategoryAttributes);
+
+const validateStepOne = () => {
+  // Basic validation
+  if (!form.value.title || !form.value.title_en || !form.value.price) {
+    showWarning(t("validation.all_fields_required"));
+    return;
+  }
+
+  // Dynamic fields
+  for (const attr of dynamicAttributes.value) {
+    if (attr.is_required && !form.value[`attr_${attr.id}`]) {
+      showWarning(
+        `${isArabic.value ? attr.name : attr.name_en} ${t(
+          "validation.all_fields_required"
+        )}`
+      );
+      return;
     }
   }
 
-  return list;
-});
+  step.value = 2;
+};
 
-const activeCategory = computed(() =>
-  postAdCategories.find((c) => c.id === activeTab.value)
-);
+const triggerFileUpload = () => fileInput.value?.click();
 
-const categories = [
-  { id: 1, label_ar: "تفاصيل", label_en: "Details" },
-  { id: 2, label_ar: "سمات", label_en: "Features" },
-  { id: 3, label_ar: "صور", label_en: "Photos" },
-];
+const handleFiles = (e) => {
+  const files = Array.from(e.target.files || []);
+  uploadedFiles.value = files.map((f) => ({
+    file: f,
+    preview: URL.createObjectURL(f),
+  }));
+};
 
-function showDetails() {
-  detailsAnimals.value = true;
-}
+const submitAd = async () => {
+  if (!uploadedFiles.value.length) {
+    showError(t("validation.uploadImages"));
+    return;
+  }
 
-function hideDetails() {
-  detailsAnimals.value = false;
-}
+  try {
+    const formData = new FormData();
+    formData.append("user_id", 1);
+    formData.append("title", form.value.title);
+    formData.append("title_en", form.value.title_en);
+    formData.append("price", form.value.price);
+
+    // Build attributes payload properly
+    const attributesPayload = dynamicAttributes.value.flatMap((attr) => {
+      const val = form.value[`attr_${attr.id}`];
+      const type = attr.category_attributes_types?.code;
+
+      // 🗺️ Handle location FIRST
+      if (type === "location") {
+        const loc = form.value[`attr_location_${attr.id}`] || location.value;
+        if (!loc?.lat || !loc?.lng) return [];
+        return [
+          {
+            category_attribute_id: attr.id,
+            lat: loc.lat,
+            lng: loc.lng,
+            address: loc.address || "",
+          },
+        ];
+      }
+
+      // 🧩 Handle select, radio, checkbox
+      if (["radio", "select", "checkbox"].includes(type)) {
+        if (!val) return [];
+        if (Array.isArray(val)) {
+          return val.map((v) => ({
+            category_attribute_id: attr.id,
+            category_attribute_value_id: Number(v),
+          }));
+        }
+        return [
+          {
+            category_attribute_id: attr.id,
+            category_attribute_value_id: Number(val),
+          },
+        ];
+      }
+
+      // 📝 Handle text, textarea, number
+      if (["text", "textarea", "number"].includes(type)) {
+        if (!val) return [];
+        return [
+          {
+            category_attribute_id: attr.id,
+            text: String(val),
+          },
+        ];
+      }
+
+      return [];
+    });
+
+    formData.append("attributes", JSON.stringify(attributesPayload));
+
+    // Append images
+    uploadedFiles.value.forEach((fileObj) => {
+      formData.append("ads_images", fileObj.file);
+    });
+
+    const res = await requestService.create("/ads", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    showSuccess(res?.message || t("postAdd.successMessage"));
+    step.value = 3;
+  } catch (err) {
+    console.error("Ad submission failed:", err);
+    showError(err || t("postAdd.errorMessage"));
+  }
+};
 </script>
-
-<style scoped>
-.category-card :last-child hr {
-  display: none;
-}
-</style>
