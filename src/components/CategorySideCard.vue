@@ -68,7 +68,7 @@
               :to="{
                 name: 'category-listing',
                 params: {
-                  id: i18?.locale?.value === 'ar' ? item?.name : item?.name_en,
+                  id: item?.id,
                 },
               }"
               class="text-[#146AAB] text-xs font-normal hover:underline"
