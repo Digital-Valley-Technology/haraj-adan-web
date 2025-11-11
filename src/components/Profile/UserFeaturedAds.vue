@@ -7,7 +7,7 @@ import { MEDIA_URL } from "../../services/axios";
 const { t, locale } = useI18n();
 
 // Define props for the component
-defineProps({
+const props = defineProps({
   /**
    * Array of product/item objects to display.
    * Required properties for each item:
@@ -46,7 +46,7 @@ defineProps({
  * @param {string} currency - The currency symbol.
  * @returns {string} The formatted price string.
  */
-const formatPrice = (price, currency) => {
+const formatPrice = (price, item) => {
   const amount = typeof price === "string" ? parseFloat(price) : price;
   if (isNaN(amount) || amount === null) return "";
 
@@ -58,9 +58,9 @@ const formatPrice = (price, currency) => {
 
   // Simple logic for currency display based on locale
   if (locale.value === "ar") {
-    return `${formattedAmount} ${currency}`; // e.g., 10,000 $
+    return `${formattedAmount} ${item?.currencies?.name}`; // e.g., 10,000 $
   } else {
-    return `${currency} ${formattedAmount}`; // e.g., $ 10,000
+    return `${item?.currencies?.name_en} ${formattedAmount}`; // e.g., $ 10,000
   }
 };
 
@@ -133,7 +133,7 @@ const translateFeatured = computed(() => {
               <div class="flex items-center gap-2">
                 <i class="pi pi-map-marker text-[9px] text-[#6B7280]"></i>
                 <p class="text-[10px] text-[#6B7280]">
-                  {{ item?.ad_attributes[0]?.address || "N/A" }}
+                  {{ item?.address || "N/A" }}
                 </p>
               </div>
             </div>
@@ -142,7 +142,7 @@ const translateFeatured = computed(() => {
           <!-- Price -->
           <div class="flex items-end gap-1 min-w-[60px]">
             <p class="text-sm font-bold text-[#146AAB]">
-              {{ formatPrice(item.price, "$") }}
+              {{ formatPrice(item?.price, item) }}
             </p>
           </div>
         </div>

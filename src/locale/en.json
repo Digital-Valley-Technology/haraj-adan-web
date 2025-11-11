@@ -151,8 +151,22 @@
   },
   "ads": {
     "post_ad": "Post Ad",
-    "search_placeholder": "Place, Location",
-    "featured": "Featured"
+    "search_placeholder": "Location, place",
+    "featured": "Featured",
+    "currency": "Currency",
+    "table": {
+      "title": "Title",
+      "price": "Price",
+      "color": "Color",
+      "image": "Image",
+      "created": "Created Date",
+      "actions": "Actions"
+    },
+    "actions": {
+      "delete": "Delete",
+      "add_new": "Add New Ad"
+    },
+    "not_provided": "Not provided"
   },
   "otp": {
     "send_code": "Send OTP",
@@ -567,6 +581,8 @@
   },
   "postAdd": {
     "detailsTitle": "Ad Details",
+    "descr": "Description",
+    "location": "Location",
     "titleLabel": "Ad Title (AR)",
     "titleLabelEn": "Ad Title (EN)",
     "titlePlaceholder": "Your title (AR)",
@@ -603,6 +619,10 @@
   "steps": {
     "details": "Details",
     "images": "Images"
+  },
+  "adDetails": {
+    "no-descr": "No description available",
+    "no-location": "No location available"
   },
   "generic": {
     "403-title": "Unauthorized",

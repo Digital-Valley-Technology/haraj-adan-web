@@ -79,6 +79,53 @@
               />
             </div>
 
+            <div class="mb-3">
+              <label class="block mb-1 text-sm font-medium">
+                {{ $t("postAdd.currencyLabel") }}
+              </label>
+
+              <!-- Radio -->
+              <div class="flex flex-wrap gap-2">
+                <label
+                  v-for="currency in currencies"
+                  :key="currency.id"
+                  class="cursor-pointer border rounded-md px-4 py-2 text-sm flex items-center justify-center"
+                  :class="[
+                    form.currency_id === currency.id
+                      ? 'bg-[#146AAB] text-white border-[#146AAB]'
+                      : 'bg-white text-gray-600 border-gray-300',
+                  ]"
+                >
+                  <input
+                    type="radio"
+                    :value="currency.id"
+                    v-model="form.currency_id"
+                    class="hidden"
+                  />
+                  {{ isArabic ? currency.name : currency.name_en }}
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <label class="block mb-1 text-sm font-medium">
+                {{ $t("postAdd.location") }}
+              </label>
+              <!-- Location -->
+              <PickLocation v-model="location" :map-id="`ad-map-location`" />
+            </div>
+
+            <div>
+              <label class="block mb-1 text-sm font-medium">
+                {{ $t("postAdd.descr") }}
+              </label>
+              <!-- Textarea -->
+              <textarea
+                v-model="form.descr"
+                class="w-full border border-gray-300 rounded-md p-2 text-sm"
+              ></textarea>
+            </div>
+
             <!-- Dynamic Attributes -->
             <div v-if="dynamicAttributes.length">
               <div
@@ -132,27 +179,6 @@
                   class="w-full border border-gray-300 rounded-md p-2 text-sm"
                 />
 
-                <!-- Checkbox -->
-                <div
-                  v-else-if="
-                    attr.category_attributes_types?.code === 'checkbox'
-                  "
-                  class="flex flex-wrap gap-2"
-                >
-                  <label
-                    v-for="val in attr.category_attributes_values"
-                    :key="val.id"
-                    class="flex items-center gap-2 text-sm"
-                  >
-                    <input
-                      type="checkbox"
-                      :value="val.id"
-                      v-model="form[`attr_${attr.id}`]"
-                    />
-                    {{ isArabic ? val.name : val.name_en }}
-                  </label>
-                </div>
-
                 <!-- Radio -->
                 <div
                   v-else-if="attr.category_attributes_types?.code === 'radio'"
@@ -178,20 +204,45 @@
                   </label>
                 </div>
 
-                <!-- Location -->
+                <!-- Checkbox -->
+                <!-- <div
+                  v-else-if="
+                    attr.category_attributes_types?.code === 'checkbox'
+                  "
+                  class="flex flex-wrap gap-2"
+                >
+                  <label
+                    v-for="val in attr.category_attributes_values"
+                    :key="val.id"
+                    class="flex items-center gap-2 text-sm"
+                  >
+                    <input
+                      type="checkbox"
+                      :value="val.id"
+                      v-model="form[`attr_${attr.id}`]"
+                    />
+                    {{ isArabic ? val.name : val.name_en }}
+                  </label>
+                </div> -->
+
                 <div
                   v-else-if="
-                    attr.category_attributes_types?.code === 'location'
+                    attr.category_attributes_types?.code === 'checkbox'
                   "
+                  class="flex flex-wrap gap-2"
                 >
-                  <!-- <PickLocation
-                    v-model="form[`attr_location_${attr.id}`]"
-                    :map-id="`ad-map-${attr.id}`"
-                  /> -->
-                  <PickLocation
-                    v-model="form[`attr_location_${attr.id}`]"
-                    :map-id="`ad-map-${attr.id}`"
-                  />
+                  <label
+                    v-for="val in attr.category_attributes_values"
+                    :key="val.id"
+                    class="flex items-center gap-2 text-sm"
+                  >
+                    <input
+                      type="checkbox"
+                      :value="val.id"
+                      v-model="form[`attr_${attr.id}`]"
+                    />
+                    {{ isArabic ? val.name : val.name_en }}
+                  </label>
                 </div>
               </div>
             </div>
@@ -301,11 +352,13 @@ const step = ref(1);
 const fileInput = ref(null);
 const uploadedFiles = ref([]);
 const dynamicAttributes = ref([]);
+const currencies = ref([]);
 
 const form = ref({
   title: "",
   title_en: "",
   price: "",
+  descr: null,
 });
 
 const location = ref({
@@ -328,16 +381,42 @@ const fetchCategoryAttributes = async () => {
       res.data?.category_attributes?.sort(
         (a, b) => a.attribute_order - b.attribute_order
       ) || [];
+
+    // Initialize form keys based on attribute types
+    dynamicAttributes.value.forEach((attr) => {
+      if (attr.category_attributes_types?.code === "checkbox") {
+        form.value[`attr_${attr.id}`] = [];
+      } else {
+        form.value[`attr_${attr.id}`] = null;
+      }
+    });
   } catch (err) {
     console.error("Error loading attributes:", err);
   }
 };
 
-onMounted(fetchCategoryAttributes);
+const fetchCurrencies = async () => {
+  try {
+    const res = await requestService.getAll(`/currencies`);
+    currencies.value = res.data;
+  } catch (err) {
+    console.error("Error loading attributes:", err);
+  }
+};
+
+onMounted(() => {
+  fetchCategoryAttributes();
+  fetchCurrencies();
+});
 
 const validateStepOne = () => {
   // Basic validation
-  if (!form.value.title || !form.value.title_en || !form.value.price) {
+  if (
+    !form.value.title ||
+    !form.value.title_en ||
+    !form.value.price ||
+    !form.value?.currency_id
+  ) {
     showWarning(t("validation.all_fields_required"));
     return;
   }
@@ -372,32 +451,31 @@ const submitAd = async () => {
     showError(t("validation.uploadImages"));
     return;
   }
+  if (
+    !location.value?.lat ||
+    !location.value?.lng ||
+    !location.value?.address
+  ) {
+    showError(t("validation.location_required"));
+    return;
+  }
 
   try {
     const formData = new FormData();
     formData.append("user_id", 1);
     formData.append("title", form.value.title);
     formData.append("title_en", form.value.title_en);
+    formData.append("currency_id", form.value.currency_id);
     formData.append("price", form.value.price);
+    formData.append("descr", form.value.descr || null);
+    formData.append("lat", location.value?.lat);
+    formData.append("lng", location.value?.lng);
+    formData.append("address", location.value?.address);
 
     // Build attributes payload properly
     const attributesPayload = dynamicAttributes.value.flatMap((attr) => {
       const val = form.value[`attr_${attr.id}`];
       const type = attr.category_attributes_types?.code;
-
-      // 🗺️ Handle location FIRST
-      if (type === "location") {
-        const loc = form.value[`attr_location_${attr.id}`] || location.value;
-        if (!loc?.lat || !loc?.lng) return [];
-        return [
-          {
-            category_attribute_id: attr.id,
-            lat: loc.lat,
-            lng: loc.lng,
-            address: loc.address || "",
-          },
-        ];
-      }
 
       // 🧩 Handle select, radio, checkbox
       if (["radio", "select", "checkbox"].includes(type)) {

@@ -61,7 +61,13 @@
             {{ locale === "ar" ? adData.title : adData.title_en }}
           </span>
           <span class="text-xl font-semibold text-[#146AAB]">
-            {{ formatPrice(adData.price) }}
+            {{
+              `${formatPrice(adData.price)} ${
+                locale === "ar"
+                  ? adData?.currencies?.name
+                  : adData?.currencies?.name_en
+              }`
+            }}
           </span>
         </div>
 
@@ -174,7 +180,7 @@
         {{ locale === "ar" ? "الوصف" : "Description" }}
       </h3>
       <p class="text-sm text-gray-700 leading-relaxed">
-        {{ description }}
+        {{ ad?.descr || t("adDetails.no-descr") }}
       </p>
     </div>
 
@@ -187,7 +193,7 @@
         loading="lazy"
       ></iframe>
       <p v-else class="text-sm text-gray-500">
-        {{ locale === "ar" ? "لا يوجد موقع" : "No location available" }}
+        {{ t("adDetails.no-location") }}
       </p>
     </div>
   </div>
@@ -278,35 +284,18 @@ const visibleAttributes = computed(() =>
   (adData.value?.ad_attributes ?? []).filter((a) => a.category_attributes)
 );
 
-const description = computed(() => {
-  const attrs = adData.value?.ad_attributes ?? [];
-  const textarea = attrs.find(
-    (a) => a.category_attributes?.category_attributes_types?.code === "textarea"
-  );
-  return (
-    textarea?.text ||
-    (locale.value === "ar" ? "لا يوجد وصف متاح" : "No description available")
-  );
-});
-
-const locationAttribute = computed(() =>
-  (adData.value?.ad_attributes ?? []).find(
-    (a) => a.category_attributes?.category_attributes_types?.code === "location"
-  )
-);
-
 const mapUrl = computed(() => {
-  const loc = locationAttribute.value;
-  if (!loc || !loc.lat || !loc.lng) return "";
-  return `https://www.google.com/maps?q=${loc.lat},${loc.lng}&hl=${
-    locale.value === "ar" ? "ar" : "en"
-  }&z=15&output=embed`;
+  if (!adData.value?.lng || !adData.value.lat || !adData.value?.address)
+    return "";
+  return `https://www.google.com/maps?q=${adData.value.lat},${
+    adData.value.lng
+  }&hl=${locale.value === "ar" ? "ar" : "en"}&z=15&output=embed`;
 });
 
 function formatPrice(p) {
   if (!p) return "";
   const n = Number(p);
-  return isNaN(n) ? p : n.toLocaleString() + " $";
+  return isNaN(n) ? p : `${n.toLocaleString()}`;
 }
 </script>
 

@@ -4,6 +4,7 @@ import requestService from "../services/api/requestService";
 export const useFiltersStore = defineStore("filters", {
   state: () => ({
     categories: [],
+    currencies: [],
     selectedCategory: {},
     page: 1,
     limit: 10,
@@ -25,6 +26,7 @@ export const useFiltersStore = defineStore("filters", {
     // Attribute filters
     selectedAttributes: {}, // { [attributeId]: valueId }
     selectedCheckboxes: {}, // { [attributeId]: [valueIds] }
+    selectedCurrency: null,
 
     // Ads results (fetched from API)
     ads: [],
@@ -33,6 +35,8 @@ export const useFiltersStore = defineStore("filters", {
   getters: {
     getCategories: (state) => state.categories,
     getSelectedCategory: (state) => state?.selectedCategory,
+    getSelectedCurrency: (state) => state?.selectedCurrency,
+    getCurrencies: (state) => state?.currencies,
   },
 
   actions: {
@@ -55,6 +59,7 @@ export const useFiltersStore = defineStore("filters", {
       this.selectedCheckboxes = {};
       this.minPrice = null;
       this.maxPrice = null;
+      this.selectedCategory = null;
     },
 
     // 🔹 Attribute filters (radio style)
@@ -65,8 +70,14 @@ export const useFiltersStore = defineStore("filters", {
         this.selectedAttributes[attributeId] = valueId;
       }
     },
+    toggleCurrencyValue(valueId) {
+      this.selectedCurrency = valueId;
+    },
     isAttributeActive(attributeId, valueId) {
       return this.selectedAttributes[attributeId] === valueId;
+    },
+    isCurrencyActive(valueId) {
+      return this.selectedCurrency === valueId;
     },
 
     // 🔹 Checkbox filters
@@ -98,6 +109,7 @@ export const useFiltersStore = defineStore("filters", {
     clearFilters() {
       this.minPrice = null;
       this.maxPrice = null;
+      this.selectedCurrency = null;
       this.sortBy = "";
       this.selectedAttributes = {};
       this.selectedCheckboxes = {};
@@ -113,6 +125,7 @@ export const useFiltersStore = defineStore("filters", {
           category_id: this.selectedCategory?.id,
           min_price: this.minPrice,
           max_price: this.maxPrice,
+          currency_id: this.selectedCurrency,
           sort_by: this.sortBy,
           attributes: Object.entries(this.selectedAttributes).map(
             ([attributeId, valueId]) => ({
@@ -143,6 +156,19 @@ export const useFiltersStore = defineStore("filters", {
         };
       } catch (error) {
         console.error("Error fetching ads:", error);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async fetchCurrencies() {
+      this.loading = true;
+
+      try {
+        const res = await requestService.getAll("/currencies");
+        this.currencies = res?.data || [];
+      } catch (error) {
+        console.error("Error fetching currencies:", error);
       } finally {
         this.loading = false;
       }

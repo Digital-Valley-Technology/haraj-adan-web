@@ -36,7 +36,7 @@ const props = defineProps({
  * @param {string} currency - The currency symbol.
  * @returns {string} The formatted price string.
  */
-const formatPrice = (price, currency) => {
+const formatPrice = (price) => {
   const amount = typeof price === "string" ? parseFloat(price) : price;
   if (isNaN(amount) || amount === null) return "";
 
@@ -46,9 +46,9 @@ const formatPrice = (price, currency) => {
   });
 
   if (locale.value === "ar") {
-    return `${formattedAmount} ${currency}`; // e.g., 10,000 $
+    return `${formattedAmount} ${props.item?.currencies?.name}`; // e.g., 10,000 $
   } else {
-    return `${currency} ${formattedAmount}`; // e.g., $ 10,000
+    return `${props.item?.currencies?.name_en} ${formattedAmount}`; // e.g., $ 10,000
   }
 };
 
@@ -67,8 +67,8 @@ const getAdImageUrl = (item) => {
   );
 };
 
-const getAddress = (item) => {
-  return item?.ad_attributes?.find((attr) => attr.address)?.address || "N/A";
+const isFeatured = () => {
+  return props?.item?.ad_featured_history?.some((f) => f.status === true);
 };
 
 const goToAdDetails = (adId) => {
@@ -103,7 +103,7 @@ const goToAdDetails = (adId) => {
         <!-- Title: text-xs font-semibold mb-1 -->
 
         <div class="flex flex-col ms-2 flex-1">
-          <span
+          <span v-if="isFeatured()"
             class="bg-yellow-400 text-xs font-semibold text-gray-800 px-2 py-0.5 rounded w-fit mb-1"
           >
             {{ t("ads.featured") }}
@@ -124,7 +124,7 @@ const goToAdDetails = (adId) => {
           <!-- Dynamic Location -->
 
           <p class="text-[9px] text-[#6B7280]">
-            {{ getAddress(props.item) }}
+            {{ props?.item?.address || "N/A" }}
           </p>
         </div>
       </div>
@@ -136,7 +136,7 @@ const goToAdDetails = (adId) => {
       <!-- Dynamic Price -->
 
       <p class="text-sm text-[#146AAB] font-semibold">
-        {{ formatPrice(props.item.price, "$") }}
+        {{ formatPrice(props.item.price) }}
       </p>
     </div>
   </div>

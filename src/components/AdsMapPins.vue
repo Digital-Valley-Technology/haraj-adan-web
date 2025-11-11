@@ -144,7 +144,10 @@ function clearMarkers() {
  */
 function createPopupContent(ad) {
   const adTitle = locale.value === "ar" ? ad.title : ad.title_en;
-  const adPrice = locale.value === "ar" ? `${ad.price} $` : `$ ${ad.price}`;
+  const adPrice =
+    locale.value === "ar"
+      ? `${ad.price} ${ad?.currencies?.name}`
+      : `${ad?.currencies?.name_en} ${ad.price}`;
   const adImage = mainImage(ad?.ads_images?.[0]?.image);
   const adLocation = getAdAddress(ad);
   const rtl = locale.value === "ar" ? "rtl" : "ltr";

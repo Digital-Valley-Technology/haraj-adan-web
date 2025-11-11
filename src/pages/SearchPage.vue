@@ -70,6 +70,7 @@
               <h6 class="text-xs font-medium mb-2">
                 {{ currentLocale == "ar" ? "السعر" : "Price" }}
               </h6>
+
               <div class="flex items-center justify-between w-full mb-4">
                 <input
                   type="number"
@@ -88,6 +89,23 @@
                   "
                   class="py-2 px-2 border border-[#cdced1] text-xs rounded-md text-center w-30"
                 />
+              </div>
+
+              <h6 class="text-xs font-medium mb-2">{{ $t("ads.currency") }}</h6>
+              <div class="flex flex-wrap gap-2 mb-4">
+                <button
+                  v-for="val in currencies"
+                  :key="val.id"
+                  @click="filtersStore.toggleCurrencyValue(val.id)"
+                  :class="[
+                    'text-xs capitalize py-2 px-4 rounded-md cursor-pointer transition-colors',
+                    filtersStore.isCurrencyActive(val.id)
+                      ? 'bg-[#146AAB] text-white'
+                      : 'bg-[#EDEFF2] text-black hover:bg-[#0f76c5] hover:text-white',
+                  ]"
+                >
+                  {{ currentLocale === "ar" ? val.name : val.name_en }}
+                </button>
               </div>
 
               <!-- Dynamic Filters (Radio Logic) -->
@@ -231,6 +249,25 @@
                     "
                     class="py-2 px-2 border border-[#cdced1] text-xs rounded-md text-center w-30"
                   />
+                </div>
+
+                <h6 class="text-xs font-medium mb-2">
+                  {{ $t("ads.currency") }}
+                </h6>
+                <div class="flex flex-wrap gap-2 mb-4">
+                  <button
+                    v-for="val in currencies"
+                    :key="val.id"
+                    @click="filtersStore.toggleCurrencyValue(val.id)"
+                    :class="[
+                      'text-xs capitalize py-2 px-4 rounded-md cursor-pointer transition-colors',
+                      filtersStore.isCurrencyActive(val.id)
+                        ? 'bg-[#146AAB] text-white'
+                        : 'bg-[#EDEFF2] text-black hover:bg-[#0f76c5] hover:text-white',
+                    ]"
+                  >
+                    {{ currentLocale === "ar" ? val.name : val.name_en }}
+                  </button>
                 </div>
 
                 <!-- Dynamic Filters (Radio Logic) -->
@@ -451,10 +488,12 @@
 
                 <!-- Price -->
                 <div
-                  class="w-[100px] text-center text-blue-700 font-bold text-base px-2"
+                  class="w-[100px] text-center text-blue-700 font-bold text-sm px-2"
                 >
                   {{
-                    currentLocale == "ar" ? ad?.price + " $" : "$ " + ad?.price
+                    currentLocale == "ar"
+                      ? `${ad?.price} ${ad?.currencies?.name}`
+                      : `${ad?.currencies?.name_en} ${ad?.price}`
                   }}
                 </div>
 
@@ -501,7 +540,9 @@
                     </p>
                     <p class="text-xs text-[#146AAB]">
                       {{
-                        currentLocale == "ar" ? "$" + ad.price : "$ " + ad.price
+                        currentLocale == "ar"
+                          ? `${ad?.price} ${ad?.currencies?.name}`
+                          : `${ad?.currencies?.name_en} ${ad?.price}`
                       }}
                     </p>
                     <p class="text-xs text-[#A1A1A1]">
@@ -690,20 +731,13 @@ const getAdCoordinates = (ad) => {
   return null;
 };
 
-// 2. Computed property to gather all valid coordinates
-const adCoordinates = computed(() => {
-  if (!filtersStore.ads) return [];
-
-  return filtersStore.ads
-    .map((ad) => getAdCoordinates(ad))
-    .filter((coords) => coords !== null); // Filter out ads that didn't have coordinates
-});
-
 const categoriesFilter = computed(() => filtersStore.getCategories);
 const selectedCategory = computed(() => filtersStore.getSelectedCategory);
+const currencies = computed(() => filtersStore.getCurrencies);
 
 onMounted(() => {
   filtersStore.fetchCategories();
+  filtersStore.fetchCurrencies();
   filtersStore.fetchAds(routeQuery.value);
 });
 </script>

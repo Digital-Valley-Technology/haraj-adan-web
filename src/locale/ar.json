@@ -147,7 +147,8 @@
   "ads": {
     "post_ad": "نشر إعلان",
     "search_placeholder": "المكان، الموقع",
-    "featured":"مميز",
+    "featured": "مميز",
+    "currency": "العملة",
     "table": {
       "title": "العنوان",
       "price": "السعر",
@@ -585,6 +586,8 @@
   },
   "postAdd": {
     "detailsTitle": "تفاصيل الإعلان",
+    "descr": "الوصف",
+    "location": "الموقع",
     "titleLabel": "عنوان الإعلان (عربي)",
     "titleLabelEn": "عنوان الإعلان (إنجليزي)",
     "titlePlaceholder": "اكتب العنوان بالعربية",
@@ -621,6 +624,10 @@
   "steps": {
     "details": "التفاصيل",
     "images": "الصور"
+  },
+  "adDetails": {
+    "no-descr": "لا يوجد وصف متاح",
+    "no-location": "لا يوجد موقع متاح"
   },
   "generic": {
     "403-title": "غير مصرح",
