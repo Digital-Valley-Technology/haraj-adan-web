@@ -121,7 +121,7 @@ const total = computed(() => walletDepositsRequestsStore.getTotal); // use total
         <wallet-deposits-requests-table
           v-if="walletDepositsRequests?.length > 0"
           :wallet-deposits-requests="walletDepositsRequests"
-          @fetch-wallet-deposit-requests="fetchData()"
+          @fetch-wallet-deposits-requests="fetchData()"
           @change-status="
             (data) =>
               processChangeStatus(data?.walletDepositRequest, data?.status)

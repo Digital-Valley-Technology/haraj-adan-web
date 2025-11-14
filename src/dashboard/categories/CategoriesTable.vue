@@ -25,7 +25,8 @@ const handleDelete = (category) => emit("delete", category);
   <DataTable
     :value="categories"
     paginator
-    :rowsPerPageOptions="[2, 5, 10, 20, 50]"
+    :lazy="true"
+    :rowsPerPageOptions="[5, 10, 20, 50]"
     tableStyle="min-width: 50rem"
     :rows="categoryStore.limit"
     :totalRecords="categoryStore.total"
@@ -90,23 +91,6 @@ const handleDelete = (category) => emit("delete", category);
             rounded
             size="small"
           />
-
-          <!-- <Button
-            severity="info"
-            :label="$t('dashboard.categories.actions.sub_categories')"
-            :badge="String(slotProps.data?._count?.other_categories || 0)"
-            badgeSeverity="danger"
-            @click="
-              () =>
-                handleNavigation(
-                  slotProps.data?.id,
-                  'subcategories',
-                  'parentId'
-                )
-            "
-            rounded
-            size="small"
-          /> -->
 
           <div class="relative inline-block">
             <Button

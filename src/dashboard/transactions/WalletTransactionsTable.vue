@@ -25,6 +25,7 @@ const handleViewDetails = (transaction) => {
   <DataTable
     :value="transactions"
     paginator
+    :lazy="true"
     :rowsPerPageOptions="[5, 10, 20, 50]"
     tableStyle="min-width: 50rem"
     :rows="walletStore.limit"
