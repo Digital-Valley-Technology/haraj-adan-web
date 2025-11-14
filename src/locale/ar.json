@@ -627,7 +627,12 @@
   },
   "adDetails": {
     "no-descr": "لا يوجد وصف متاح",
-    "no-location": "لا يوجد موقع متاح"
+    "no-location": "لا يوجد موقع متاح",
+    "location": "الموقع",
+    "descr": "الوصف",
+    "call": "اتصال",
+    "send-message": "إرسال رسالة",
+    "no-images": "لا توجد صور"
   },
   "generic": {
     "403-title": "غير مصرح",

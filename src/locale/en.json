@@ -622,7 +622,12 @@
   },
   "adDetails": {
     "no-descr": "No description available",
-    "no-location": "No location available"
+    "no-location": "No location available",
+    "location":"Location",
+    "descr":"Description",
+    "call":"Call",
+    "send-message":"Send Message",
+    "no-images":"No images available"
   },
   "generic": {
     "403-title": "Unauthorized",

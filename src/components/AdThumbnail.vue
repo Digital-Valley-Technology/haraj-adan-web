@@ -48,7 +48,7 @@
         v-else
         class="w-full aspect-[6/4] bg-gray-100 flex items-center justify-center text-gray-400 text-sm"
       >
-        {{ locale === "ar" ? "لا توجد صور" : "No images available" }}
+        {{ t("adDetails.no-images") }}
       </div>
     </div>
 
@@ -108,7 +108,7 @@
                 }}
               </template>
               <template v-else>
-                {{ attr.text || (locale === "ar" ? "—" : "—") }}
+                {{ attr.text || "_" }}
               </template>
             </span>
           </div>
@@ -119,12 +119,12 @@
           <button
             class="bg-[#146AAB] cursor-pointer hover:bg-[#125d94] transition text-white py-2 w-full rounded-md text-sm font-medium"
           >
-            {{ locale === "ar" ? "اتصال" : "Call" }}
+            {{ t("adDetails.call") }}
           </button>
           <button
             class="bg-[#FFE800] cursor-pointer hover:bg-[#e6d400] transition py-2 w-full rounded-md text-sm font-medium"
           >
-            {{ locale === "ar" ? "إرسال رسالة" : "Send Message" }}
+            {{ t("adDetails.send-message") }}
           </button>
           <button
             @click="toggleFavorite"
@@ -156,7 +156,7 @@
       ]"
       class="cursor-pointer"
     >
-      {{ locale === "ar" ? "الوصف" : "Description" }}
+      {{ t("adDetails.descr") }}
     </button>
 
     <button
@@ -169,7 +169,7 @@
       ]"
       class="cursor-pointer"
     >
-      {{ locale === "ar" ? "الموقع" : "Location" }}
+      {{ t("adDetails.location") }}
     </button>
   </div>
 
@@ -177,7 +177,7 @@
   <div class="bg-white p-6 rounded-lg my-4">
     <div v-if="activeTab === 'description'">
       <h3 class="text-lg font-semibold text-gray-900 mb-3">
-        {{ locale === "ar" ? "الوصف" : "Description" }}
+        {{ t("adDetails.descr") }}
       </h3>
       <p class="text-sm text-gray-700 leading-relaxed">
         {{ ad?.descr || t("adDetails.no-descr") }}
@@ -264,7 +264,7 @@ const toggleFavorite = () => {
 };
 
 // --- Swiper + Tabs + Computed ---
-const { locale } = useI18n();
+const { locale, t } = useI18n();
 const thumbsSwiper = ref(null);
 const activeTab = ref("description");
 
