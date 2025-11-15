@@ -178,7 +178,7 @@ const selectedType = computed(() =>
   props.types.find((t) => t.id === props.modelValue?.type_id)
 );
 const showValuesInput = computed(() =>
-  ["checkbox", "radio"].includes(selectedType.value?.code)
+  ["checkbox", "radio", "select"].includes(selectedType.value?.code)
 );
 
 const attributeValues = computed({
@@ -198,7 +198,7 @@ watch(
   (newTypeId, oldTypeId) => {
     const newType = props.types.find((t) => t.id === newTypeId)?.code;
 
-    if (["checkbox", "radio"].includes(newType)) {
+    if (["checkbox", "radio", "select"].includes(newType)) {
       if (!props.modelValue.values || props.modelValue.values.length === 0) {
         emit("update:modelValue", {
           ...props.modelValue,

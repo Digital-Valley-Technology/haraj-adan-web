@@ -144,7 +144,6 @@
                   v-model="form[`attr_${attr.id}`]"
                   class="w-full border border-gray-300 rounded-md p-2 text-sm"
                 >
-                  <option value="">{{ $t("validation.selectOption") }}</option>
                   <option
                     v-for="val in attr.category_attributes_values"
                     :key="val.id"

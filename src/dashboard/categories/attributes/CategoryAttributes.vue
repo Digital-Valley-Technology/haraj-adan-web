@@ -185,7 +185,7 @@ const validateForm = () => {
 
   const type = attributesTypes.value.find((t) => t.id === val.type_id)?.code;
 
-  if (["checkbox", "radio"].includes(type)) {
+  if (["checkbox", "radio", "select"].includes(type)) {
     if (!val.values || val.values.length === 0) {
       showError(t("dashboard.categories.attributes.type_value_required"));
       return false;
@@ -220,7 +220,7 @@ const buildPayload = (attr) => {
 
   const type = attributesTypes.value.find((t) => t.id === type_id)?.code;
 
-  if (["checkbox", "radio"].includes(type)) {
+  if (["checkbox", "radio", "select"].includes(type)) {
     payload.values = (values || []).map((v, index) => {
       const result = {
         name: v.name.trim(),
