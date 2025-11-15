@@ -1,12 +1,10 @@
 <template>
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
-    <!-- Left: Image Gallery -->
     <div class="flex flex-col items-center overflow-hidden">
       <div
         v-if="images.length"
         class="swiper-initialized swiper-horizontal w-full aspect-[6/4] mb-4 rounded-lg swiper-backface-hidden"
       >
-        <!-- Main Swiper -->
         <swiper
           :slides-per-view="1"
           :modules="[FreeMode, Thumbs]"
@@ -22,7 +20,6 @@
           </SwiperSlide>
         </swiper>
 
-        <!-- Thumbnail Swiper -->
         <swiper
           @swiper="onThumbSwiper"
           :modules="[FreeMode, Thumbs, Navigation]"
@@ -52,10 +49,8 @@
       </div>
     </div>
 
-    <!-- Right: Details -->
     <div class="w-full bg-white rounded-2xl shadow-sm">
       <div class="flex flex-col justify-center p-5">
-        <!-- Title + Price -->
         <div class="flex justify-between items-center mb-6">
           <span class="text-2xl font-semibold text-gray-900">
             {{ locale === "ar" ? adData.title : adData.title_en }}
@@ -71,7 +66,6 @@
           </span>
         </div>
 
-        <!-- Attributes -->
         <div v-if="visibleAttributes.length" class="divide-y">
           <div
             v-for="(attr, index) in visibleAttributes"
@@ -88,23 +82,17 @@
             <span class="text-gray-800 text-sm font-medium">
               <template
                 v-if="
-                  attr.category_attributes?.category_attributes_types?.code ===
-                  'location'
-                "
-              >
-                {{ attr.address || (locale === "ar" ? "لا يوجد" : "N/A") }}
-              </template>
-              <template
-                v-else-if="
                   attr.ad_attribute_options && attr.ad_attribute_options.length
                 "
               >
                 {{
-                  locale === "ar"
-                    ? attr.ad_attribute_options[0]?.category_attributes_values
-                        ?.name
-                    : attr.ad_attribute_options[0]?.category_attributes_values
-                        ?.name_en
+                  attr.ad_attribute_options
+                    .map((option) =>
+                      locale === "ar"
+                        ? option.category_attributes_values?.name
+                        : option.category_attributes_values?.name_en
+                    )
+                    .join(", ")
                 }}
               </template>
               <template v-else>
@@ -114,7 +102,6 @@
           </div>
         </div>
 
-        <!-- Buttons -->
         <div class="flex justify-between items-center gap-3 mt-8">
           <button
             class="bg-[#146AAB] cursor-pointer hover:bg-[#125d94] transition text-white py-2 w-full rounded-md text-sm font-medium"
@@ -144,7 +131,6 @@
     </div>
   </div>
 
-  <!-- Tabs -->
   <div class="bg-white p-4 rounded-lg flex items-start gap-4 mb-2">
     <button
       @click="activeTab = 'description'"
@@ -173,7 +159,6 @@
     </button>
   </div>
 
-  <!-- Description / Location Content -->
   <div class="bg-white p-6 rounded-lg my-4">
     <div v-if="activeTab === 'description'">
       <h3 class="text-lg font-semibold text-gray-900 mb-3">
@@ -287,7 +272,9 @@ const visibleAttributes = computed(() =>
 const mapUrl = computed(() => {
   if (!adData.value?.lng || !adData.value.lat || !adData.value?.address)
     return "";
-  return `https://www.google.com/maps?q=${adData.value.lat},${
+
+  // FIX: Correctly construct the Google Maps embed URL
+  return `https://maps.google.com/maps?q=${adData.value.lat},${
     adData.value.lng
   }&hl=${locale.value === "ar" ? "ar" : "en"}&z=15&output=embed`;
 });
