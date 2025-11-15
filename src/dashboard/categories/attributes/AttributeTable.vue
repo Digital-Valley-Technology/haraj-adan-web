@@ -2,7 +2,8 @@
   <DataTable
     :value="attributes"
     :loading="loading"
-    :paginator="true"
+    paginator
+    :lazy="true"
     :rows="rowsPerPage"
     :totalRecords="totalRecords"
     :first="(currentPage - 1) * rowsPerPage"
