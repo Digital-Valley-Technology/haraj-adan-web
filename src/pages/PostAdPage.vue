@@ -508,6 +508,7 @@ const submitAd = async () => {
     });
 
     formData.append("attributes", JSON.stringify(attributesPayload));
+    formData.append("ad_categories", JSON.stringify([categoryId]));
 
     // Append images
     uploadedFiles.value.forEach((fileObj) => {

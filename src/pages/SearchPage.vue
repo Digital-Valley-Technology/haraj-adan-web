@@ -55,7 +55,6 @@
               <select
                 class="border rounded-md p-2 w-full border-[#cdced1] mb-4"
                 v-model="filtersStore.selectedCategory"
-                @change="handleUpdateSelectedCategory"
               >
                 <option
                   v-for="cat in categoriesFilter"
@@ -216,7 +215,6 @@
                 <select
                   class="border rounded-md p-2 w-full border-[#cdced1] mb-4"
                   v-model="filtersStore.selectedCategory"
-                  @change="handleUpdateSelectedCategory"
                 >
                   <option
                     v-for="cat in categoriesFilter"
@@ -617,10 +615,6 @@ const toggleView = () => {
   activeButtonList.value !== "map"
     ? (activeButtonList.value = "map")
     : (activeButtonList.value = "list");
-};
-
-const handleUpdateSelectedCategory = () => {
-  filtersStore.setSelectedCategory(filtersStore.selectedCategory);
 };
 
 const goToAdDetails = (adId) => {
