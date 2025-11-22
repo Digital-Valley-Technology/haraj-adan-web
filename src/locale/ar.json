@@ -78,9 +78,22 @@
       "title": "الإعلانات المفضلة",
       "no_favoured_ads": "ليس لديك أي إعلانات مفضلة."
     },
-    "no_featured_ads": {
+    "featured": {
       "no_featured_ads": "ليس لديك أي إعلانات مميزة."
     }
+  },
+  "empty": {
+    "published_title": "لا توجد إعلانات منشورة",
+    "published_message": "ليس لديك أي إعلانات منشورة حالياً.",
+
+    "unpublished_title": "لا توجد إعلانات غير منشورة",
+    "unpublished_message": "ستظهر إعلاناتك غير المنشورة هنا.",
+
+    "rejected_title": "لا توجد إعلانات مرفوضة",
+    "rejected_message": "ليس لديك أي إعلانات مرفوضة حالياً.",
+
+    "default_title": "لا توجد بيانات",
+    "default_message": "لا يوجد عناصر للعرض حالياً."
   },
   "footer": {
     "brand": "حراج عدن",

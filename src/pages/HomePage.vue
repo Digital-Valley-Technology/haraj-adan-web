@@ -6,12 +6,29 @@ import SideMenuClient from "../components/SideMenuClient.vue";
 import { homeAds } from "../data";
 import { useI18n } from "vue-i18n";
 import { useHomeStore } from "../store/home";
-import { computed, onMounted } from "vue";
+import { computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
+import { useLocationStore } from "../store/location";
 
 const { locale } = useI18n();
 const homeStore = useHomeStore();
 const router = useRouter();
+
+const locationStore = useLocationStore();
+const nearByAds = computed(() => homeStore.nearbyAds);
+// Watch latitude/longitude and call API as soon as valid
+watch(
+  () => locationStore.locationLoaded,
+  (loaded) => {
+    if (loaded) {
+      homeStore.fetchNearbyAds({
+        lat: locationStore.latitude, // unwrap the ref
+        lng: locationStore.longitude,
+      });
+    }
+  },
+  { immediate: true }
+);
 
 const fetchHomePageAds = () => {
   homeStore.fetchAds();
@@ -25,7 +42,19 @@ const handleNavigation = (routeName) => {
   router.push({ name: routeName });
 };
 
-onMounted(() => fetchHomePageAds());
+onMounted(() => {
+  fetchHomePageAds();
+
+  if (!locationStore.locationLoaded) {
+    locationStore.detectLocation();
+  } else if (locationStore.latitude && locationStore.longitude) {
+    // Location already cached: call API immediately
+    homeStore.fetchNearbyAds({
+      lat: locationStore.latitude,
+      lng: locationStore.longitude,
+    });
+  }
+});
 </script>
 
 <template>
@@ -64,9 +93,7 @@ onMounted(() => fetchHomePageAds());
             </div>
           </div>
           <!-- Ads Section -->
-          <div
-            class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3"
-          >
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             <!-- Skeletons when loading -->
             <template v-if="loading">
               <div v-for="n in 8" :key="n" class="animate-pulse space-y-2">
@@ -99,7 +126,7 @@ onMounted(() => fetchHomePageAds());
             >
           </div>
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div v-for="add in homeAds" :key="add?.id">
+            <div v-for="add in nearByAds" :key="add?.id">
               <ad-card :item="add" />
             </div>
           </div>

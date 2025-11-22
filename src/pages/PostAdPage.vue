@@ -341,9 +341,12 @@ import requestService from "../services/api/requestService";
 import AppLayout from "../Layout/AppLayout.vue";
 import PickLocation from "../components/PickLocation.vue";
 import { showError, showWarning, showSuccess } from "../utils/notifications";
+import { useAuthStore } from "../store/auth";
 
+const authStore = useAuthStore();
 const { locale, t } = useI18n();
 const isArabic = computed(() => locale.value === "ar");
+const currentUser = computed(() => authStore?.user);
 const route = useRoute();
 const categoryId = route.params.categoryId;
 
@@ -461,7 +464,7 @@ const submitAd = async () => {
 
   try {
     const formData = new FormData();
-    formData.append("user_id", 1);
+    formData.append("user_id", currentUser?.value?.id);
     formData.append("title", form.value.title);
     formData.append("title_en", form.value.title_en);
     formData.append("currency_id", form.value.currency_id);

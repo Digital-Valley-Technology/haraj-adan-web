@@ -6,6 +6,7 @@ export const useHomeStore = defineStore("home", {
   state: () => ({
     ads: [],
     sidMenuCategories: [],
+    nearbyAds: [],
     adsLoading: false,
     sideMenuCategoriesLoading: false,
   }),
@@ -15,6 +16,7 @@ export const useHomeStore = defineStore("home", {
     getSideMenuCategories: (state) => state.sidMenuCategories,
     getAdsLoading: (state) => state.adsLoading,
     getSideMenuCategoriesLoading: (state) => state.sideMenuCategoriesLoading,
+    getNearbyAds: (state) => state.nearbyAds,
   },
 
   actions: {
@@ -30,6 +32,15 @@ export const useHomeStore = defineStore("home", {
         console.error("Failed to fetch ads:", err);
       } finally {
         this.adsLoading = false;
+      }
+    },
+
+    async fetchNearbyAds(params) {
+      try {
+        const res = await requestService.getAll("ads/nearby", { params });
+        this.nearbyAds = res.data;
+      } catch (e) {
+        console.log(e);
       }
     },
 

@@ -78,9 +78,22 @@
       "title": "Favoured Ads",
       "no_favoured_ads": "You have no favoured ads."
     },
-    "no_featured_ads": {
+    "featured": {
       "no_featured_ads": "You have no featured ads."
     }
+  },
+  "empty": {
+    "published_title": "No Published Ads",
+    "published_message": "You don't have any published ads yet.",
+
+    "unpublished_title": "No Unpublished Ads",
+    "unpublished_message": "Your unpublished ads will appear here.",
+
+    "rejected_title": "No Rejected Ads",
+    "rejected_message": "You currently have no rejected ads.",
+
+    "default_title": "No Data",
+    "default_message": "There are no items to display."
   },
   "footer": {
     "brand": "Haraj Aden",
@@ -623,11 +636,11 @@
   "adDetails": {
     "no-descr": "No description available",
     "no-location": "No location available",
-    "location":"Location",
-    "descr":"Description",
-    "call":"Call",
-    "send-message":"Send Message",
-    "no-images":"No images available"
+    "location": "Location",
+    "descr": "Description",
+    "call": "Call",
+    "send-message": "Send Message",
+    "no-images": "No images available"
   },
   "generic": {
     "403-title": "Unauthorized",

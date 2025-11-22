@@ -691,7 +691,7 @@ const extractAndFormatCityAndCountry = (formattedAddress) => {
 
 const getAdAddress = (ad) => {
   // Find the attribute that has the full address
-  const fullAddress = ad.ad_attributes?.find((att) => att?.address)?.address;
+  const fullAddress = ad?.address;
 
   if (!fullAddress) {
     return "N/A";
@@ -709,16 +709,11 @@ const getAdAddress = (ad) => {
  * @returns {{lat: number, lng: number} | null} An object with lat/lng as numbers, or null if coordinates are not found.
  */
 const getAdCoordinates = (ad) => {
-  // Find the ad attribute that contains the coordinates.
-  const locationAttribute = ad.ad_attributes?.find(
-    (att) => att?.lat && att?.lng
-  );
-
-  if (locationAttribute) {
+  if (ad?.lat != null && ad?.lng != null) {
     // Return the coordinates, ensuring they are treated as numbers.
     return {
-      lat: +locationAttribute.lat,
-      lng: +locationAttribute.lng,
+      lat: +ad?.lat,
+      lng: +ad?.lng,
     };
   }
 

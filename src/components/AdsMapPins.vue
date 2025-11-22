@@ -39,7 +39,7 @@ const extractAndFormatCityAndCountry = (formattedAddress) => {
 };
 
 const getAdAddress = (ad) => {
-  const fullAddress = ad.ad_attributes?.find((att) => att?.address)?.address;
+  const fullAddress = ad?.address;
   return fullAddress ? extractAndFormatCityAndCountry(fullAddress) : "N/A";
 };
 
@@ -69,13 +69,10 @@ const adPopup = ref(null);
 
 // --- Coordinate Extraction (Reused Logic) ---
 const getAdCoordinates = (ad) => {
-  const locationAttribute = ad.ad_attributes?.find(
-    (att) => att?.lat && att?.lng
-  );
-  if (locationAttribute) {
+  if (ad?.lat != null && ad?.lng != null) {
     return {
-      lat: +locationAttribute.lat,
-      lng: +locationAttribute.lng,
+      lat: +ad?.lat,
+      lng: +ad?.lng,
     };
   }
   return null;

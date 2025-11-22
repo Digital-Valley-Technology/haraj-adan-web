@@ -18,6 +18,7 @@ import FavoriteAdItem from "../components/Profile/FavoriteAdItem.vue";
 import RejectedAdItem from "../components/Profile/RejectedAdItem.vue";
 import OnAirAdItem from "../components/Profile/OnAirAdItem.vue";
 import UserInfo from "../components/Profile/UserInfo.vue";
+import EmptyState from "../components/EmptyState.vue";
 
 const { t, locale } = useI18n();
 const authStore = useAuthStore();
@@ -34,96 +35,104 @@ const permission2 = ref(false);
 
 const isLoading = ref(false);
 
+const publishedAds = ref([]);
+const unPublishedAds = ref([]);
+const rejectedAds = ref([]);
+
+const publishedAdsTotal = ref(0);
+const unPublishedAdsTotal = ref(0);
+const rejectedAdsTotal = ref(0);
+
 const currentView = ref("form");
 const isPaymentLoading = ref(false); // To show a loading state during the API call
 
-const rejectedAds = [
-  {
-    id: 1,
-    title_en: "Gajah Mada Billboard (Rejected)",
-    title: "لوحة إعلانات جاجاه مادا (مرفوض)",
-    price: 10000,
-    status: "Rejected",
-    status_ar: "مرفوض",
-    ads_images: [
-      { image: "https://placehold.co/80x72/D81515/FFFFFF?text=Ad1" },
-    ],
-    ad_attributes: [
-      {
-        address: "Surakarta, Central Java, Indonesia",
-        address_ar: "سوراكارتا، جاوة تينغاه، إندونيسيا",
-      },
-    ],
-  },
-  {
-    id: 2,
-    title_en: "Premium City Center Ad Space (Pending)",
-    title: "مساحة إعلانات ممتازة وسط المدينة (قيد الانتظار)",
-    price: 15500,
-    status: "Pending",
-    status_ar: "قيد الانتظار",
-    ads_images: [
-      { image: "https://placehold.co/80x72/F59E0B/FFFFFF?text=Ad2" },
-    ],
-    ad_attributes: [
-      {
-        address: "Bandung, West Java, Indonesia",
-        address_ar: "باندونج، جاوة الغربية، إندونيسيا",
-      },
-    ],
-  },
-  {
-    id: 3,
-    title_en: "Highway Entrance Display (Rejected)",
-    title: "شاشة عرض مدخل الطريق السريع (مرفوض)",
-    price: 20250,
-    status: "Rejected",
-    status_ar: "مرفوض",
-    ads_images: [
-      { image: "https://placehold.co/80x72/D81515/FFFFFF?text=Ad3" },
-    ],
-    ad_attributes: [
-      {
-        address: "Jakarta, DKI Jakarta, Indonesia",
-        address_ar: "جاكرتا، جاكرتا العاصمة، إندونيسيا",
-      },
-    ],
-  },
-  {
-    id: 4,
-    title_en: "Coastal View Billboard (Completed)",
-    title: "لوحة إعلانات بإطلالة ساحلية (مكتمل)",
-    price: 8900,
-    status: "Completed",
-    status_ar: "مكتمل",
-    ads_images: [
-      { image: "https://placehold.co/80x72/10B981/FFFFFF?text=Ad4" },
-    ],
-    ad_attributes: [
-      {
-        address: "Denpasar, Bali, Indonesia",
-        address_ar: "دنpasar، بالي، إندونيسيا",
-      },
-    ],
-  },
-  {
-    id: 5,
-    title_en: "Retail Storefront LED (Rejected)",
-    title: "شاشة LED واجهة متجر بيع بالتجزئة (مرفوض)",
-    price: 12100,
-    status: "Rejected",
-    status_ar: "مرفوض",
-    ads_images: [
-      { image: "https://placehold.co/80x72/D81515/FFFFFF?text=Ad5" },
-    ],
-    ad_attributes: [
-      {
-        address: "Surabaya, East Java, Indonesia",
-        address_ar: "سورابايا، جاوة الشرقية، إندونيسيا",
-      },
-    ],
-  },
-];
+// const rejectedAds = [
+//   {
+//     id: 1,
+//     title_en: "Gajah Mada Billboard (Rejected)",
+//     title: "لوحة إعلانات جاجاه مادا (مرفوض)",
+//     price: 10000,
+//     status: "Rejected",
+//     status_ar: "مرفوض",
+//     ads_images: [
+//       { image: "https://placehold.co/80x72/D81515/FFFFFF?text=Ad1" },
+//     ],
+//     ad_attributes: [
+//       {
+//         address: "Surakarta, Central Java, Indonesia",
+//         address_ar: "سوراكارتا، جاوة تينغاه، إندونيسيا",
+//       },
+//     ],
+//   },
+//   {
+//     id: 2,
+//     title_en: "Premium City Center Ad Space (Pending)",
+//     title: "مساحة إعلانات ممتازة وسط المدينة (قيد الانتظار)",
+//     price: 15500,
+//     status: "Pending",
+//     status_ar: "قيد الانتظار",
+//     ads_images: [
+//       { image: "https://placehold.co/80x72/F59E0B/FFFFFF?text=Ad2" },
+//     ],
+//     ad_attributes: [
+//       {
+//         address: "Bandung, West Java, Indonesia",
+//         address_ar: "باندونج، جاوة الغربية، إندونيسيا",
+//       },
+//     ],
+//   },
+//   {
+//     id: 3,
+//     title_en: "Highway Entrance Display (Rejected)",
+//     title: "شاشة عرض مدخل الطريق السريع (مرفوض)",
+//     price: 20250,
+//     status: "Rejected",
+//     status_ar: "مرفوض",
+//     ads_images: [
+//       { image: "https://placehold.co/80x72/D81515/FFFFFF?text=Ad3" },
+//     ],
+//     ad_attributes: [
+//       {
+//         address: "Jakarta, DKI Jakarta, Indonesia",
+//         address_ar: "جاكرتا، جاكرتا العاصمة، إندونيسيا",
+//       },
+//     ],
+//   },
+//   {
+//     id: 4,
+//     title_en: "Coastal View Billboard (Completed)",
+//     title: "لوحة إعلانات بإطلالة ساحلية (مكتمل)",
+//     price: 8900,
+//     status: "Completed",
+//     status_ar: "مكتمل",
+//     ads_images: [
+//       { image: "https://placehold.co/80x72/10B981/FFFFFF?text=Ad4" },
+//     ],
+//     ad_attributes: [
+//       {
+//         address: "Denpasar, Bali, Indonesia",
+//         address_ar: "دنpasar، بالي، إندونيسيا",
+//       },
+//     ],
+//   },
+//   {
+//     id: 5,
+//     title_en: "Retail Storefront LED (Rejected)",
+//     title: "شاشة LED واجهة متجر بيع بالتجزئة (مرفوض)",
+//     price: 12100,
+//     status: "Rejected",
+//     status_ar: "مرفوض",
+//     ads_images: [
+//       { image: "https://placehold.co/80x72/D81515/FFFFFF?text=Ad5" },
+//     ],
+//     ad_attributes: [
+//       {
+//         address: "Surabaya, East Java, Indonesia",
+//         address_ar: "سورابايا، جاوة الشرقية، إندونيسيا",
+//       },
+//     ],
+//   },
+// ];
 const onAirItems = rejectedAds;
 const notPublishedAds = rejectedAds;
 
@@ -132,6 +141,8 @@ const featuredAds = ref([]);
 const STORAGE_KEY = "AD_FAVORITES_LIST";
 
 const favoritesAds = ref([]);
+
+const adStats = ref({});
 
 // --- METHODS ---
 
@@ -202,6 +213,15 @@ const handleTabClick = (tabName) => {
   if (tabName === "featured") {
     fetchFeaturedAds();
   }
+  if (tabName === "on air") {
+    fetchPublishedAds();
+  }
+  if (tabName === "not published") {
+    fetchUnPublishedAds();
+  }
+  if (tabName === "Rejected") {
+    fetchRejectedAds();
+  }
 };
 
 const formatPhone = (value) => {
@@ -232,6 +252,53 @@ const fetchFeaturedAds = async () => {
       "ads/user-featured-ads/" + currentUser.value?.id
     );
     featuredAds.value = res?.data || [];
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const fetchPublishedAds = async () => {
+  try {
+    const res = await requestService.getAll(
+      `ads/user-ads-by-status/${currentUser.value?.id}/published`
+    );
+    publishedAds.value = res?.data || [];
+    publishedAdsTotal.value = res?.data?.length || 0;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const fetchUnPublishedAds = async () => {
+  try {
+    const res = await requestService.getAll(
+      `ads/user-ads-by-status/${currentUser.value?.id}/unpublished`
+    );
+    unPublishedAds.value = res?.data || [];
+    unPublishedAdsTotal.value = res?.data?.length || 0;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const fetchRejectedAds = async () => {
+  try {
+    const res = await requestService.getAll(
+      `ads/user-ads-by-status/${currentUser.value?.id}/rejected`
+    );
+    rejectedAds.value = res?.data || [];
+    rejectedAdsTotal.value = res?.data?.length || 0;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const fetchStats = async (status = "published") => {
+  try {
+    const res = await requestService.getAll(
+      `ads/user-ads-stats/${currentUser.value?.id}`
+    );
+    adStats.value = res?.data || {};
   } catch (error) {
     console.log(error);
   }
@@ -314,8 +381,8 @@ onMounted(async () => {
     originalPhone.value = phone.value;
 
     fetchWalletSummary();
-    fetchFeaturedAds();
     loadFavoritesFromLocalStorage();
+    fetchStats();
   } catch (err) {
     console.log(err);
 
@@ -519,7 +586,7 @@ onMounted(async () => {
 
             <!-- On Air -->
             <button
-              @click="activeTab = 'on air'"
+              @click="handleTabClick('on air')"
               :class="[
                 'flex justify-between items-center px-2 py-2  hover:text-[#146AAB] cursor-pointer group border-1 border-solid border-[#EEEEEEEE] rounded-lg',
                 activeTab === 'on air'
@@ -535,12 +602,12 @@ onMounted(async () => {
               >
                 {{ i18.locale.value == "ar" ? "نشط" : "On Air" }}
               </span>
-              <span> (0) </span>
+              <span> ({{ adStats?.totalPublished || 0 }}) </span>
             </button>
 
             <!-- Not Published -->
             <button
-              @click="activeTab = 'not published'"
+              @click="handleTabClick('not published')"
               :class="[
                 'flex justify-between items-center px-2 py-2  hover:text-[#146AAB] cursor-pointer group border-1 border-solid border-[#EEEEEEEE] rounded-lg',
                 activeTab === 'not published'
@@ -558,12 +625,12 @@ onMounted(async () => {
               >
                 {{ i18.locale.value == "ar" ? "غير منشور" : "Not Published" }}
               </span>
-              <span> (0) </span>
+              <span> ({{ adStats?.totalUnPublished || 0 }}) </span>
             </button>
 
             <!-- Rejected -->
             <button
-              @click="activeTab = 'Rejected'"
+              @click="handleTabClick('Rejected')"
               :class="[
                 'flex justify-between items-center px-2 py-2  hover:text-[#146AAB] cursor-pointer group border-1 border-solid border-[#EEEEEEEE] rounded-lg',
                 activeTab === 'Rejected'
@@ -581,7 +648,7 @@ onMounted(async () => {
                   i18.locale.value == "ar" ? "الإعلانات المرفوضة" : "Rejected"
                 }}
               </span>
-              <span> (0) </span>
+              <span> ({{ adStats?.totalRejected || 0 }}) </span>
             </button>
 
             <!-- Featured -->
@@ -602,7 +669,7 @@ onMounted(async () => {
               >
                 {{ i18.locale.value == "ar" ? "إعلانات مميزة" : "Featured" }}
               </span>
-              <span> ({{ featuredAds?.length || 0 }}) </span>
+              <span> ({{ adStats?.totalFeatured || 0 }}) </span>
             </button>
 
             <h3 class="uppercase text-xs">
@@ -1130,22 +1197,50 @@ onMounted(async () => {
         </div>
         <!-- On Air -->
         <div v-if="activeTab === 'on air'" class="flex-1 h-fit">
-          <OnAirAdItem v-for="item in onAirItems" :key="item.id" :item="item" />
+          <div v-if="publishedAds.length > 0">
+            <OnAirAdItem
+              v-for="item in publishedAds"
+              :key="item.id"
+              :item="item"
+            />
+          </div>
+
+          <EmptyState
+            v-else
+            title="empty.published_title"
+            message="empty.published_message"
+          />
         </div>
         <!-- Not Published -->
         <div v-if="activeTab === 'not published'" class="flex-1 h-fit">
-          <NotPublishedAdItem
-            v-for="item in notPublishedAds"
-            :key="item.id"
-            :item="item"
+          <div v-if="unPublishedAds.length > 0">
+            <OnAirAdItem
+              v-for="item in unPublishedAds"
+              :key="item.id"
+              :item="item"
+            />
+          </div>
+
+          <EmptyState
+            v-else
+            title="empty.unpublished_title"
+            message="empty.unpublished_message"
           />
         </div>
         <!-- Rejected -->
         <div v-if="activeTab === 'Rejected'" class="flex-1 h-fit">
-          <RejectedAdItem
-            v-for="item in rejectedAds"
-            :key="item.id"
-            :item="item"
+          <div v-if="rejectedAds.length > 0">
+            <OnAirAdItem
+              v-for="item in rejectedAds"
+              :key="item.id"
+              :item="item"
+            />
+          </div>
+
+          <EmptyState
+            v-else
+            title="empty.rejected_title"
+            message="empty.rejected_message"
           />
         </div>
         <!-- Featured -->
