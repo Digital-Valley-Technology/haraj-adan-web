@@ -4,7 +4,6 @@ import DeleteDialog from "../../components/DeleteDialog.vue";
 import NoData from "../../components/NoData.vue";
 import AdsTableHeader from "./AdsTableHeader.vue";
 import AdsTable from "./AdsTable.vue";
-import CustomConfirmDialog from "../../components/CustomConfirmDialog.vue";
 
 import { onMounted, computed, ref, watch } from "vue";
 import { useAdsStore } from "../../store/ads";
@@ -15,19 +14,12 @@ import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
 const adsStore = useAdsStore();
-
+const adsStatuses = ref([]);
 const isSubmitting = ref(false);
 const selectedAdId = ref(null); // Store the ID of the ad to delete
 
 // Dialog states
 const isDeleteDialogOpen = ref(false);
-const isConfirmDialogOpen = ref(false);
-
-// Confirmation state
-const confirmationMessageText = ref("");
-const selectedAd = ref({});
-
-const banLoading = ref(false);
 
 // Search / Filter
 const searchText = ref("");
@@ -41,6 +33,15 @@ const fetchData = () => {
     search: searchText.value,
     filterBy: selectedFilter.value?.name,
   });
+};
+
+const fetchAdStatuses = async () => {
+  try {
+    const response = await requestService.getAll("/ads/statuses");
+    adsStatuses.value = response?.data || [];
+  } catch (error) {
+    console.error("Failed to fetch ad statuses:", error);
+  }
 };
 
 const handleDelete = async () => {
@@ -64,13 +65,33 @@ const handleDelete = async () => {
   }
 };
 
+const updateStatus = async (adId, statusId) => {
+  try {
+    const response = await requestService.patch(`/ads/${adId}/status`, {
+      status_id: statusId,
+    });
+
+    showSuccess(
+      response?.message || t("dashboard.ads.form.status_updated_successfully")
+    );
+
+    fetchData(); // refresh ads
+  } catch (error) {
+    console.error(error);
+    showError(error || t("dashboard.ads.form.update_failed"));
+  }
+};
+
 const processDelete = (ad) => {
   selectedAdId.value = ad?.id;
   isDeleteDialogOpen.value = true;
 };
 
 // Fetch data on mount
-onMounted(fetchData);
+onMounted(() => {
+  fetchData();
+  fetchAdStatuses();
+});
 
 // Debounced fetch on search/filter change
 watch(
@@ -100,8 +121,10 @@ const total = computed(() => adsStore.getTotal);
         <ads-table
           v-if="ads?.length > 0"
           :ads="ads"
+          :adsStatuses="adsStatuses"
           @delete="processDelete"
           @fetch-ads="fetchData"
+          @update-status="updateStatus"
         />
         <no-data v-else class="mt-12" :content="$t('dashboard.ads.no_data')" />
       </div>

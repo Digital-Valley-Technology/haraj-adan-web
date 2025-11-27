@@ -1,5 +1,4 @@
 <script setup>
-import { onMounted, ref, nextTick } from "vue";
 import Viewer from "viewerjs";
 import "viewerjs/dist/viewer.css";
 import { MEDIA_URL } from "../../services/axios";
@@ -8,20 +7,20 @@ import { useI18n } from "vue-i18n";
 import imagePlaceholder from "../../assets/no image placeholder.jpeg";
 import { useRouter } from "vue-router";
 import { encode } from "js-base64";
+import { computed } from "vue";
 
-defineProps(["ads"]);
+defineProps(["ads", "adsStatuses"]);
 const emit = defineEmits(["delete", "fetchAds"]);
 
 const { t, locale } = useI18n();
 const adsStore = useAdsStore();
 const router = useRouter();
 
-// Remove global viewer refs as we will create a dynamic one per click
-// const viewer = ref(null);
-// const viewerInstance = ref(null);
 let currentViewerInstance = null; // To hold the dynamically created instance
 
 const NOT_PROVIDED = t("dashboard.ads.not_provided");
+
+const currentLocale = computed(() => locale.value);
 
 // Navigation
 const handleNavigation = (param, routeName, paramName) =>
@@ -64,7 +63,7 @@ const destroyViewer = () => {
   }
 };
 
-// --- UPDATED: Open viewer dynamically for a specific ad ---
+// ---  Open viewer dynamically for a specific ad ---
 const openViewer = (ad) => {
   if (!ad?.ads_images?.length) return; // Exit if no images
 
@@ -105,11 +104,6 @@ const openViewer = (ad) => {
   currentViewerInstance.show();
 };
 // --- END UPDATED VIEWER LOGIC ---
-
-// Lifecycle hook adjustments
-onMounted(() => {
-  // We no longer need the global initialization here
-});
 </script>
 
 <template>
@@ -180,7 +174,11 @@ onMounted(() => {
       <template #body="{ data }">
         <span class="font-semibold text-gray-700">
           {{
-            data?.price ? data.price + " $" : $t("dashboard.ads.not_provided")
+            `${data?.price} ${
+              currentLocale == "ar"
+                ? data?.currencies?.name
+                : data?.currencies?.name_en
+            }` || $t("dashboard.ads.not_provided")
           }}
         </span>
       </template>
@@ -195,6 +193,20 @@ onMounted(() => {
             $t("dashboard.ads.not_provided")
           }}
         </span>
+      </template>
+    </Column>
+
+    <Column :header="$t('dashboard.ads.table.status')">
+      <template #body="{ data }">
+        <Select
+          v-model="data.status_id"
+          :options="adsStatuses"
+          @change="$emit('update-status', data?.id, data?.status_id)"
+          :optionLabel="currentLocale == 'ar' ? 'name' : 'name_en'"
+          class="w-full"
+          optionValue="id"
+        >
+        </Select>
       </template>
     </Column>
 

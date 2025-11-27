@@ -98,9 +98,19 @@ const routes = [
     component: () => import("../pages/AdDetailsPage.vue"),
   },
   {
+    name: "edit-ad",
+    path: "/edit-ad/:adId/:categoryId",
+    component: () => import("../pages/EditAdPage.vue"),
+  },
+  {
     name: "category-listing",
     path: "/category-listing/:id",
     component: () => import("../pages/CategoryListingPage.vue"),
+  },
+  {
+    name: "category-ads",
+    path: "/category-ads/:id/:type",
+    component: () => import("../pages/CategoryAdsPage.vue"),
   },
   {
     name: "search",

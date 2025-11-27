@@ -22,6 +22,10 @@ const adConfigSchema = yup.object({
     .integer(t("dashboard.settings.errors.days_integer"))
     .min(1, t("dashboard.settings.errors.days_min")),
   show_discount_banner: yup.boolean(),
+  near_locations_distance: yup
+    .number()
+    .required(t("dashboard.settings.errors.distance_required"))
+    .min(0, t("dashboard.settings.errors.distance_min")),
 });
 
 const discountSchema = yup.object({
@@ -84,6 +88,7 @@ const saveAdConfig = async () => {
       featured_ad_price: Number(adConfig.value.featured_ad_price),
       featured_ad_days_count: Number(adConfig.value.featured_ad_days_count),
       show_discount_banner: Boolean(adConfig.value.show_discount_banner),
+      near_locations_distance: Number(adConfig.value.near_locations_distance),
     };
 
     const res = await requestService.patch("/settings/config", payload);
@@ -187,14 +192,14 @@ onMounted(() => {
 <template>
   <dashboard-layout>
     <main
-      class="py-[var(--padding-dashboard-section)] px-4 md:px-8 custom-container space-y-8"
+      class="py-[var(--padding-dashboard-section)] px-4 md:px-8 custom-container space-y-12"
     >
       <!-- Ad Config Card -->
       <div
-        class="card w-full mx-auto px-4 md:px-8 py-8 shadow-md border border-gray-200 rounded-lg"
+        class="card w-full mx-auto px-6 md:px-10 py-10 shadow-md border border-gray-200 rounded-lg"
       >
-        <div class="flex justify-between items-center mb-6">
-          <h2 class="text-xl font-semibold">
+        <div class="flex justify-between items-center mb-8">
+          <h2 class="text-2xl font-semibold">
             {{ $t("dashboard.settings.adConfigTitle") }}
           </h2>
 
@@ -206,7 +211,7 @@ onMounted(() => {
           />
         </div>
 
-        <div class="flex flex-col md:flex-row gap-6">
+        <div class="flex flex-col md:flex-row gap-8">
           <!-- Featured Ad Price -->
           <FloatLabel class="flex-grow">
             <InputText
@@ -239,13 +244,36 @@ onMounted(() => {
             <small
               v-if="adConfigErrors.featured_ad_days_count"
               class="text-red-500"
-              >{{ adConfigErrors.featured_ad_days_count }}</small
             >
+              {{ adConfigErrors.featured_ad_days_count }}
+            </small>
+          </FloatLabel>
+        </div>
+
+        <!-- Near Locations Distance -->
+        <div class="flex flex-col md:flex-row gap-8 mt-8">
+          <FloatLabel class="flex-grow">
+            <InputText
+              id="near_locations_distance"
+              v-model="adConfig.near_locations_distance"
+              type="number"
+              :min="0"
+              class="!bg-slate-50 !rounded-lg !pb-4 w-full"
+            />
+            <label for="near_locations_distance">{{
+              $t("dashboard.settings.nearLocationsDistance")
+            }}</label>
+            <small
+              v-if="adConfigErrors.near_locations_distance"
+              class="text-red-500"
+            >
+              {{ adConfigErrors.near_locations_distance }}
+            </small>
           </FloatLabel>
         </div>
 
         <!-- Show Discount Banner Toggle -->
-        <div class="flex items-center justify-between mt-6">
+        <div class="flex items-center justify-between mt-8">
           <label for="show_discount_banner" class="font-medium text-gray-700">
             {{ $t("dashboard.settings.showDiscountBanner") }}
           </label>
@@ -259,13 +287,13 @@ onMounted(() => {
 
       <!-- Ad Discounts Card -->
       <div
-        class="card w-full mx-auto px-4 md:px-8 py-8 shadow-md border border-gray-200 rounded-lg"
+        class="card w-full mx-auto px-6 md:px-10 py-10 shadow-md border border-gray-200 rounded-lg"
       >
-        <div class="flex justify-between items-center mb-6">
-          <h2 class="text-xl font-semibold">
+        <div class="flex justify-between items-center mb-8">
+          <h2 class="text-2xl font-semibold">
             {{ $t("dashboard.settings.adDiscountsTitle") }}
           </h2>
-          <div class="flex gap-2">
+          <div class="flex gap-4">
             <BaseButton
               icon="pi pi-plus"
               :label="$t('generic.add')"
@@ -280,7 +308,7 @@ onMounted(() => {
           </div>
         </div>
 
-        <div v-if="adDiscounts.length > 0" class="space-y-4">
+        <div v-if="adDiscounts.length > 0" class="space-y-6">
           <div
             v-for="(discount, index) in adDiscounts"
             :key="discount.id"
@@ -331,7 +359,7 @@ onMounted(() => {
           </div>
         </div>
 
-        <p v-else class="text-gray-500 italic">
+        <p v-else class="text-gray-500 italic mt-4">
           {{ $t("dashboard.settings.noDiscounts") }}
         </p>
       </div>

@@ -103,9 +103,9 @@ const toggleFavorite = () => {
 
       <!-- Favorite Button -->
       <button
+        @click.stop="toggleFavorite"
         class="absolute top-2 right-2 p-2 rounded-full bg-[#bebebe] shadow cursor-pointer grid place-items-center border border-gray-200 transition duration-150"
         :class="{ 'opacity-55': !isFavorite, 'opacity-100': isFavorite }"
-        @click.stop="toggleFavorite"
       >
         <!-- Filled Heart (Favorite) -->
         <i

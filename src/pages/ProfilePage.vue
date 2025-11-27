@@ -164,7 +164,7 @@ const loadFavoritesFromLocalStorage = () => {
   }
 };
 
-const walletBalance = ref(150.75);
+const walletBalance = ref(0);
 const transactionsData = ref([
   {
     type: "received",
@@ -210,7 +210,7 @@ const handleTabClick = (tabName) => {
   if (tabName === "wallet") {
     fetchWalletSummary();
   }
-  if (tabName === "featured") {
+  if (tabName === "Featured") {
     fetchFeaturedAds();
   }
   if (tabName === "on air") {
@@ -653,7 +653,7 @@ onMounted(async () => {
 
             <!-- Featured -->
             <button
-              @click="activeTab = 'Featured'"
+              @click="handleTabClick('Featured')"
               :class="[
                 'flex justify-between items-center px-2 py-2  hover:text-[#146AAB] cursor-pointer group border-1 border-solid border-[#EEEEEEEE] rounded-lg',
                 activeTab === 'Featured'
@@ -1245,7 +1245,10 @@ onMounted(async () => {
         </div>
         <!-- Featured -->
         <div v-if="activeTab === 'Featured'" class="flex-1 h-fit">
-          <UserFeaturedAds :items="featuredAds" />
+          <!-- <UserFeaturedAds :items="featuredAds" /> -->
+          <div v-for="item in featuredAds" :key="item">
+            <OnAirAdItem :item="item" />
+          </div>
         </div>
         <!-- Favorites -->
         <div v-if="activeTab === 'favorites'" class="flex-1 h-fit">

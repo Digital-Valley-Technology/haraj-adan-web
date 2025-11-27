@@ -104,6 +104,7 @@
 
         <div class="flex justify-between items-center gap-3 mt-8">
           <button
+            @click="toggle"
             class="bg-[#146AAB] cursor-pointer hover:bg-[#125d94] transition text-white py-2 w-full rounded-md text-sm font-medium"
           >
             {{ t("adDetails.call") }}
@@ -118,14 +119,49 @@
             class="bg-gray-200 py-2 px-4 rounded-md hover:bg-gray-300 transition flex items-center gap-1"
           >
             <i
-              class="pi"
+              class="cursor-pointer pi"
               :class="
                 isFavorite
-                  ? 'pi-star-fill text-[#146AAB]'
-                  : 'pi-star text-gray-400'
+                  ? 'pi-heart-fill text-[#146AAB]'
+                  : 'pi-heart text-gray-400'
               "
             ></i>
           </button>
+          <button
+            v-if="currentUser?.id"
+            @click="toggleLiked"
+            class="bg-gray-200 py-2 px-4 rounded-md hover:bg-gray-300 transition flex items-center gap-1"
+          >
+            <i
+              class="cursor-pointer pi"
+              :class="
+                isLiked
+                  ? 'pi-thumbs-up-fill text-[#146AAB]'
+                  : 'pi-thumbs-up text-gray-400'
+              "
+            ></i>
+          </button>
+        </div>
+
+        <div class="card flex justify-center">
+          <Popover ref="op">
+            <div>
+              <InputGroup>
+                <Button severity="secondary">{{
+                  t("adDetails.mobile")
+                }}</Button>
+                <Button @click="callUser" label="Invite" icon="pi pi-users">
+                  <span class="force-ltr">
+                    {{
+                      adData?.users?.phone
+                        ? formatPhoneNumber(adData?.users?.phone)
+                        : "_"
+                    }}
+                  </span>
+                </Button>
+              </InputGroup>
+            </div>
+          </Popover>
         </div>
       </div>
     </div>
@@ -182,6 +218,117 @@
       </p>
     </div>
   </div>
+
+  <div class="bg-white p-6 rounded-lg my-4">
+    <h3 class="text-lg font-semibold text-gray-900 mb-4">
+      {{ t("adDetails.comments") }}
+    </h3>
+
+    <!-- Add Comment Form -->
+    <div class="mb-6" v-if="currentUser?.id">
+      <Textarea
+        v-model="newComment"
+        rows="3"
+        autoResize
+        class="w-full"
+        :placeholder="t('adDetails.write-comment')"
+      />
+      <Button
+        @click="submitComment"
+        :label="t('adDetails.add-comment')"
+        icon="pi pi-send"
+        class="mt-3"
+      />
+    </div>
+
+    <!-- Comments List + Pagination -->
+    <div v-if="comments.length" class="space-y-4">
+      <div
+        v-for="(comment, index) in comments"
+        :key="index"
+        :class="[
+          'flex items-start gap-3 p-3 rounded-lg',
+          comment.users.id === currentUser?.id
+            ? 'bg-blue-50 border border-blue-300'
+            : 'bg-gray-50',
+        ]"
+      >
+        <!-- Avatar -->
+        <div
+          class="w-10 h-10 rounded-full text-white flex items-center justify-center font-semibold text-sm"
+          :class="
+            comment.users.id === currentUser?.id
+              ? 'bg-blue-500'
+              : 'bg-[#146AAB]'
+          "
+        >
+          {{ comment.users.name?.charAt(0) || "U" }}
+        </div>
+
+        <!-- Content -->
+        <div class="flex-1">
+          <p
+            class="text-sm leading-relaxed"
+            :class="
+              comment.users.id === currentUser?.id
+                ? 'text-blue-900'
+                : 'text-gray-800'
+            "
+          >
+            {{ comment.text }}
+          </p>
+
+          <div class="flex justify-between items-center mt-1 text-xs">
+            <span
+              :class="
+                comment.users.id === currentUser?.id
+                  ? 'text-blue-500'
+                  : 'text-gray-500'
+              "
+            >
+              —
+              {{
+                comment.users.id === currentUser?.id
+                  ? t("adDetails.you")
+                  : comment.users.name || "Anonymous"
+              }}
+              ·
+              {{ formatedDate(comment?.created) }}
+            </span>
+
+            <!-- Delete button only for user's own comment -->
+            <a
+              role="button"
+              v-if="comment?.users?.id === currentUser?.id"
+              @click="processDelete(comment.id)"
+              class="text-red-500 hover:text-red-700 text-xs me-2 cursor-pointer"
+            >
+              {{ t("generic.delete") }}
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p v-else class="text-gray-500 text-sm">
+      {{ t("adDetails.no-comments") }}
+    </p>
+
+    <!-- Pagination -->
+    <Paginator
+      v-if="total > rows"
+      :rows="rows"
+      :totalRecords="total"
+      :first="first"
+      @page="onPageChange"
+    />
+  </div>
+
+  <DeleteDialog
+    v-model="isDeleteDialogOpen"
+    :content="$t('generic.delete_confirmation')"
+    @confirm="handleDelete"
+  />
 </template>
 
 <script setup>
@@ -189,22 +336,106 @@ import { Swiper, SwiperSlide } from "swiper/vue";
 import { FreeMode, Thumbs, Navigation } from "swiper/modules";
 import { ref, computed, toRef } from "vue";
 import { useI18n } from "vue-i18n";
+import dayjs from "dayjs";
 
 import "swiper/css";
 import "swiper/css/free-mode";
 import "swiper/css/navigation";
 import "swiper/css/thumbs";
 import { MEDIA_URL } from "../services/axios";
+import { useAuthStore } from "../store/auth";
+import { showError, showSuccess } from "../utils/notifications";
+import requestService from "../services/api/requestService";
+import DeleteDialog from "./DeleteDialog.vue";
 
 const props = defineProps({
-  ad: {
-    type: Object,
-    required: true,
-  },
+  ad: Object,
+  comments: Array,
+  first: Number,
+  rows: Number,
+  total: Number,
 });
+
+const emit = defineEmits(["paginate-comments", "toggle-like"]);
+const authStore = useAuthStore();
+const isDeleteDialogOpen = ref(false);
+const selectedCommentId = ref(null);
 
 const ad = toRef(props, "ad");
 const adData = ad;
+const adId = adData.value?.id;
+
+const newComment = ref("");
+
+// Pagination state
+const first = toRef(props, "first"); // starting index
+const rows = toRef(props, "rows"); // comments per page
+const comments = toRef(props, "comments");
+
+const currentUser = computed(() => authStore.user);
+
+const isLiked = computed(() => {
+  if (!adData.value || !currentUser.value) return false;
+  return adData.value.ad_likes?.some(
+    (like) => like.user_id === currentUser.value.id
+  );
+});
+
+function onPageChange(event) {
+  const newPage = event.page + 1; // PrimeVue pagination starts from 0
+  const newLimit = event.rows;
+
+  emit("paginate-comments", { page: newPage, limit: newLimit });
+}
+
+const submitComment = async () => {
+  if (!newComment.value.trim()) return;
+
+  try {
+    const res = await requestService.create(
+      `/ads/comments/${adData.value.id}`,
+      {
+        userId: currentUser?.value?.id,
+        text: newComment.value.trim(),
+      }
+    );
+    showSuccess(res?.message);
+    emit("paginate-comments", { page: 1, limit: rows.value });
+    newComment.value = "";
+  } catch (error) {
+    console.log(error);
+    showError(error);
+  }
+};
+
+const processDelete = (commentId) => {
+  selectedCommentId.value = commentId;
+  isDeleteDialogOpen.value = true;
+};
+
+const handleDelete = async () => {
+  try {
+    const res = await requestService.delete(
+      `/ads/comments`,
+      selectedCommentId.value
+    );
+    showSuccess(res?.message || "Comment deleted successfully");
+
+    emit("paginate-comments", { page: 1, limit: rows.value });
+  } catch (err) {
+    console.log(err);
+
+    showError(err || "Failed to delete comment");
+  } finally {
+    isDeleteDialogOpen.value = false;
+  }
+};
+
+const op = ref();
+
+const toggle = (event) => {
+  op.value.toggle(event);
+};
 
 // --- LocalStorage Favorites Logic ---
 const FAVORITES_KEY = "AD_FAVORITES_LIST";
@@ -227,9 +458,12 @@ const setStoredFavorites = (favoritesArray) => {
   }
 };
 
-const adId = adData.value?.id;
 const initialFavorites = getStoredFavorites();
 const isFavorite = ref(initialFavorites.some((item) => item.id === adId));
+
+const formatedDate = (date) => {
+  return dayjs(date).format("MMM D, YYYY");
+};
 
 const toggleFavorite = () => {
   if (!adId) return;
@@ -248,6 +482,22 @@ const toggleFavorite = () => {
   setStoredFavorites(currentFavorites);
 };
 
+const toggleLiked = () => {
+  emit("toggle-like", { adId, isLiked: isLiked.value });
+};
+
+function callUser() {
+  const phone = adData.value?.users?.phone;
+  if (phone) {
+    // Remove spaces and dashes for dialer
+    const cleanedPhone = phone.replace(/[\s-]/g, "");
+    window.location.href = `tel:${cleanedPhone}`;
+  } else {
+    // fallback: open the popover
+    toggle();
+  }
+}
+
 // --- Swiper + Tabs + Computed ---
 const { locale, t } = useI18n();
 const thumbsSwiper = ref(null);
@@ -255,6 +505,34 @@ const activeTab = ref("description");
 
 function onThumbSwiper(swiper) {
   thumbsSwiper.value = swiper;
+}
+
+function formatPhoneNumber(phone) {
+  if (!phone) return "";
+
+  // Remove all spaces and hyphens
+  let cleaned = phone.toString().replace(/[\s-]/g, "");
+
+  // Already in full international format → return as is
+  if (cleaned.startsWith("+")) return cleaned;
+
+  // Convert 00XX to +XX
+  if (cleaned.startsWith("00")) {
+    cleaned = "+" + cleaned.substring(2);
+  }
+
+  // If local number starting with 0 -> keep but format spacing
+  if (cleaned.startsWith("0")) {
+    return cleaned.replace(/(\d{3})(\d{3})(\d{3,})/, "$1 $2 $3"); // 079 123 4567
+  }
+
+  // If 9 digits (Jordan style or similar)
+  if (/^\d{9,10}$/.test(cleaned)) {
+    return cleaned.replace(/(\d{3})(\d{3})(\d{3,})/, "$1 $2 $3");
+  }
+
+  // Fallback
+  return cleaned;
 }
 
 const images = computed(() => {
@@ -291,5 +569,11 @@ function formatPrice(p) {
   border: 2px solid #146aab;
   border-radius: 0.5rem;
   opacity: 1;
+}
+.force-ltr {
+  direction: ltr !important;
+  unicode-bidi: bidi-override !important;
+  display: inline-block;
+  text-align: left;
 }
 </style>

@@ -14,42 +14,26 @@ const props = defineProps({
   },
 });
 
-/**
- * Current Locale
- */
 const currentLocale = computed(() => locale.value);
 
-/**
- * Computed title based on locale
- */
 const adTitle = computed(() =>
   currentLocale.value === "ar" ? props.item?.title : props.item?.title_en
 );
 
-/**
- * Format price based on locale and currency.
- */
 const formattedPrice = computed(() => {
   const price = props.item?.price;
-
   if (price == null || isNaN(parseFloat(price))) return "";
-
   const amount = parseFloat(price).toLocaleString(currentLocale.value, {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   });
-
   const currency =
     currentLocale.value === "ar"
       ? props.item?.currencies?.name
       : props.item?.currencies?.name_en;
-
   return `${currency} ${amount}`;
 });
 
-/**
- * Returns first ad image or fallback placeholder.
- */
 const adImageUrl = computed(() => {
   const path = props.item?.ads_images?.[0]?.image;
   return path
@@ -61,9 +45,10 @@ const goToAdDetails = (adId) => {
   router.push({ name: "ad-details", params: { adId } });
 };
 
-/**
- * Check if the ad is featured.
- */
+const goToEditAd = (adId, categoryId) => {
+  router.push({ name: "edit-ad", params: { adId, categoryId } });
+};
+
 const isFeatured = computed(() =>
   props.item?.ad_featured_history?.some((f) => f.status === true)
 );
@@ -71,7 +56,7 @@ const isFeatured = computed(() =>
 
 <template>
   <div
-    class="flex flex-col gap-2 bg-white p-4 rounded-lg cursor-pointer"
+    class="flex flex-col gap-2 bg-white p-4 rounded-lg cursor-pointer relative"
     @click="goToAdDetails(item.id)"
   >
     <div class="flex justify-between items-center">
@@ -106,8 +91,18 @@ const isFeatured = computed(() =>
       </div>
 
       <!-- Price -->
-      <div class="flex items-end">
+      <div class="flex flex-col items-end">
         <p class="text-sm text-[#146AAB]">{{ formattedPrice }}</p>
+
+        <!-- Inline Edit Button -->
+        <button
+          class="mt-1 text-xs text-blue-600 hover:underline"
+          @click.stop="
+            goToEditAd(item.id, item?.ad_categories?.[0]?.category_id)
+          "
+        >
+          {{ t("generic.edit") }}
+        </button>
       </div>
     </div>
   </div>

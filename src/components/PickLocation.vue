@@ -207,6 +207,41 @@ function useCurrentLocation() {
   );
 }
 
+// onMounted(async () => {
+//   nextTick(async () => {
+//     window.mapboxgl.accessToken = MAP_ACCESS_TOKEN;
+//     initRTLPlugin();
+
+//     map.value = new window.mapboxgl.Map({
+//       container: props.mapId,
+//       style: "mapbox://styles/mapbox/streets-v12",
+//       center: [lng.value, lat.value],
+//       zoom: props.zoom,
+//       minZoom: 3,
+//       maxZoom: 18,
+//       attributionControl: false,
+//     });
+
+//     updateGeocoder();
+
+//     await detectCountryByIP();
+
+//     map.value.on("click", async (e) => {
+//       lng.value = e.lngLat.lng;
+//       lat.value = e.lngLat.lat;
+//       ensureMarker(lng.value, lat.value);
+//       map.value.flyTo({ center: [lng.value, lat.value], zoom: 13 });
+//       await reverseGeocode(lng.value, lat.value);
+//     });
+
+//     map.value.on("style.load", () => {
+//       updateMapLanguage();
+//       if (props.modelValue.lat && props.modelValue.lng)
+//         reverseGeocode(lng.value, lat.value);
+//     });
+//   });
+// });
+
 onMounted(async () => {
   nextTick(async () => {
     window.mapboxgl.accessToken = MAP_ACCESS_TOKEN;
@@ -217,13 +252,17 @@ onMounted(async () => {
       style: "mapbox://styles/mapbox/streets-v12",
       center: [lng.value, lat.value],
       zoom: props.zoom,
-      minZoom: 3,
-      maxZoom: 18,
-      attributionControl: false,
     });
 
     updateGeocoder();
-    await detectCountryByIP();
+
+    // FIX: Don't overwrite ad location when editing
+    if (!props.modelValue.lat || !props.modelValue.lng) {
+      await detectCountryByIP();
+    } else {
+      ensureMarker(lng.value, lat.value);
+      reverseGeocode(lng.value, lat.value);
+    }
 
     map.value.on("click", async (e) => {
       lng.value = e.lngLat.lng;
@@ -231,12 +270,6 @@ onMounted(async () => {
       ensureMarker(lng.value, lat.value);
       map.value.flyTo({ center: [lng.value, lat.value], zoom: 13 });
       await reverseGeocode(lng.value, lat.value);
-    });
-
-    map.value.on("style.load", () => {
-      updateMapLanguage();
-      if (props.modelValue.lat && props.modelValue.lng)
-        reverseGeocode(lng.value, lat.value);
     });
   });
 });

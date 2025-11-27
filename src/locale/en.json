@@ -173,7 +173,8 @@
       "color": "Color",
       "image": "Image",
       "created": "Created Date",
-      "actions": "Actions"
+      "actions": "Actions",
+      "status": "Status"
     },
     "actions": {
       "delete": "Delete",
@@ -276,6 +277,7 @@
       "discountPercentage": "Discount Percentage (%)",
       "discountPeriod": "Discount Period (days)",
       "noDiscounts": "No discounts available.",
+      "nearLocationsDistance": "Near Locations Distance (km)",
       "success": {
         "config_saved": "Ad configuration saved successfully.",
         "discounts_saved": "Ad discounts saved successfully."
@@ -293,7 +295,9 @@
         "period_min": "Period must be at least 1 day.",
         "fetch_failed": "Failed to fetch settings.",
         "save_config_failed": "Failed to save ad configuration.",
-        "save_discounts_failed": "Failed to save ad discounts."
+        "save_discounts_failed": "Failed to save ad discounts.",
+        "distance_required": "Distance is required.",
+        "distance_min": "Distance must be at least 0 km."
       }
     },
     "support": {
@@ -324,7 +328,8 @@
         "image": "Image",
         "created": "Created At",
         "updated": "Updated At",
-        "actions": "Actions"
+        "actions": "Actions",
+        "status": "Status"
       },
       "actions": {
         "delete": "Delete",
@@ -595,6 +600,12 @@
   "postAdd": {
     "detailsTitle": "Ad Details",
     "descr": "Description",
+    "addNewImages": "Add New Images",
+    "update": "Update",
+    "existingImages": "Existing Images",
+    "edit": "Edit",
+    "current": "Current",
+    "seselectCategory": "Select Category",
     "location": "Location",
     "titleLabel": "Ad Title (AR)",
     "titleLabelEn": "Ad Title (EN)",
@@ -619,7 +630,7 @@
     "previous": "Previous",
     "uploadTitle": "Upload Photos",
     "chooseFile": "Choose file to upload",
-    "submit": "Submit",
+    "submit": "Post",
     "thankYou": "Thank you!",
     "underReview": "Your ad is under review",
     "home": "Home"
@@ -640,7 +651,14 @@
     "descr": "Description",
     "call": "Call",
     "send-message": "Send Message",
-    "no-images": "No images available"
+    "no-images": "No images available",
+    "mobile": "Mobile",
+    "comments": "Comments",
+    "add-comment": "Add a Comment",
+    "submit-comment": "Submit Comment",
+    "no-comments": "No comments yet. Be the first to comment!",
+    "write-comment": "Write your comment here...",
+    "you": "You"
   },
   "generic": {
     "403-title": "Unauthorized",

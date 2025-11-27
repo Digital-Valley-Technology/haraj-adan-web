@@ -168,7 +168,8 @@
       "color": "اللون",
       "image": "الصورة",
       "created": "تاريخ الإنشاء",
-      "actions": "الإجراءات"
+      "actions": "الإجراءات",
+      "status": "الحالة"
     },
     "actions": {
       "delete": "حذف",
@@ -276,6 +277,7 @@
       "discountPercentage": "نسبة الخصم (%)",
       "discountPeriod": "فترة الخصم (أيام)",
       "noDiscounts": "لا توجد خصومات متاحة.",
+      "nearLocationsDistance": "مسافة المواقع القريبة (كم)",
       "success": {
         "config_saved": "تم حفظ إعدادات الإعلان بنجاح.",
         "discounts_saved": "تم حفظ خصومات الإعلان بنجاح."
@@ -293,7 +295,9 @@
         "period_min": "يجب أن تكون الفترة يومًا واحدًا على الأقل.",
         "fetch_failed": "فشل في جلب الإعدادات.",
         "save_config_failed": "فشل في حفظ إعدادات الإعلان.",
-        "save_discounts_failed": "فشل في حفظ خصومات الإعلان."
+        "save_discounts_failed": "فشل في حفظ خصومات الإعلان.",
+        "distance_required": "المسافة مطلوبة.",
+        "distance_min": "يجب أن تكون المسافة 0 كم على الأقل."
       }
     },
     "support": {
@@ -324,7 +328,8 @@
         "image": "الصورة",
         "created": "تاريخ الإنشاء",
         "updated": "تاريخ التحديث",
-        "actions": "الإجراءات"
+        "actions": "الإجراءات",
+        "status": "الحالة"
       },
       "actions": {
         "delete": "حذف",
@@ -600,7 +605,13 @@
   "postAdd": {
     "detailsTitle": "تفاصيل الإعلان",
     "descr": "الوصف",
+    "addNewImages": "إضافة صور جديدة",
+    "update": "تحديث",
+    "existingImages": "الصور الموجودة",
     "location": "الموقع",
+    "edit": "تعديل",
+    "current": " الحالي",
+    "selectCategory": "اختر الصنف",
     "titleLabel": "عنوان الإعلان (عربي)",
     "titleLabelEn": "عنوان الإعلان (إنجليزي)",
     "titlePlaceholder": "اكتب العنوان بالعربية",
@@ -624,7 +635,7 @@
     "previous": "السابق",
     "uploadTitle": "رفع الصور",
     "chooseFile": "اختر ملف للتحميل",
-    "submit": "إرسال",
+    "submit": "نشر",
     "thankYou": "شكرًا لك!",
     "underReview": "إعلانك قيد المراجعة",
     "home": "الرئيسية"
@@ -645,7 +656,14 @@
     "descr": "الوصف",
     "call": "اتصال",
     "send-message": "إرسال رسالة",
-    "no-images": "لا توجد صور"
+    "no-images": "لا توجد صور",
+    "mobile": "الموبايل",
+    "comments": "التعليقات",
+    "add-comment": "أضف تعليق",
+    "submit-comment": "إرسال التعليق",
+    "no-comments": "لا توجد تعليقات بعد. كن أول من يعلق!",
+    "write-comment": "اكتب تعليقك هنا...",
+    "you": "أنت"
   },
   "generic": {
     "403-title": "غير مصرح",
