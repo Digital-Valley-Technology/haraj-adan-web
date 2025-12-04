@@ -10,7 +10,7 @@ import { encode } from "js-base64";
 import { computed } from "vue";
 
 defineProps(["ads", "adsStatuses"]);
-const emit = defineEmits(["delete", "fetchAds"]);
+const emit = defineEmits(["delete", "fetchAds", "handleRefund"]);
 
 const { t, locale } = useI18n();
 const adsStore = useAdsStore();
@@ -104,6 +104,17 @@ const openViewer = (ad) => {
   currentViewerInstance.show();
 };
 // --- END UPDATED VIEWER LOGIC ---
+
+const isFeatured = (item) =>
+  item?.ad_featured_history?.some((f) => f.status === true);
+
+const hasRefundRequest = (ad) => {
+  return ad?.ad_refunds_requests && ad.ad_refunds_requests.length > 0;
+};
+
+const isAlreadyRefunded = (ad) => {
+  return ad?.ad_refunds_requests?.some((req) => req.status === true);
+};
 </script>
 
 <template>
@@ -170,6 +181,16 @@ const openViewer = (ad) => {
       </template>
     </Column>
 
+    <Column :header="$t('dashboard.ads.table.type')">
+      <template #body="{ data }">
+        <span>{{
+          isFeatured(data)
+            ? $t("dashboard.ads.table.featured")
+            : $t("dashboard.ads.table.normal")
+        }}</span>
+      </template>
+    </Column>
+
     <Column field="price" :header="$t('dashboard.ads.table.price')">
       <template #body="{ data }">
         <span class="font-semibold text-gray-700">
@@ -219,6 +240,26 @@ const openViewer = (ad) => {
     <Column :header="$t('dashboard.ads.table.actions')">
       <template #body="{ data }">
         <div class="flex gap-2">
+          <Button
+            :disabled="!hasRefundRequest(data) || isAlreadyRefunded(data)"
+            :severity="
+              isAlreadyRefunded(data)
+                ? 'success'
+                : hasRefundRequest(data)
+                ? 'warning'
+                : 'secondary'
+            "
+            class="w-[max-content]"
+            :label="
+              isAlreadyRefunded(data)
+                ? t('dashboard.ads.table.refunded')
+                : t('dashboard.ads.table.refund')
+            "
+            rounded
+            @click="() => emit('handleRefund', data)"
+            size="small"
+          />
+
           <Button
             class="w-[max-content]"
             severity="info"

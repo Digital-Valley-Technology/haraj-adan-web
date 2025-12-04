@@ -1202,6 +1202,7 @@ onMounted(async () => {
               v-for="item in publishedAds"
               :key="item.id"
               :item="item"
+              @refreshAds="handleTabClick('on air')"
             />
           </div>
 
@@ -1218,6 +1219,7 @@ onMounted(async () => {
               v-for="item in unPublishedAds"
               :key="item.id"
               :item="item"
+              @refreshAds="handleTabClick('not published')"
             />
           </div>
 
@@ -1234,6 +1236,7 @@ onMounted(async () => {
               v-for="item in rejectedAds"
               :key="item.id"
               :item="item"
+              @refreshAds="handleTabClick('Rejected')"
             />
           </div>
 
@@ -1245,10 +1248,20 @@ onMounted(async () => {
         </div>
         <!-- Featured -->
         <div v-if="activeTab === 'Featured'" class="flex-1 h-fit">
-          <!-- <UserFeaturedAds :items="featuredAds" /> -->
-          <div v-for="item in featuredAds" :key="item">
-            <OnAirAdItem :item="item" />
+          <div v-if="featuredAds.length > 0">
+            <OnAirAdItem
+              v-for="item in featuredAds"
+              :key="item.id"
+              :item="item"
+              @refreshAds="handleTabClick('Rejected')"
+            />
           </div>
+
+          <EmptyState
+            v-else
+            title="empty.featured_title"
+            message="empty.featured_message"
+          />
         </div>
         <!-- Favorites -->
         <div v-if="activeTab === 'favorites'" class="flex-1 h-fit">

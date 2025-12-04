@@ -3,9 +3,15 @@ import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { MEDIA_URL } from "../../services/axios";
 import { useRouter } from "vue-router";
+import DeleteDialog from "../DeleteDialog.vue";
+import { ref } from "vue";
+import { showError, showSuccess } from "../../utils/notifications";
+import requestService from "../../services/api/requestService";
 
 const { t, locale } = useI18n();
 const router = useRouter();
+
+const emit = defineEmits(["refreshAds"]);
 
 const props = defineProps({
   item: {
@@ -14,11 +20,58 @@ const props = defineProps({
   },
 });
 
+const selectedAdId = ref(null);
+const isDialogOpen = ref(false);
+
 const currentLocale = computed(() => locale.value);
 
 const adTitle = computed(() =>
   currentLocale.value === "ar" ? props.item?.title : props.item?.title_en
 );
+
+const goToPostFeaturedAd = (adId) => {
+  router.push({
+    name: "post-featured-ad",
+    params: {
+      adId,
+    },
+  });
+};
+
+const processRefund = (adId) => {
+  selectedAdId.value = adId;
+  isDialogOpen.value = true;
+};
+
+const handleRefund = async () => {
+  try {
+    const res = await requestService.patch(`ads/${selectedAdId.value}/refund`);
+    showSuccess(res?.message || "refund success");
+    emit("refreshAds");
+  } catch (error) {
+    console.log(error);
+    showError(error || "refund faild");
+  } finally {
+    isDialogOpen.value = false;
+  }
+};
+
+const isFeatured = computed(() =>
+  props.item?.ad_featured_history?.some((f) => f.status === true)
+);
+
+const canRequestRefund = computed(() => {
+  const featuredItem = props?.item?.ad_featured_history?.find(
+    (h) => h?.status === true
+  );
+
+  if (!featuredItem?.created) return false;
+
+  const hoursPassed =
+    (Date.now() - new Date(featuredItem.created).getTime()) / (1000 * 60 * 60);
+
+  return hoursPassed < 24; // refund allowed within 24 hours
+});
 
 const formattedPrice = computed(() => {
   const price = props.item?.price;
@@ -48,10 +101,6 @@ const goToAdDetails = (adId) => {
 const goToEditAd = (adId, categoryId) => {
   router.push({ name: "edit-ad", params: { adId, categoryId } });
 };
-
-const isFeatured = computed(() =>
-  props.item?.ad_featured_history?.some((f) => f.status === true)
-);
 </script>
 
 <template>
@@ -96,14 +145,35 @@ const isFeatured = computed(() =>
 
         <!-- Inline Edit Button -->
         <button
-          class="mt-1 text-xs text-blue-600 hover:underline"
+          class="mt-1 text-xs text-blue-600 hover:underline cursor-pointer"
           @click.stop="
             goToEditAd(item.id, item?.ad_categories?.[0]?.category_id)
           "
         >
           {{ t("generic.edit") }}
         </button>
+        <button
+          v-if="isFeatured && canRequestRefund"
+          class="mt-1 text-xs text-blue-600 hover:underline cursor-pointer"
+          @click.stop="processRefund(item.id)"
+        >
+          {{ t("postAdd.refund_request") }}
+        </button>
+        <button
+          v-if="!isFeatured"
+          class="mt-1 text-xs text-blue-600 hover:underline cursor-pointer"
+          @click.stop="
+            goToPostFeaturedAd(item.id, item?.ad_categories?.[0]?.category_id)
+          "
+        >
+          {{ t("postAdd.featured") }}
+        </button>
       </div>
     </div>
   </div>
+  <DeleteDialog
+    v-model="isDialogOpen"
+    :content="$t('postAdd.refund_confirmation')"
+    @confirm="handleRefund"
+  />
 </template>

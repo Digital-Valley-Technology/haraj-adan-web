@@ -90,7 +90,9 @@
     "unpublished_message": "Your unpublished ads will appear here.",
 
     "rejected_title": "No Rejected Ads",
+    "featured_title": "No Featured Ads",
     "rejected_message": "You currently have no rejected ads.",
+    "featured_message": "You currently have no featured ads.",
 
     "default_title": "No Data",
     "default_message": "There are no items to display."
@@ -174,7 +176,10 @@
       "image": "Image",
       "created": "Created Date",
       "actions": "Actions",
-      "status": "Status"
+      "status": "Status",
+      "type": "Type",
+      "featured": "Featured",
+      "normal": "Normal"
     },
     "actions": {
       "delete": "Delete",
@@ -319,6 +324,18 @@
       "title": "Advertisements",
       "wallet_balance": "Wallet Balance",
       "featured": "Featured",
+      "refund": "Refund Request",
+      "price": "Price",
+      "seller": "Seller",
+      "refund_requested_at": "Refund Requested At",
+      "no_refund_request": "No refund request found",
+      "refund_confirmation_message": "Are you sure you want to process this refund?",
+      "refund_amount": "Refund Amount",
+      "transaction_description": "Transaction Description",
+      "invoice_summary": "Invoice Summary",
+      "refund_already_processed": "Refund already processed",
+      "no_refund_request_message": "There is no refund request for this ad.",
+      "refund_already_processed_message": "This ad has already been refunded.",
       "table": {
         "title": "Title",
         "title_en": "Title (English)",
@@ -329,12 +346,19 @@
         "created": "Created At",
         "updated": "Updated At",
         "actions": "Actions",
-        "status": "Status"
+        "status": "Status",
+        "type": "Type",
+        "featured": "Featured",
+        "normal": "Normal",
+        "refund": "Refund",
+        "refunded": "Refunded"
       },
       "actions": {
         "delete": "Delete",
         "add_new": "Add New Ad",
-        "details": "Details"
+        "details": "Details",
+        "view_image": "View Images",
+        "view_gallery": "View Gallery"
       },
       "details": {
         "title": "Ad Details",
@@ -600,11 +624,14 @@
   "postAdd": {
     "detailsTitle": "Ad Details",
     "descr": "Description",
+    "refund_confirmation": "Are you sure you want to request a refund?",
     "addNewImages": "Add New Images",
     "update": "Update",
     "existingImages": "Existing Images",
     "edit": "Edit",
     "current": "Current",
+    "refund_request": "Refund Request",
+    "featured": "Featured",
     "seselectCategory": "Select Category",
     "location": "Location",
     "titleLabel": "Ad Title (AR)",
@@ -633,7 +660,30 @@
     "submit": "Post",
     "thankYou": "Thank you!",
     "underReview": "Your ad is under review",
-    "home": "Home"
+    "home": "Home",
+    "featuredTitle": "Featured Ad",
+    "featuredDescription": "Boost your ad visibility by making it featured.",
+    "isFeaturedLabel": "Make this ad featured",
+    "selectDiscount": "Select Discount",
+    "noDiscounts": "No available discounts",
+    "discountApplied": "Discount applied",
+    "walletBalance": "Wallet Balance",
+    "insufficientBalance": "You do not have enough balance to feature this ad.",
+    "featurePrice": "Featured Price",
+    "totalAfterDiscount": "Total After Discount",
+    "autoFeatured": "Featured automatically after selecting a discount",
+    "makeFeatured": "Make this ad featured",
+    "noDiscount": "No Discount",
+    "days": "days",
+    "walletEmptyMessage": "Your wallet balance is 0.",
+    "goDeposit": "Deposit now",
+    "depositNow": "Deposit now",
+    "optional": "Optional",
+    "totalFeaturedPrice": "Total Featured Price",
+    "featuredDays": "Featured Days"
+  },
+  "wallet": {
+    "balance": "Wallet Balance"
   },
   "adTypes": {
     "sell": "Sell",

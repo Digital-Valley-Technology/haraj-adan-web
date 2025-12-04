@@ -124,6 +124,12 @@ const routes = [
     props: true,
   },
   {
+    path: "/post-featured-ad/:adId",
+    name: "post-featured-ad",
+    component: () => import("../pages/EditFeatured.vue"),
+    props: true,
+  },
+  {
     name: "post-ad-categories",
     path: "/post-ad-categories",
     component: () => import("../pages/PostAdCategoriesPage.vue"),

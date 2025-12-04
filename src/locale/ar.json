@@ -92,6 +92,9 @@
     "rejected_title": "لا توجد إعلانات مرفوضة",
     "rejected_message": "ليس لديك أي إعلانات مرفوضة حالياً.",
 
+    "featured_message": "ليس لديك حالياً أي إعلانات مميزة.",
+    "featured_title": "لا توجد إعلانات مميزة",
+
     "default_title": "لا توجد بيانات",
     "default_message": "لا يوجد عناصر للعرض حالياً."
   },
@@ -169,7 +172,10 @@
       "image": "الصورة",
       "created": "تاريخ الإنشاء",
       "actions": "الإجراءات",
-      "status": "الحالة"
+      "status": "الحالة",
+      "type": "النوع",
+      "featured": "مميز",
+      "normal": "عادي"
     },
     "actions": {
       "delete": "حذف",
@@ -319,6 +325,18 @@
       "title": "الإعلانات",
       "wallet_balance": "رصيد المحفظة",
       "featured": "مميز",
+      "refund": "طلب استرجاع",
+      "price": "السعر",
+      "seller": "البائع",
+      "refund_requested_at": "تاريخ طلب الاسترجاع",
+      "no_refund_request": "لا يوجد طلب استرجاع",
+      "refund_confirmation_message": "هل أنت متأكد أنك تريد تنفيذ عملية الاسترجاع؟",
+      "refund_amount": "مبلغ الاسترجاع",
+      "transaction_description": "وصف العملية",
+      "invoice_summary": "ملخص الفاتورة",
+      "refund_already_processed": "تم استرجاع المبلغ بالفعل",
+      "no_refund_request_message": "لا يوجد طلب استرجاع لهذا الإعلان.",
+      "refund_already_processed_message": "تم استرجاع هذا الإعلان مسبقًا.",
       "table": {
         "title": "العنوان",
         "title_en": "العنوان (بالإنجليزية)",
@@ -329,12 +347,19 @@
         "created": "تاريخ الإنشاء",
         "updated": "تاريخ التحديث",
         "actions": "الإجراءات",
-        "status": "الحالة"
+        "status": "الحالة",
+        "type": "النوع",
+        "featured": "مميز",
+        "normal": "عادي",
+        "refund": "استرداد",
+        "refunded": "مسترد"
       },
       "actions": {
         "delete": "حذف",
         "add_new": "إضافة إعلان جديد",
-        "details": "التفاصيل"
+        "details": "التفاصيل",
+        "view_image": "عرض الصور",
+        "view_gallery": "عرض المعرض"
       },
       "details": {
         "title": "تفاصيل الإعلان",
@@ -605,12 +630,15 @@
   "postAdd": {
     "detailsTitle": "تفاصيل الإعلان",
     "descr": "الوصف",
+    "refund_confirmation": "هل أنت متأكد أنك تريد طلب استرداد المبلغ؟",
     "addNewImages": "إضافة صور جديدة",
     "update": "تحديث",
     "existingImages": "الصور الموجودة",
     "location": "الموقع",
     "edit": "تعديل",
     "current": " الحالي",
+    "refund_request": "طلب استرداد",
+    "featured": "مميز",
     "selectCategory": "اختر الصنف",
     "titleLabel": "عنوان الإعلان (عربي)",
     "titleLabelEn": "عنوان الإعلان (إنجليزي)",
@@ -638,7 +666,30 @@
     "submit": "نشر",
     "thankYou": "شكرًا لك!",
     "underReview": "إعلانك قيد المراجعة",
-    "home": "الرئيسية"
+    "home": "الرئيسية",
+    "featuredTitle": "إعلان مميز",
+    "featuredDescription": "قم بزيادة ظهور إعلانك بجعله إعلانًا مميزًا.",
+    "isFeaturedLabel": "جعل الإعلان مميز",
+    "selectDiscount": "اختيار الخصم",
+    "noDiscounts": "لا توجد خصومات متاحة",
+    "discountApplied": "تم تطبيق الخصم",
+    "walletBalance": "رصيد المحفظة",
+    "insufficientBalance": "ليس لديك رصيد كافٍ لجعل الإعلان مميزًا.",
+    "featurePrice": "سعر التمييز",
+    "totalAfterDiscount": "الإجمالي بعد الخصم",
+    "autoFeatured": "تم تمييز الإعلان تلقائيًا بعد اختيار الخصم",
+    "makeFeatured": "اجعل هذا الإعلان مميزًا",
+    "noDiscount": "بدون خصم",
+    "days": "يوم",
+    "walletEmptyMessage": "رصيد محفظتك هو 0.",
+    "goDeposit": "قم بالإيداع الآن",
+    "depositNow": "قم بالإيداع الآن",
+    "optional": "اختياري",
+    "totalFeaturedPrice": "الإجمالي بعد التمييز",
+    "featuredDays": "أيام التمييز"
+  },
+  "wallet": {
+    "balance": "رصيد المحفظة"
   },
   "adTypes": {
     "sell": "بيع",
