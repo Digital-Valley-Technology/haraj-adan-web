@@ -80,6 +80,16 @@
     },
     "featured": {
       "no_featured_ads": "ليس لديك أي إعلانات مميزة."
+    },
+    "chats": {
+      "search": "إبحث بالإسم",
+      "yesterday": "أمس",
+      "no_chats": "لا يوجد محادثات متاحة",
+      "type_message": "اكتب رسالة ...",
+      "image": "صورة",
+      "video": "فيديو",
+      "audio": "صوت",
+      "file": "ملف"
     }
   },
   "empty": {

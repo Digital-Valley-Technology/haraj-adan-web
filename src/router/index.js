@@ -16,6 +16,14 @@ const routes = [
       requiresAuth: true,
       permissions: ["profile.read", "profile.write"],
     },
+    // children: [
+    //   {
+    //     name: "user-profile-messages",
+    //     path: "messages/:chatId?",
+    //     component: () => import("../components/Profile/MessagesSection.vue"),
+    //     props: true,
+    //   },
+    // ],
   },
   {
     name: "register",

@@ -1,8 +1,12 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import { nextTick } from "vue";
 import { useI18n } from "vue-i18n";
+import { MEDIA_URL } from "../services/axios";
 import { useAuthStore } from "../store/auth";
 import requestService from "../services/api/requestService";
+import { socket } from "../services/SocketPlugin";
 import { showError, showSuccess } from "../utils/notifications";
 import person from "../assets/person.png";
 import { Avatar } from "primevue";
@@ -13,15 +17,23 @@ import PaymentSuccess from "../components/Profile/PaymentSuccess.vue";
 import PaymentFaild from "../components/Profile/PaymentFaild.vue";
 import { computed } from "vue";
 import WalletSummary from "../components/Profile/WalletSummary.vue";
-import UserFeaturedAds from "../components/Profile/UserFeaturedAds.vue";
 import FavoriteAdItem from "../components/Profile/FavoriteAdItem.vue";
-import RejectedAdItem from "../components/Profile/RejectedAdItem.vue";
 import OnAirAdItem from "../components/Profile/OnAirAdItem.vue";
 import UserInfo from "../components/Profile/UserInfo.vue";
 import EmptyState from "../components/EmptyState.vue";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import localizedFormat from "dayjs/plugin/localizedFormat";
+import "dayjs/locale/ar";
+import "dayjs/locale/en";
+
+dayjs.extend(relativeTime);
+dayjs.extend(localizedFormat);
 
 const { t, locale } = useI18n();
 const authStore = useAuthStore();
+const router = useRouter();
+const route = useRoute();
 const i18 = useI18n();
 
 const name = ref("");
@@ -46,96 +58,6 @@ const rejectedAdsTotal = ref(0);
 const currentView = ref("form");
 const isPaymentLoading = ref(false); // To show a loading state during the API call
 
-// const rejectedAds = [
-//   {
-//     id: 1,
-//     title_en: "Gajah Mada Billboard (Rejected)",
-//     title: "لوحة إعلانات جاجاه مادا (مرفوض)",
-//     price: 10000,
-//     status: "Rejected",
-//     status_ar: "مرفوض",
-//     ads_images: [
-//       { image: "https://placehold.co/80x72/D81515/FFFFFF?text=Ad1" },
-//     ],
-//     ad_attributes: [
-//       {
-//         address: "Surakarta, Central Java, Indonesia",
-//         address_ar: "سوراكارتا، جاوة تينغاه، إندونيسيا",
-//       },
-//     ],
-//   },
-//   {
-//     id: 2,
-//     title_en: "Premium City Center Ad Space (Pending)",
-//     title: "مساحة إعلانات ممتازة وسط المدينة (قيد الانتظار)",
-//     price: 15500,
-//     status: "Pending",
-//     status_ar: "قيد الانتظار",
-//     ads_images: [
-//       { image: "https://placehold.co/80x72/F59E0B/FFFFFF?text=Ad2" },
-//     ],
-//     ad_attributes: [
-//       {
-//         address: "Bandung, West Java, Indonesia",
-//         address_ar: "باندونج، جاوة الغربية، إندونيسيا",
-//       },
-//     ],
-//   },
-//   {
-//     id: 3,
-//     title_en: "Highway Entrance Display (Rejected)",
-//     title: "شاشة عرض مدخل الطريق السريع (مرفوض)",
-//     price: 20250,
-//     status: "Rejected",
-//     status_ar: "مرفوض",
-//     ads_images: [
-//       { image: "https://placehold.co/80x72/D81515/FFFFFF?text=Ad3" },
-//     ],
-//     ad_attributes: [
-//       {
-//         address: "Jakarta, DKI Jakarta, Indonesia",
-//         address_ar: "جاكرتا، جاكرتا العاصمة، إندونيسيا",
-//       },
-//     ],
-//   },
-//   {
-//     id: 4,
-//     title_en: "Coastal View Billboard (Completed)",
-//     title: "لوحة إعلانات بإطلالة ساحلية (مكتمل)",
-//     price: 8900,
-//     status: "Completed",
-//     status_ar: "مكتمل",
-//     ads_images: [
-//       { image: "https://placehold.co/80x72/10B981/FFFFFF?text=Ad4" },
-//     ],
-//     ad_attributes: [
-//       {
-//         address: "Denpasar, Bali, Indonesia",
-//         address_ar: "دنpasar، بالي، إندونيسيا",
-//       },
-//     ],
-//   },
-//   {
-//     id: 5,
-//     title_en: "Retail Storefront LED (Rejected)",
-//     title: "شاشة LED واجهة متجر بيع بالتجزئة (مرفوض)",
-//     price: 12100,
-//     status: "Rejected",
-//     status_ar: "مرفوض",
-//     ads_images: [
-//       { image: "https://placehold.co/80x72/D81515/FFFFFF?text=Ad5" },
-//     ],
-//     ad_attributes: [
-//       {
-//         address: "Surabaya, East Java, Indonesia",
-//         address_ar: "سورابايا، جاوة الشرقية، إندونيسيا",
-//       },
-//     ],
-//   },
-// ];
-const onAirItems = rejectedAds;
-const notPublishedAds = rejectedAds;
-
 const featuredAds = ref([]);
 
 const STORAGE_KEY = "AD_FAVORITES_LIST";
@@ -144,7 +66,338 @@ const favoritesAds = ref([]);
 
 const adStats = ref({});
 
+const walletBalance = ref(0);
+const transactionsData = ref([]);
+
+// chats variables
+const chatList = ref([]);
+const selectedChatUserId = ref(null);
+const chatListPage = ref(1);
+const chatListPageSize = 20; // same as your backend limit
+const totalChats = ref(0);
+const isLoadingChatList = ref(false);
+const chatListContainer = ref(null);
+let searchTimeout;
+
+// chat messages variables
+const chatMessages = ref([]);
+const currentPage = ref(1);
+const pageSize = 20; // match your backend default
+const totalMessages = ref(0);
+const isLoadingMessages = ref(false);
+const messagesContainer = ref(null);
+const searchText = ref("");
+const chatUser = ref({});
+const newMessage = ref(""); // the text input for the chat message
+
+const mediaFile = ref(null); // selected file
+const mediaPreviewUrl = ref(""); // preview URL
+
+const isSendingMedia = ref(false);
+
 // --- METHODS ---
+const handleMediaSelect = (event) => {
+  const target = event.target;
+  if (target.files && target.files.length > 0) {
+    mediaFile.value = target.files[0];
+
+    // Generate preview URL
+    if (
+      mediaFile.value.type.startsWith("image/") ||
+      mediaFile.value.type.startsWith("video/") ||
+      mediaFile.value.type.startsWith("audio/")
+    ) {
+      mediaPreviewUrl.value = URL.createObjectURL(mediaFile.value);
+    } else {
+      mediaPreviewUrl.value = "";
+    }
+  }
+};
+
+const cancelMedia = () => {
+  mediaFile.value = null;
+  mediaPreviewUrl.value = "";
+};
+
+const sendMediaMessage = async () => {
+  if (!mediaFile.value || !selectedChatUserId.value) return;
+
+  const formData = new FormData();
+  formData.append("file", mediaFile.value);
+  formData.append("senderId", String(currentUser?.value?.id));
+  formData.append("receiverId", String(selectedChatUserId.value));
+
+  isSendingMedia.value = true;
+
+  try {
+    const res = await requestService.create("chats/media", formData);
+
+    if (res?.data) {
+      chatMessages.value.push(res.data); // add to messages
+      await nextTick();
+      messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+
+      // Clear selected media
+      cancelMedia();
+    }
+  } catch (err) {
+    console.error("Failed to send media message:", err);
+    showError(err || "Failed to send media message");
+  } finally {
+    isSendingMedia.value = false;
+  }
+};
+
+const sendMessage = async () => {
+  if (!newMessage.value.trim() || !selectedChatUserId.value) return;
+
+  // Prepare payload
+  const payload = {
+    receiver_id: selectedChatUserId.value,
+    message: newMessage.value,
+  };
+
+  try {
+    await socket.emit("sendUserMessage", {
+      receiverId: selectedChatUserId.value,
+      senderId: currentUser?.value?.id,
+      message: newMessage.value,
+      type: "text",
+    });
+
+    // 3. Clear input
+    newMessage.value = "";
+
+    await fetchChatMessages(1);
+
+    // 4. Scroll to bottom
+    await nextTick();
+    if (messagesContainer.value) {
+      messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+    }
+  } catch (err) {
+    console.error("Failed to send message:", err);
+    showError("Failed to send message");
+  }
+};
+
+const handleSearchInput = () => {
+  if (searchTimeout) clearTimeout(searchTimeout);
+
+  searchTimeout = setTimeout(() => {
+    fetchChatsList(1, false); // Reset list and fetch first page
+  }, 300);
+};
+
+const handleChatListScroll = () => {
+  const container = chatListContainer.value;
+  if (!container || isLoadingChatList.value) return;
+
+  const scrollBottom =
+    container.scrollTop + container.clientHeight >= container.scrollHeight - 10;
+
+  if (scrollBottom) {
+    // check if there are more chats to load
+    if (chatList.value.length < totalChats.value) {
+      fetchChatsList(chatListPage.value + 1, true); // append next page
+    }
+  }
+};
+
+const fetchChatsList = async (page = 1, append = false) => {
+  if (isLoadingChatList.value) return;
+
+  isLoadingChatList.value = true;
+  try {
+    const queryParams = new URLSearchParams({
+      page,
+      limit: chatListPageSize,
+      userId: currentUser?.value?.id,
+    });
+
+    // Include search query if it exists
+    if (searchText.value.trim()) {
+      queryParams.append("search", searchText.value.trim());
+    }
+
+    const res = await requestService.getAll(
+      `chats/paginate/customer?${queryParams.toString()}`
+    );
+
+    const chats = res?.data || [];
+    if (append) {
+      chatList.value = [...chatList.value, ...chats];
+    } else {
+      chatList.value = chats;
+    }
+
+    totalChats.value = res?.meta?.total || chats.length;
+    chatListPage.value = page;
+  } catch (error) {
+    console.log(error);
+  } finally {
+    isLoadingChatList.value = false;
+  }
+};
+
+const fetchChatMessages = async (page = 1, append = false) => {
+  if (!selectedChatUserId.value) return;
+  isLoadingMessages.value = true;
+  try {
+    const res = await requestService.getAll(
+      `chats/messages?userId=${selectedChatUserId.value}&page=${page}&limit=${pageSize}`
+    );
+
+    chatUser.value = res?.chatUser;
+
+    const messages = res?.data || [];
+    if (append) {
+      chatMessages.value = [...chatMessages.value, ...messages];
+    } else {
+      chatMessages.value = messages;
+    }
+
+    // Assuming backend sends total count, otherwise you can calculate
+    totalMessages.value = res?.meta?.total || messages.length;
+    currentPage.value = page;
+  } catch (error) {
+    console.log(error);
+  } finally {
+    isLoadingMessages.value = false;
+  }
+};
+
+const handleScroll = () => {
+  const container = messagesContainer.value;
+  if (!container || isLoadingMessages.value) return;
+
+  const scrollBottom =
+    container.scrollTop + container.clientHeight >= container.scrollHeight - 10;
+
+  if (scrollBottom) {
+    // check if there are more messages
+    if (chatMessages.value.length < totalMessages.value) {
+      fetchChatMessages(currentPage.value + 1, true); // load next page
+    }
+  }
+};
+
+const getOtherChatUser = (chatItem) => {
+  if (!chatItem?.members || !Array.isArray(chatItem.members)) return null;
+
+  const other = chatItem.members.find(
+    (member) => member?.user_id !== currentUser.value?.id
+  );
+
+  return other?.users?.name || null;
+};
+
+const formattedDate = (date) => {
+  if (!date) return "";
+
+  dayjs.locale(locale.value); // dynamically set locale
+  const msgDate = dayjs(date);
+  const today = dayjs();
+
+  if (msgDate.isSame(today, "day")) {
+    return msgDate.format("h:mm A"); // Today → show time
+  } else if (msgDate.isSame(today.subtract(1, "day"), "day")) {
+    return t("profile.chats.yesterday"); // Yesterday
+  } else if (msgDate.isSame(today, "year")) {
+    return msgDate.format("DD/MM"); // Same year
+  } else {
+    return msgDate.format("DD/MM/YYYY"); // Older
+  }
+};
+
+const formatTime = (date) => {
+  return dayjs(date).format("h:mm A"); // e.g., 2:14 PM
+};
+
+watch(chatMessages, async () => {
+  await nextTick();
+  const container = messagesContainer.value;
+  if (container) {
+    container.scrollTop = container.scrollHeight;
+  }
+
+  // mark messages as read whenever new messages are rendered
+  markMessagesAsRead();
+});
+
+watch(
+  () => route.query.userId,
+  async (userId) => {
+    if (userId) {
+      selectedChatUserId.value = Number(userId);
+      await fetchChatMessages();
+      activeTab.value = "messages";
+    } else {
+      selectedChatUserId.value = null;
+    }
+  },
+  { immediate: true }
+);
+
+const markMessagesAsRead = async () => {
+  if (!selectedChatUserId.value) return;
+
+  // Collect IDs of unread messages sent by the other user
+  const unreadMessageIds = chatMessages.value
+    .filter((msg) => !msg.is_read && msg.sender_id !== currentUser.value?.id)
+    .map((msg) => msg.id);
+
+  if (unreadMessageIds.length === 0) return;
+
+  try {
+    socket.emit("readUserMessages", {
+      chatId: selectedChatUserId.value,
+      messageIds: unreadMessageIds,
+    });
+
+    // Optimistically mark messages as read in UI
+    chatMessages.value = chatMessages.value.map((msg) =>
+      unreadMessageIds.includes(msg.id) ? { ...msg, is_read: true } : msg
+    );
+  } catch (err) {
+    console.error("Failed to mark messages as read:", err);
+  }
+};
+
+const handleSetSelectedUserId = async (chat) => {
+  const chatUser = chat?.members?.find(
+    (m) => m?.user_id !== currentUser.value?.id
+  );
+  const userId = chatUser?.user_id;
+
+  selectedChatUserId.value = userId;
+  activeTab.value = "messages";
+
+  currentPage.value = 1;
+  chatMessages.value = []; // reset messages
+
+  fetchChatMessages(1).then(() => {
+    // After messages are loaded, mark as read
+    markMessagesAsRead();
+  });
+
+  router.push({
+    name: "user-profile",
+    query: { userId },
+  });
+};
+
+const handleChatBackButton = () => {
+  selectedChatUserId.value = null;
+  activeTab.value = "messages";
+
+  router.push({
+    name: "user-profile",
+    query: {}, // clear query
+  });
+
+  fetchChatsList();
+};
 
 /**
  * Loads all favorite ads from localStorage.
@@ -164,35 +417,8 @@ const loadFavoritesFromLocalStorage = () => {
   }
 };
 
-const walletBalance = ref(0);
-const transactionsData = ref([
-  {
-    type: "received",
-    description_key: "profile.wallet.deposit_received",
-    date: "2025-12-12",
-    time: "02:40 pm",
-    amount: 234,
-    status: "completed",
-  },
-  {
-    type: "purchased",
-    description_key: "profile.wallet.product_purchased",
-    date: "2025-12-10",
-    time: "11:00 am",
-    amount: 50,
-    status: "pending",
-  },
-  {
-    type: "purchased",
-    description_key: "profile.wallet.product_purchased",
-    date: "2025-12-05",
-    time: "09:15 am",
-    amount: 80,
-    status: "cancelled",
-  },
-]);
-
 const currentUser = computed(() => authStore?.getUser);
+const currentLocale = computed(() => locale.value);
 
 const handleSaveUser = async (validatedData) => {
   // Pass the validated data directly to your Pinia update action
@@ -207,21 +433,20 @@ const handleSaveUser = async (validatedData) => {
 
 const handleTabClick = (tabName) => {
   activeTab.value = tabName;
-  if (tabName === "wallet") {
-    fetchWalletSummary();
+
+  if (tabName === "messages") {
+    selectedChatUserId.value = null; // Reset so the chat list shows
+    fetchChatsList(); // load chat list
+  } else {
+    selectedChatUserId.value = null; // reset for other tabs too
   }
-  if (tabName === "Featured") {
-    fetchFeaturedAds();
-  }
-  if (tabName === "on air") {
-    fetchPublishedAds();
-  }
-  if (tabName === "not published") {
-    fetchUnPublishedAds();
-  }
-  if (tabName === "Rejected") {
-    fetchRejectedAds();
-  }
+
+  // fetch data for other tabs
+  if (tabName === "wallet") fetchWalletSummary();
+  if (tabName === "Featured") fetchFeaturedAds();
+  if (tabName === "on air") fetchPublishedAds();
+  if (tabName === "not published") fetchUnPublishedAds();
+  if (tabName === "Rejected") fetchRejectedAds();
 };
 
 const formatPhone = (value) => {
@@ -383,6 +608,12 @@ onMounted(async () => {
     fetchWalletSummary();
     loadFavoritesFromLocalStorage();
     fetchStats();
+    const userId = route.query.userId;
+
+    if (userId) {
+      selectedChatUserId.value = Number(userId);
+      activeTab.value = "messages";
+    }
   } catch (err) {
     console.log(err);
 
@@ -403,7 +634,7 @@ onMounted(async () => {
               <i class="pi pi-megaphone text-yellow-500 text-2xl"></i>
               <p class="text-lg font-bold">
                 {{
-                  i18.locale.value == "ar"
+                  currentLocale == "ar"
                     ? "اجعل إعلانك مميزًا"
                     : "MAKE YOUR AD STAND OUT"
                 }}
@@ -411,14 +642,14 @@ onMounted(async () => {
             </div>
             <p class="text-xs font-normal uppercase">
               {{
-                i18.locale.value == "ar"
+                currentLocale == "ar"
                   ? "فيما يلي نص توضيحي حول كيفية صنع"
                   : "here is an explanatory text on how to make the"
               }}
             </p>
             <p class="text-xs font-normal uppercase">
               {{
-                i18.locale.value == "ar"
+                currentLocale == "ar"
                   ? "فيما يلي نص توضيحي حول كيفية صنع"
                   : "here is an explanatory text on how to make the"
               }}
@@ -427,7 +658,7 @@ onMounted(async () => {
               class="mt-4 bg-[#FFE800] text-sm text-black px-4 py-2 rounded-lg hover:bg-yellow-600 transition"
               @click="activeTab = 'deposit'"
             >
-              {{ i18.locale.value == "ar" ? "إيداع" : "Deposit" }}
+              {{ currentLocale == "ar" ? "إيداع" : "Deposit" }}
             </button>
           </div>
           <!-- Categories -->
@@ -451,7 +682,7 @@ onMounted(async () => {
                 ]"
               >
                 {{
-                  i18.locale.value == "ar"
+                  currentLocale == "ar"
                     ? "معلومات حسابي"
                     : "My Account Information"
                 }}
@@ -480,7 +711,7 @@ onMounted(async () => {
                   activeTab === 'wallet' ? 'text-[#146AAB]' : 'text-black',
                 ]"
               >
-                {{ i18.locale.value == "ar" ? "المحفظة" : "Wallet" }}
+                {{ currentLocale == "ar" ? "المحفظة" : "Wallet" }}
               </span>
               <span>
                 <i
@@ -506,7 +737,7 @@ onMounted(async () => {
                   activeTab === 'deposit' ? 'text-[#146AAB]' : 'text-black',
                 ]"
               >
-                {{ i18.locale.value == "ar" ? "إيداع" : "Deposit" }}
+                {{ currentLocale == "ar" ? "إيداع" : "Deposit" }}
               </span>
               <span>
                 <i
@@ -518,7 +749,7 @@ onMounted(async () => {
 
             <h3 class="uppercase text-xs">
               {{
-                i18.locale.value == "ar"
+                currentLocale == "ar"
                   ? "الرسائل والمعلومات"
                   : "Messages and Information"
               }}
@@ -526,7 +757,7 @@ onMounted(async () => {
 
             <!-- messages -->
             <button
-              @click="activeTab = 'messages'"
+              @click="handleTabClick('messages')"
               :class="[
                 'flex justify-between items-center px-2 py-2  hover:text-[#146AAB] cursor-pointer group border-1 border-solid border-[#EEEEEEEE] rounded-lg',
                 activeTab === 'messages'
@@ -540,7 +771,7 @@ onMounted(async () => {
                   activeTab === 'messages' ? 'text-[#146AAB]' : 'text-black',
                 ]"
               >
-                {{ i18.locale.value == "ar" ? "الرسائل" : "Messages" }}
+                {{ currentLocale == "ar" ? "الرسائل" : "Messages" }}
               </span>
               <span>
                 <i
@@ -566,7 +797,7 @@ onMounted(async () => {
                   activeTab === 'permissions' ? 'text-[#146AAB]' : 'text-black',
                 ]"
               >
-                {{ i18.locale.value == "ar" ? "أذونات" : "Permissions" }}
+                {{ currentLocale == "ar" ? "أذونات" : "Permissions" }}
               </span>
               <span>
                 <i
@@ -578,7 +809,7 @@ onMounted(async () => {
 
             <h3 class="uppercase text-xs">
               {{
-                i18.locale.value == "ar"
+                currentLocale == "ar"
                   ? "إدارة الإعلانات"
                   : "Advertisement Management"
               }}
@@ -600,7 +831,7 @@ onMounted(async () => {
                   activeTab === 'on air' ? 'text-[#146AAB]' : 'text-black',
                 ]"
               >
-                {{ i18.locale.value == "ar" ? "نشط" : "On Air" }}
+                {{ currentLocale == "ar" ? "نشط" : "On Air" }}
               </span>
               <span> ({{ adStats?.totalPublished || 0 }}) </span>
             </button>
@@ -623,7 +854,7 @@ onMounted(async () => {
                     : 'text-black',
                 ]"
               >
-                {{ i18.locale.value == "ar" ? "غير منشور" : "Not Published" }}
+                {{ currentLocale == "ar" ? "غير منشور" : "Not Published" }}
               </span>
               <span> ({{ adStats?.totalUnPublished || 0 }}) </span>
             </button>
@@ -644,9 +875,7 @@ onMounted(async () => {
                   activeTab === 'Rejected' ? 'text-[#146AAB]' : 'text-black',
                 ]"
               >
-                {{
-                  i18.locale.value == "ar" ? "الإعلانات المرفوضة" : "Rejected"
-                }}
+                {{ currentLocale == "ar" ? "الإعلانات المرفوضة" : "Rejected" }}
               </span>
               <span> ({{ adStats?.totalRejected || 0 }}) </span>
             </button>
@@ -667,13 +896,13 @@ onMounted(async () => {
                   activeTab === 'Featured' ? 'text-[#146AAB]' : 'text-black',
                 ]"
               >
-                {{ i18.locale.value == "ar" ? "إعلانات مميزة" : "Featured" }}
+                {{ currentLocale == "ar" ? "إعلانات مميزة" : "Featured" }}
               </span>
               <span> ({{ adStats?.totalFeatured || 0 }}) </span>
             </button>
 
             <h3 class="uppercase text-xs">
-              {{ i18.locale.value == "ar" ? "المفضلة" : "favorites" }}
+              {{ currentLocale == "ar" ? "المفضلة" : "favorites" }}
             </h3>
 
             <!-- favorites -->
@@ -692,13 +921,13 @@ onMounted(async () => {
                   activeTab === 'favorites' ? 'text-[#146AAB]' : 'text-black',
                 ]"
               >
-                {{ i18.locale.value == "ar" ? "المفضلة" : "Favorites" }}
+                {{ currentLocale == "ar" ? "المفضلة" : "Favorites" }}
               </span>
               <span> ({{ favoritesAds?.length || 0 }}) </span>
             </button>
 
             <h3 class="uppercase text-xs">
-              {{ i18.locale.value == "ar" ? "عام" : "general" }}
+              {{ currentLocale == "ar" ? "عام" : "general" }}
             </h3>
 
             <!-- Pollicy -->
@@ -720,7 +949,7 @@ onMounted(async () => {
                 ]"
               >
                 {{
-                  i18.locale.value == "ar"
+                  currentLocale == "ar"
                     ? "الخصوصية والسياسة"
                     : "privacy and policy"
                 }}
@@ -741,7 +970,7 @@ onMounted(async () => {
                 <i class="pi pi-sign-out" style="font-size: 0.9rem"></i>
               </span>
               <span>
-                {{ i18.locale.value == "ar" ? "تسجيل الخروج" : "Log Out" }}
+                {{ currentLocale == "ar" ? "تسجيل الخروج" : "Log Out" }}
               </span>
             </button>
           </div>
@@ -794,14 +1023,14 @@ onMounted(async () => {
               <i class="pi pi-check text-[#09B285]"></i>
               <p class="text-sm">
                 {{
-                  i18.locale.value == "ar"
+                  currentLocale == "ar"
                     ? "تم إرسال إيصال الدفع بنجاح."
                     : "Payment receipt sent successfully."
                 }}
               </p>
               <p class="text-xs text-center">
                 {{
-                  i18.locale.value == "ar"
+                  currentLocale == "ar"
                     ? "سيتم مراجعة إيصال الدفع الخاص بك في غضون 24 ساعة وسيتم تحديث رصيدك بعد الموافقة."
                     : "Your payment receipt will be reviewed within 24 hours and your balance will be updated upon approval."
                 }}
@@ -810,291 +1039,119 @@ onMounted(async () => {
                 class="w-64 bg-[#FFE800] text-black px-4 py-2 rounded-lg hover:bg-[#f5e103] transition mb-4 cursor-pointer"
                 @click="activeTab = 'deposit'"
               >
-                {{ i18.locale.value == "ar" ? "الصفحة الرئيسية" : "Home" }}
+                {{ currentLocale == "ar" ? "الصفحة الرئيسية" : "Home" }}
               </button>
             </div>
           </div>
         </div>
         <!-- Messages -->
-        <div v-if="activeTab === 'messages'" class="flex-1 h-fit">
+        <div
+          v-if="activeTab === 'messages' && !selectedChatUserId"
+          class="flex-1 h-fit"
+        >
           <div class="bg-white p-4 rounded-lg">
             <div>
               <input
                 type="text"
-                :placeholder="i18.locale.value == 'ar' ? 'بحث' : 'Search'"
+                v-model="searchText"
+                @input="handleSearchInput"
+                :placeholder="$t('profile.chats.search')"
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
               />
-              <!-- Message 1 -->
-              <button
-                @click="activeTab = 'Athalia Putri'"
-                class="flex flex-col gap-2 w-full mb-4 cursor-pointer hover:bg-gray-100 p-2 rounded-lg"
+
+              <div
+                ref="chatListContainer"
+                class="bg-white p-4 rounded-lg h-[400px] overflow-y-auto"
+                @scroll="handleChatListScroll"
               >
-                <div class="flex justify-between items-center">
-                  <div class="flex gap-2 items-center">
-                    <Avatar
-                      :image="authStore.user?.avatar || person"
-                      shape="circle"
-                      size="large"
-                      class=""
-                    />
-                    <div
-                      class="flex flex-col items-center justify-center gap-0.5"
-                    >
-                      <h3 class="text-sm">
-                        {{
-                          i18.locale.value == "ar"
-                            ? "أثاليا بوتري"
-                            : "Athalia Putri"
-                        }}
-                      </h3>
-                      <div class="flex items-center gap-1">
-                        <i class="pi pi-check text-[5px] text-[#ADB5BD]"></i>
+                <div v-if="chatList?.length === 0" class="text-center py-10">
+                  <p class="text-gray-500">
+                    {{ $t("profile.chats.no_chats") }}
+                  </p>
+                </div>
+
+                <div v-else class="flex flex-col gap-2">
+                  <button
+                    v-for="chat in chatList"
+                    :key="chat?.id"
+                    @click="handleSetSelectedUserId(chat)"
+                    class="flex w-full cursor-pointer hover:bg-gray-100 p-2 rounded-lg"
+                  >
+                    <div class="flex justify-between items-center w-full">
+                      <div class="flex gap-3 items-center">
+                        <Avatar :image="person" shape="circle" size="large" />
+                        <div class="flex flex-col items-start gap-0.5">
+                          <h3 class="text-sm font-medium">
+                            {{ getOtherChatUser(chat) }}
+                          </h3>
+                          <div class="flex items-center gap-1">
+                            <i
+                              class="pi pi-check text-[7px] text-[#ADB5BD]"
+                            ></i>
+                            <p
+                              class="text-xs text-[#ADB5BD] truncate w-[150px] flex items-center gap-1"
+                            >
+                              <i
+                                v-if="chat?.lastMessage?.type === 'image'"
+                                class="pi pi-image"
+                              ></i>
+                              <i
+                                v-else-if="chat?.lastMessage?.type === 'video'"
+                                class="pi pi-video"
+                              ></i>
+                              <i
+                                v-else-if="chat?.lastMessage?.type === 'audio'"
+                                class="pi pi-music"
+                              ></i>
+                              <i
+                                v-else-if="chat?.lastMessage?.type === 'file'"
+                                class="pi pi-file"
+                              ></i>
+                              <span>
+                                {{
+                                  chat?.lastMessage?.type === "text"
+                                    ? chat?.lastMessage?.message
+                                    : chat?.lastMessage?.type === "image"
+                                    ? $t("profile.chats.image")
+                                    : chat?.lastMessage?.type === "video"
+                                    ? $t("profile.chats.video")
+                                    : chat?.lastMessage?.type === "audio"
+                                    ? $t("profile.chats.audio")
+                                    : $t("profile.chats.file")
+                                }}
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="flex flex-col items-end gap-1">
                         <p class="text-xs text-[#ADB5BD]">
-                          {{
-                            i18.locale.value == "ar"
-                              ? "صباح الخير"
-                              : "Good morning"
-                          }}
+                          {{ formattedDate(chat?.lastMessage?.created) }}
+                        </p>
+                        <p
+                          v-if="chat?.unreadCount > 0"
+                          class="text-xs bg-[#146AAB] p-1 w-5 h-5 text-white rounded-full text-center"
+                        >
+                          {{ chat?.unreadCount }}
                         </p>
                       </div>
                     </div>
-                  </div>
-                  <div class="flex flex-col items-center gap-1">
-                    <p class="text-xs text-[#ADB5BD]">
-                      {{ i18.locale.value == "ar" ? "اليوم" : "Today" }}
-                    </p>
-                    <p
-                      class="text-xs bg-[#146AAB] p-1 text-center w-5 h-5 rounded-full text-white"
-                    >
-                      1
-                    </p>
+                  </button>
+
+                  <div
+                    v-if="isLoadingChatList"
+                    class="text-center text-sm py-2"
+                  >
+                    {{ $t("generic.loading") }}
                   </div>
                 </div>
-              </button>
-              <!-- Message 2 -->
-              <button
-                class="flex flex-col gap-2 w-full mb-4 cursor-pointer hover:bg-gray-100 p-2 rounded-lgbutton"
-              >
-                <div class="flex justify-between items-center">
-                  <div class="flex gap-2 items-center">
-                    <Avatar
-                      :image="authStore.user?.avatar || person"
-                      shape="circle"
-                      size="large"
-                      class=""
-                    />
-                    <div
-                      class="flex flex-col items-center justify-center gap-0.5"
-                    >
-                      <h3 class="text-sm">
-                        {{
-                          i18.locale.value == "ar" ? "راكي ديفون" : "Raki Devon"
-                        }}
-                      </h3>
-                      <div class="flex items-center gap-1">
-                        <i class="pi pi-check text-[5px] text-[#ADB5BD]"></i>
-                        <p class="text-xs text-[#ADB5BD]">
-                          {{
-                            i18.locale.value == "ar"
-                              ? "كيف حالك؟"
-                              : "How is it going?"
-                          }}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="flex flex-col items-center gap-1">
-                    <p class="text-xs text-[#ADB5BD]">17/6</p>
-                    <p
-                      class="text-xs bg-[#146AAB] p-1 text-center w-5 h-5 rounded-full text-white"
-                    >
-                      1
-                    </p>
-                  </div>
-                </div>
-              </button>
-              <!-- Message 3 -->
-              <button
-                class="flex flex-col gap-2 w-full mb-4 cursor-pointer hover:bg-gray-100 p-2 rounded-lgbutton"
-              >
-                <div class="flex justify-between items-center">
-                  <div class="flex gap-2 items-center">
-                    <Avatar
-                      :image="authStore.user?.avatar || person"
-                      shape="circle"
-                      size="large"
-                      class=""
-                    />
-                    <div
-                      class="flex flex-col items-center justify-center gap-0.5"
-                    >
-                      <h3 class="text-sm">
-                        {{
-                          i18.locale.value == "ar" ? "راكي ديفون" : "Raki Devon"
-                        }}
-                      </h3>
-                      <div class="flex items-center gap-1">
-                        <i class="pi pi-check text-[5px] text-[#ADB5BD]"></i>
-                        <p class="text-xs text-[#ADB5BD]">
-                          {{
-                            i18.locale.value == "ar"
-                              ? "كيف حالك؟"
-                              : "How is it going?"
-                          }}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="flex flex-col items-center gap-1">
-                    <p class="text-xs text-[#ADB5BD]">17/6</p>
-                    <p
-                      class="text-xs bg-[#146AAB] p-1 text-center w-5 h-5 rounded-full text-white"
-                    >
-                      1
-                    </p>
-                  </div>
-                </div>
-              </button>
-              <!-- Message 4 -->
-              <button
-                class="flex flex-col gap-2 w-full mb-4 cursor-pointer hover:bg-gray-100 p-2 rounded-lg"
-              >
-                <div class="flex justify-between items-center">
-                  <div class="flex gap-2 items-center">
-                    <Avatar
-                      :image="authStore.user?.avatar || person"
-                      shape="circle"
-                      size="large"
-                      class=""
-                    />
-                    <div
-                      class="flex flex-col items-center justify-center gap-0.5"
-                    >
-                      <h3 class="text-sm">
-                        {{
-                          i18.locale.value == "ar"
-                            ? "أثاليا بوتري"
-                            : "Athalia Putri"
-                        }}
-                      </h3>
-                      <div class="flex items-center gap-1">
-                        <i class="pi pi-check text-[5px] text-[#ADB5BD]"></i>
-                        <p class="text-xs text-[#ADB5BD]">
-                          {{
-                            i18.locale.value == "ar"
-                              ? "صباح الخير"
-                              : "Good morning"
-                          }}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="flex flex-col items-center gap-1">
-                    <p class="text-xs text-[#ADB5BD]">
-                      {{ i18.locale.value == "ar" ? "اليوم" : "Today" }}
-                    </p>
-                    <p
-                      class="text-xs bg-[#146AAB] p-1 text-center w-5 h-5 rounded-full text-white"
-                    >
-                      1
-                    </p>
-                  </div>
-                </div>
-              </button>
-              <!-- Message 5 -->
-              <button
-                class="flex flex-col gap-2 w-full mb-4 cursor-pointer hover:bg-gray-100 p-2 rounded-lg"
-              >
-                <div class="flex justify-between items-center">
-                  <div class="flex gap-2 items-center">
-                    <Avatar
-                      :image="authStore.user?.avatar || person"
-                      shape="circle"
-                      size="large"
-                      class=""
-                    />
-                    <div
-                      class="flex flex-col items-center justify-center gap-0.5"
-                    >
-                      <h3 class="text-sm">
-                        {{
-                          i18.locale.value == "ar" ? "راكي ديفون" : "Raki Devon"
-                        }}
-                      </h3>
-                      <div class="flex items-center gap-1">
-                        <i class="pi pi-check text-[5px] text-[#ADB5BD]"></i>
-                        <p class="text-xs text-[#ADB5BD]">
-                          {{
-                            i18.locale.value == "ar"
-                              ? "كيف حالك؟"
-                              : "How is it going?"
-                          }}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="flex flex-col items-center gap-1">
-                    <p class="text-xs text-[#ADB5BD]">17/6</p>
-                    <p
-                      class="text-xs bg-[#146AAB] p-1 text-center w-5 h-5 rounded-full text-white"
-                    >
-                      1
-                    </p>
-                  </div>
-                </div>
-              </button>
-              <!-- Message 6 -->
-              <button
-                class="flex flex-col gap-2 w-full mb-4 cursor-pointer hover:bg-gray-100 p-2 rounded-lg"
-              >
-                <div class="flex justify-between items-center">
-                  <div class="flex gap-2 items-center">
-                    <Avatar
-                      :image="authStore.user?.avatar || person"
-                      shape="circle"
-                      size="large"
-                      class=""
-                    />
-                    <div
-                      class="flex flex-col items-center justify-center gap-0.5"
-                    >
-                      <h3 class="text-sm">
-                        {{
-                          i18.locale.value == "ar"
-                            ? "أثاليا بوتري"
-                            : "Athalia Putri"
-                        }}
-                      </h3>
-                      <div class="flex items-center gap-1">
-                        <i class="pi pi-check text-[5px] text-[#ADB5BD]"></i>
-                        <p class="text-xs text-[#ADB5BD]">
-                          {{
-                            i18.locale.value == "ar"
-                              ? "صباح الخير"
-                              : "Good morning"
-                          }}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="flex flex-col items-center gap-1">
-                    <p class="text-xs text-[#ADB5BD]">
-                      {{ i18.locale.value == "ar" ? "اليوم" : "Today" }}
-                    </p>
-                    <p
-                      class="text-xs bg-[#146AAB] p-1 text-center w-5 h-5 rounded-full text-white"
-                    >
-                      1
-                    </p>
-                  </div>
-                </div>
-              </button>
+              </div>
             </div>
           </div>
         </div>
         <!-- Message 1 Details -->
         <div
-          v-if="activeTab === 'Athalia Putri'"
+          v-if="activeTab === 'messages' && selectedChatUserId"
           class="bg-white rounded-lg h-fit flex-1"
         >
           <div
@@ -1102,62 +1159,140 @@ onMounted(async () => {
           >
             <div class="flex items-center gap-2">
               <button
-                @click="activeTab = 'messages'"
+                @click="handleChatBackButton"
                 class="bg-[#0d548bfe] rounded-lg px-2 py-1 cursor-pointer"
               >
                 <i class="pi pi-angle-right text-white"></i>
               </button>
               <p class="text-white text-sm">
-                {{ i18.locale.value == "ar" ? "اسم المالك" : "Owner Name" }}
+                {{ chatUser?.name }}
               </p>
             </div>
             <i class="pi pi-phone text-white"></i>
           </div>
-          <div class="flex flex-col gap-4 p-4">
-            <!-- Other person's message (left) -->
-            <div class="flex justify-start">
-              <div class="bg-[#F5F6F7] rounded-b-lg rounded-tl-lg p-2 max-w-xs">
-                <p class="text-black">
-                  {{
-                    i18.locale.value == "ar"
-                      ? "محتوى مقروء لصفحة عند النظر إلى تخطيطها"
-                      : "Readable content of a page when looking at it's layout"
-                  }}
+
+          <div
+            ref="messagesContainer"
+            class="flex-1 h-[400px] overflow-y-auto p-4 flex flex-col gap-2"
+            @scroll="handleScroll"
+          >
+            <div
+              v-for="msg in chatMessages"
+              :key="msg.id"
+              :class="
+                msg.sender_id === currentUser?.id
+                  ? 'justify-end'
+                  : 'justify-start'
+              "
+              class="flex"
+            >
+              <div
+                :class="[
+                  'p-2 max-w-xs break-words',
+                  msg.sender_id === currentUser?.id
+                    ? 'bg-[#146AAB] text-white rounded-b-lg rounded-tr-lg'
+                    : 'bg-[#F5F6F7] text-black rounded-b-lg rounded-tl-lg',
+                ]"
+              >
+                <template v-if="msg.type === 'text'">
+                  <p>{{ msg.message }}</p>
+                </template>
+                <template v-else-if="msg.type === 'image'">
+                  <img
+                    :src="`${MEDIA_URL}/${msg.message}`"
+                    class="rounded max-h-48"
+                  />
+                </template>
+                <template v-else-if="msg.type === 'video'">
+                  <video
+                    :src="`${MEDIA_URL}/${msg.message}`"
+                    class="rounded max-h-48"
+                    controls
+                  ></video>
+                </template>
+                <template v-else-if="msg.type === 'audio'">
+                  <audio :src="`${MEDIA_URL}/${msg.message}`" controls></audio>
+                </template>
+                <p class="text-xs text-right mt-1">
+                  {{ formatTime(msg?.created) }}
                 </p>
-                <p class="text-black text-xs text-right">2:14 pm</p>
               </div>
             </div>
 
-            <!-- Your message (right) -->
-            <div class="flex justify-end mb-50">
-              <div
-                class="bg-[#146AAB] text-white rounded-b-lg rounded-tr-lg p-2 max-w-xs"
-              >
-                <p>
-                  {{
-                    i18.locale.value == "ar"
-                      ? "محتوى مقروء لصفحة عند النظر إلى تخطيطها"
-                      : "Readable content of a page when looking at it's layout"
-                  }}
-                </p>
-                <p class="text-xs text-right">2:14 pm</p>
-              </div>
+            <div v-if="isLoadingMessages" class="text-center text-sm py-2">
+              {{ $t("generic.loading") }}
             </div>
           </div>
-          <div class="flex items-center gap-1 p-4">
-            <i class="pi pi-image text-[#c0c0c1]"></i>
-            <i class="pi pi-folder text-[#c0c0c1]"></i>
-            <i class="pi pi-camera text-[#c0c0c1]"></i>
-            <input
-              type="text"
-              :placeholder="
-                i18.locale.value == 'ar'
-                  ? 'اكتب رسالة ...'
-                  : 'Type a message...'
-              "
-              class="bg-[##c0c0c1] px-2 py-1 rounded-lg border border-[#c0c0c1] w-full"
-            />
-            <i class="pi pi-send text-[#c0c0c1]"></i>
+
+          <div class="flex flex-col gap-2 p-4">
+            <div v-if="mediaPreviewUrl" class="relative mb-2">
+              <div
+                class="flex items-center justify-between bg-gray-100 p-2 rounded-lg"
+              >
+                <template v-if="mediaFile?.type.startsWith('image/')">
+                  <img :src="mediaPreviewUrl" class="max-h-32 rounded" />
+                </template>
+                <template v-else-if="mediaFile?.type.startsWith('video/')">
+                  <video
+                    :src="mediaPreviewUrl"
+                    class="max-h-32 rounded"
+                    controls
+                  ></video>
+                </template>
+                <template v-else-if="mediaFile?.type.startsWith('audio/')">
+                  <audio :src="mediaPreviewUrl" controls></audio>
+                </template>
+                <button
+                  @click="cancelMedia"
+                  class="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                >
+                  &times;
+                </button>
+              </div>
+            </div>
+
+            <div
+              class="flex items-center gap-2 p-3 bg-white rounded-full shadow"
+            >
+              <!-- Text input -->
+              <input
+                v-model="newMessage"
+                :disabled="mediaFile"
+                type="text"
+                :placeholder="$t('profile.chats.type_message')"
+                class="flex-1 px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              />
+
+              <!-- Send button -->
+              <button
+                @click="
+                  mediaFile
+                    ? sendMediaMessage()
+                    : newMessage.trim()
+                    ? sendMessage()
+                    : null
+                "
+                class="flex items-center justify-center w-10 h-10 bg-blue-500 hover:bg-blue-600 text-white rounded-full transition"
+              >
+                <i class="pi pi-send"></i>
+              </button>
+
+              <!-- Media attach button -->
+              <button
+                @click="$refs.mediaInput.click()"
+                class="flex items-center justify-center w-10 h-10 bg-gray-200 hover:bg-gray-300 rounded-full transition"
+              >
+                <i class="pi pi-image"></i>
+              </button>
+
+              <input
+                type="file"
+                ref="mediaInput"
+                @change="handleMediaSelect"
+                accept="image/*,video/*,audio/*"
+                class="hidden"
+              />
+            </div>
           </div>
         </div>
         <!-- permissions -->
@@ -1166,7 +1301,7 @@ onMounted(async () => {
             <div class="flex justify-between items-center">
               <p class="text-xs w-64">
                 {{
-                  i18.locale.value == "ar"
+                  currentLocale == "ar"
                     ? "إذن إشعارات التسوق عبر الإنترنت للسلع المستعملة والجديدة"
                     : "Second Hand and New Shopping Web Notification Permission"
                 }}
@@ -1178,14 +1313,14 @@ onMounted(async () => {
               <div class="flex flex-col w-64">
                 <p class="text-xs mb-2 font-bold">
                   {{
-                    i18.locale.value == "ar"
+                    currentLocale == "ar"
                       ? "معلومات قراءة الرسائل"
                       : "Message Read Information"
                   }}
                 </p>
                 <p class="text-[8px]">
                   {{
-                    i18.locale.value == "ar"
+                    currentLocale == "ar"
                       ? "يمكن للأشخاص الذين فعّلوا إشعارات قراءة الرسائل معرفة ما إذا تمت قراءة رسائلهم أثناء مراسلتهم. إذا كنت لا ترغب في إرسال هذه المعلومات إلى الشخص الذي تراسله، يمكنك إيقاف هذا الإعداد. إذا أوقفت هذا الإعداد، فلن تتمكن من رؤية إشعارات قراءة الرسائل التي ترسلها."
                       : "People who have message read notifications turned on can see whether their messages have been read while messaging each other. If you do not want this information to be sent to the person you are messaging, you can turn this off setting. If you turn this setting off, you will not be able to see the read notifications of the messages you send."
                   }}
@@ -1322,6 +1457,10 @@ main {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+div[ref="messagesContainer"] {
+  scroll-behavior: smooth;
 }
 
 .card {

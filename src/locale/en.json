@@ -80,6 +80,16 @@
     },
     "featured": {
       "no_featured_ads": "You have no featured ads."
+    },
+    "chats": {
+      "search": "Search by name",
+      "yesterday": "Yesterday",
+      "no_chats": "No chats available",
+      "type_message": "Type a message...",
+      "image": "Image",
+      "video": "Video",
+      "audio": "Audio",
+      "file": "File"
     }
   },
   "empty": {

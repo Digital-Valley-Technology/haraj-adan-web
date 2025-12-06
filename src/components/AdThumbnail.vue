@@ -110,6 +110,7 @@
             {{ t("adDetails.call") }}
           </button>
           <button
+            @click="handleNavigation"
             class="bg-[#FFE800] cursor-pointer hover:bg-[#e6d400] transition py-2 w-full rounded-md text-sm font-medium"
           >
             {{ t("adDetails.send-message") }}
@@ -337,6 +338,7 @@ import { FreeMode, Thumbs, Navigation } from "swiper/modules";
 import { ref, computed, toRef } from "vue";
 import { useI18n } from "vue-i18n";
 import dayjs from "dayjs";
+import { useRouter } from "vue-router";
 
 import "swiper/css";
 import "swiper/css/free-mode";
@@ -348,6 +350,7 @@ import { showError, showSuccess } from "../utils/notifications";
 import requestService from "../services/api/requestService";
 import DeleteDialog from "./DeleteDialog.vue";
 
+const router = useRouter();
 const props = defineProps({
   ad: Object,
   comments: Array,
@@ -380,6 +383,13 @@ const isLiked = computed(() => {
     (like) => like.user_id === currentUser.value.id
   );
 });
+
+const handleNavigation = () => {
+  router.push({
+    name: "user-profile",
+    query: { userId: adData?.value?.user_id },
+  });
+};
 
 function onPageChange(event) {
   const newPage = event.page + 1; // PrimeVue pagination starts from 0
