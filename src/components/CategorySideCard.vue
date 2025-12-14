@@ -1,12 +1,10 @@
 <template>
   <div class="category-side">
-    <!-- Category Item (collapsible all screens) -->
     <div class="category-card">
       <button
         @click="toggleCategory(category.id)"
         class="flex justify-between items-center w-full cursor-pointer hover:bg-[#F5F6F7] p-2 rounded-md"
       >
-        <!-- Left: Icon + Name -->
         <div class="flex items-center gap-4">
           <span
             class="bg-[#F5F6F7] flex items-center justify-center w-8 h-8 rounded-full"
@@ -21,11 +19,10 @@
 
           <h4 class="uppercase text-sm font-medium">
             {{ i18.locale.value === "ar" ? category?.name : category?.name_en }}
-            <span class="text-gray-400">({{ category?.adsCount || 0 }})</span>
+            <span class="text-gray-400">({{ totalChildAds || 0 }})</span>
           </h4>
         </div>
 
-        <!-- Right: Arrow Icons -->
         <i
           :class="[
             'pi text-lg transition-transform duration-200',
@@ -38,7 +35,6 @@
         ></i>
       </button>
 
-      <!-- Collapsible Content -->
       <transition name="slide-fade">
         <ul
           v-if="activeTab === category.id"
@@ -71,10 +67,12 @@
 
 <script setup>
 import { useI18n } from "vue-i18n";
-import { ref } from "vue";
+// استيراد computed لإنشاء خاصية محسوبة
+import { ref, computed } from "vue";
 import { MEDIA_URL } from "../services/axios";
 
-defineProps(["category"]);
+// تم تعريف خاصية category كخاصية (prop) للمُكوّن
+const props = defineProps(["category"]);
 
 const activeTab = ref(null);
 const i18 = useI18n();
@@ -82,6 +80,23 @@ const i18 = useI18n();
 function toggleCategory(id) {
   activeTab.value = activeTab.value === id ? null : id;
 }
+
+/**
+ * خاصية محسوبة لحساب مجموع إعلانات الأصناف الفرعية.
+ * تستخدم الدالة reduce لتجميع قيم adsCount من كل صنف فرعي.
+ */
+const totalChildAds = computed(() => {
+  // 1. تحقق من وجود الأصناف الفرعية (الأبناء)
+  if (props.category?.children && Array.isArray(props.category.children)) {
+    // 2. استخدام reduce لحساب المجموع
+    return props.category.children.reduce((total, child) => {
+      // جمع قيمة adsCount لكل ابن، أو إضافة 0 إذا لم تكن موجودة
+      return total + (child?.adsCount || 0);
+    }, 0); // البدء من مجموع ابتدائي قيمته 0
+  }
+  // 3. إذا لم يكن هناك أبناء، يكون المجموع 0
+  return 0;
+});
 </script>
 
 <style scoped>

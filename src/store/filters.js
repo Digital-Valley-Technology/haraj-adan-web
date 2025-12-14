@@ -46,20 +46,55 @@ export const useFiltersStore = defineStore("filters", {
       try {
         const res = await requestService.getAll("/categories/filter-page");
         this.categories = res?.data;
-        this.selectedCategory = res?.data?.[0] || {};
+        // this.selectedCategory = res?.data?.[0] || {};
+        if (
+          !this.selectedCategory ||
+          !Object.keys(this.selectedCategory).length
+        ) {
+          this.selectedCategory = {};
+        }
       } catch (error) {
         console.error("Error fetching categories:", error);
       }
     },
 
+    setSelectedCategoryById(categoryId) {
+      if (!categoryId) {
+        this.selectedCategory = {};
+        return;
+      }
+
+      const categoryIdNum = Number(categoryId);
+      const foundCategory = this.categories.find(
+        (cat) => cat.id === categoryIdNum
+      );
+
+      if (foundCategory) {
+        // Use the existing action to apply full object and reset sub-filters
+        this.setSelectedCategory(foundCategory);
+      } else {
+        console.warn(`Category ID ${categoryId} not found in store.`);
+        // Optionally, you might clear filters here if the ID is invalid
+      }
+    },
+
     // 🔹 Category select
+    // setSelectedCategory(category) {
+    //   this.selectedCategory = category;
+    //   this.selectedAttributes = {};
+    //   this.selectedCheckboxes = {};
+    //   this.minPrice = null;
+    //   this.maxPrice = null;
+    //   this.selectedCategory = null;
+    // },
+
     setSelectedCategory(category) {
       this.selectedCategory = category;
       this.selectedAttributes = {};
       this.selectedCheckboxes = {};
       this.minPrice = null;
       this.maxPrice = null;
-      this.selectedCategory = null;
+      this.selectedCurrency = null; // Corrected: was accidentally resetting selectedCategory
     },
 
     // 🔹 Attribute filters (radio style)

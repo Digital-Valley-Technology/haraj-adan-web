@@ -592,8 +592,8 @@
 <script setup>
 import AppLayout from "../Layout/AppLayout.vue";
 import { useI18n } from "vue-i18n";
-import { ref, computed, onMounted } from "vue";
-import { useRouter } from "vue-router";
+import { ref, computed, onMounted, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { useFiltersStore } from "../store/filters";
 import { MEDIA_URL } from "../services/axios";
 import dayjs from "dayjs";
@@ -601,6 +601,7 @@ import AdsMapPins from "../components/AdsMapPins.vue";
 
 const { t, locale } = useI18n();
 const router = useRouter();
+const route = useRoute();
 
 const filtersStore = useFiltersStore();
 
@@ -608,6 +609,10 @@ const activeButtonList = ref("list");
 
 const currentLocale = computed(() => locale.value || "ar");
 const routeQuery = computed(() => router.currentRoute.value?.query?.q || "");
+const initialCategoryId = computed(() => {
+  const id = route.query.categoryId;
+  return id ? Number(id) : null;
+});
 
 const visible = ref(false);
 
@@ -723,6 +728,23 @@ const getAdCoordinates = (ad) => {
 const categoriesFilter = computed(() => filtersStore.getCategories);
 const selectedCategory = computed(() => filtersStore.getSelectedCategory);
 const currencies = computed(() => filtersStore.getCurrencies);
+
+watch(
+  categoriesFilter,
+  (newCategories) => {
+    const id = initialCategoryId.value;
+
+    // Check if ID exists, categories are loaded, and the category filter hasn't been set yet
+    if (id && newCategories?.length > 0 && !filtersStore.selectedCategory?.id) {
+      // Use the new store action to find and set the category object
+      filtersStore.setSelectedCategoryById(id);
+
+      // After setting the category, fetch the ads immediately with the new filter
+      filtersStore.fetchAds(routeQuery.value);
+    }
+  },
+  { immediate: true }
+);
 
 onMounted(() => {
   filtersStore.fetchCategories();

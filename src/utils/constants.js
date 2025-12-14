@@ -113,6 +113,12 @@ export const sidebarItems = [
         permissions: ["dashboard.support.read", "dashboard.support.write"],
       },
       {
+        label: "sidebar.monitor_messages",
+        icon: "pi pi-headphones",
+        link: "/dashboard/monitor-messages",
+        permissions: ["dashboard.support.read", "dashboard.support.write"],
+      },
+      {
         label: "sidebar.settings",
         icon: "pi pi-cog",
         link: "/dashboard/settings",

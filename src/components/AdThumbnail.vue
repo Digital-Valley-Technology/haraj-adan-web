@@ -68,7 +68,7 @@
 
         <div v-if="visibleAttributes.length" class="divide-y">
           <div
-            v-for="(attr, index) in visibleAttributes"
+            v-for="(attr, index) in groupedAttributes"
             :key="index"
             class="flex justify-between items-center py-3"
           >
@@ -129,8 +129,7 @@
             ></i>
           </button>
           <button
-            v-if="currentUser?.id"
-            @click="toggleLiked"
+            @click="handleLikeClick"
             class="bg-gray-200 py-2 px-4 rounded-md hover:bg-gray-300 transition flex items-center gap-1"
           >
             <i
@@ -298,14 +297,14 @@
             </span>
 
             <!-- Delete button only for user's own comment -->
-            <a
+            <!-- <a
               role="button"
               v-if="comment?.users?.id === currentUser?.id"
               @click="processDelete(comment.id)"
               class="text-red-500 hover:text-red-700 text-xs me-2 cursor-pointer"
             >
               {{ t("generic.delete") }}
-            </a>
+            </a> -->
           </div>
         </div>
       </div>
@@ -346,7 +345,7 @@ import "swiper/css/navigation";
 import "swiper/css/thumbs";
 import { MEDIA_URL } from "../services/axios";
 import { useAuthStore } from "../store/auth";
-import { showError, showSuccess } from "../utils/notifications";
+import { showError, showInfo, showSuccess } from "../utils/notifications";
 import requestService from "../services/api/requestService";
 import DeleteDialog from "./DeleteDialog.vue";
 
@@ -376,6 +375,33 @@ const rows = toRef(props, "rows"); // comments per page
 const comments = toRef(props, "comments");
 
 const currentUser = computed(() => authStore.user);
+const groupedAttributes = computed(() => {
+  const groups = {};
+
+  (adData.value?.ad_attributes || []).forEach((attr) => {
+    const attrId = attr.category_attribute_id;
+
+    if (!groups[attrId]) {
+      groups[attrId] = {
+        category_attributes: attr.category_attributes,
+        text: attr.text,
+        ad_attribute_options: [],
+      };
+    }
+
+    // Collect text (for inputs like number/text fields)
+    if (attr.text) {
+      groups[attrId].text = attr.text;
+    }
+
+    // Collect options
+    if (attr.ad_attribute_options?.length) {
+      groups[attrId].ad_attribute_options.push(...attr.ad_attribute_options);
+    }
+  });
+
+  return Object.values(groups);
+});
 
 const isLiked = computed(() => {
   if (!adData.value || !currentUser.value) return false;
@@ -494,6 +520,16 @@ const toggleFavorite = () => {
 
 const toggleLiked = () => {
   emit("toggle-like", { adId, isLiked: isLiked.value });
+};
+
+const handleLikeClick = async () => {
+  if (!currentUser.value?.id) {
+    showInfo(t("adDetails.must-login-first"));
+    return;
+  }
+
+  // user is logged in → proceed normally
+  toggleLiked();
 };
 
 function callUser() {

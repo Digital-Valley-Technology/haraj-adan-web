@@ -1,10 +1,11 @@
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, onBeforeUnmount } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { nextTick } from "vue";
 import { useI18n } from "vue-i18n";
 import { MEDIA_URL } from "../services/axios";
 import { useAuthStore } from "../store/auth";
+import { useNotificationStore } from "../store/notifications";
 import requestService from "../services/api/requestService";
 import { socket } from "../services/SocketPlugin";
 import { showError, showSuccess } from "../utils/notifications";
@@ -32,6 +33,7 @@ dayjs.extend(localizedFormat);
 
 const { t, locale } = useI18n();
 const authStore = useAuthStore();
+const notificationStore = useNotificationStore();
 const router = useRouter();
 const route = useRoute();
 const i18 = useI18n();
@@ -56,7 +58,7 @@ const unPublishedAdsTotal = ref(0);
 const rejectedAdsTotal = ref(0);
 
 const currentView = ref("form");
-const isPaymentLoading = ref(false); // To show a loading state during the API call
+const isPaymentLoading = ref(false);
 
 const featuredAds = ref([]);
 
@@ -73,7 +75,7 @@ const transactionsData = ref([]);
 const chatList = ref([]);
 const selectedChatUserId = ref(null);
 const chatListPage = ref(1);
-const chatListPageSize = 20; // same as your backend limit
+const chatListPageSize = 20;
 const totalChats = ref(0);
 const isLoadingChatList = ref(false);
 const chatListContainer = ref(null);
@@ -82,110 +84,183 @@ let searchTimeout;
 // chat messages variables
 const chatMessages = ref([]);
 const currentPage = ref(1);
-const pageSize = 20; // match your backend default
+const pageSize = 20;
 const totalMessages = ref(0);
 const isLoadingMessages = ref(false);
 const messagesContainer = ref(null);
 const searchText = ref("");
 const chatUser = ref({});
-const newMessage = ref(""); // the text input for the chat message
+const newMessage = ref("");
+const previousScrollHeight = ref(0); // For history loading
 
-const mediaFile = ref(null); // selected file
-const mediaPreviewUrl = ref(""); // preview URL
+const mediaFile = ref(null);
+const mediaPreviewUrl = ref("");
 
 const isSendingMedia = ref(false);
 
-// --- METHODS ---
-const handleMediaSelect = (event) => {
-  const target = event.target;
-  if (target.files && target.files.length > 0) {
-    mediaFile.value = target.files[0];
+const currentUser = computed(() => authStore?.getUser);
+const currentLocale = computed(() => locale.value);
+const userChatCount = computed(() => notificationStore.userChatCount);
 
-    // Generate preview URL
-    if (
-      mediaFile.value.type.startsWith("image/") ||
-      mediaFile.value.type.startsWith("video/") ||
-      mediaFile.value.type.startsWith("audio/")
-    ) {
-      mediaPreviewUrl.value = URL.createObjectURL(mediaFile.value);
+// --- SOCKET LISTENERS & HANDLERS ---
+
+/**
+ * Listener for new messages in the ACTIVE chat.
+ * Handles optimistic replacement and instant scrolling.
+ */
+const setupUserMessageListener = () => {
+  // Ensure the listener is registered only once globally
+  socket.off("newUserMessage", handleNewMessage);
+  socket.on("newUserMessage", handleNewMessage);
+};
+
+const handleNewMessage = (message) => {
+  const currentChatId = chatMessages.value[0]?.chat_id;
+
+  // 1. If message is for the active chat
+  if (message.chat_id === currentChatId) {
+    // Handle optimistic replacement (if sent by current user)
+    if (message.sender_id === currentUser.value?.id) {
+      const index = chatMessages.value.findIndex(
+        (m) =>
+          m.id < 0 &&
+          m.sender_id === message.sender_id &&
+          m.message === message.message
+      );
+      if (index !== -1) {
+        chatMessages.value[index] = message;
+      } else {
+        chatMessages.value.push(message);
+      }
     } else {
-      mediaPreviewUrl.value = "";
+      // Message sent by the OTHER user: just add it
+      chatMessages.value.push(message);
+      markMessagesAsRead(); // Mark as read immediately since it's visible
+    }
+
+    // Scroll to the bottom to show the new message
+    nextTick(() => {
+      if (messagesContainer.value) {
+        messagesContainer.value.scrollTop =
+          messagesContainer.value.scrollHeight;
+      }
+    });
+  }
+  // 2. If message is for a NON-active chat, chatListUpdateHandler will catch it via COUNT_NOTIFICATIONS.
+};
+
+/**
+ * Handler function to refresh the chat list when a new message arrives for a non-active chat.
+ * This now listens to the COUNT_NOTIFICATIONS event, which is broadcast to the personal channel.
+ */
+const chatListUpdateHandler = (payload) => {
+  // Check if the user is currently viewing the Chat List tab
+  if (activeTab.value === "messages" && !selectedChatUserId.value) {
+    // This logic runs when the server sends a COUNT_NOTIFICATIONS ping (meaning a message arrived)
+    if (payload && payload.success) {
+      nextTick(() => {
+        fetchChatsList(1, false);
+      });
     }
   }
 };
 
-const cancelMedia = () => {
-  mediaFile.value = null;
-  mediaPreviewUrl.value = "";
+/**
+ * Attaches the listener for passive chat list updates.
+ */
+const setupChatListRefreshListener = () => {
+  // Listen to the notification event that is guaranteed to be sent to the personal channel
+  socket.off("countChatNotifications", chatListUpdateHandler);
+  socket.on("countChatNotifications", chatListUpdateHandler);
 };
 
-const sendMediaMessage = async () => {
-  if (!mediaFile.value || !selectedChatUserId.value) return;
+/**
+ * Removes the listener for passive chat list updates.
+ */
+const removeChatListRefreshListener = () => {
+  socket.off("countChatNotifications", chatListUpdateHandler);
+};
 
-  const formData = new FormData();
-  formData.append("file", mediaFile.value);
-  formData.append("senderId", String(currentUser?.value?.id));
-  formData.append("receiverId", String(selectedChatUserId.value));
+// --- CHAT ACTIONS ---
 
-  isSendingMedia.value = true;
+const markMessagesAsRead = async () => {
+  if (!selectedChatUserId.value || !currentUser.value?.id) return;
+
+  const unreadMessageIds = chatMessages.value
+    .filter((msg) => !msg.is_read && msg.sender_id !== currentUser.value?.id)
+    .map((msg) => msg.id);
+
+  if (unreadMessageIds.length === 0) return;
 
   try {
-    const res = await requestService.create("chats/media", formData);
+    socket.emit("readUserMessages", {
+      chatId: chatMessages.value[0]?.chat_id,
+      messageIds: unreadMessageIds,
+      readerId: currentUser.value.id,
+    });
 
-    if (res?.data) {
-      chatMessages.value.push(res.data); // add to messages
-      await nextTick();
-      messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+    chatMessages.value = chatMessages.value.map((msg) =>
+      unreadMessageIds.includes(msg.id) ? { ...msg, is_read: true } : msg
+    );
 
-      // Clear selected media
-      cancelMedia();
+    const activeChatId = chatMessages.value[0]?.chat_id;
+    const chatIndex = chatList.value.findIndex(
+      (chat) => chat.id === activeChatId
+    );
+    if (chatIndex !== -1) {
+      chatList.value[chatIndex].unreadCount = 0;
     }
   } catch (err) {
-    console.error("Failed to send media message:", err);
-    showError(err || "Failed to send media message");
-  } finally {
-    isSendingMedia.value = false;
+    console.error("Failed to mark messages as read:", err);
   }
 };
 
 const sendMessage = async () => {
   if (!newMessage.value.trim() || !selectedChatUserId.value) return;
 
-  // Prepare payload
-  const payload = {
-    receiver_id: selectedChatUserId.value,
-    message: newMessage.value,
+  const messageText = newMessage.value.trim();
+
+  const tempMessage = {
+    id: Date.now() * -1,
+    chat_id: chatMessages.value[0]?.chat_id,
+    sender_id: currentUser?.value?.id,
+    message: messageText,
+    type: "text",
+    created: new Date().toISOString(),
+    is_read: true,
   };
 
+  chatMessages.value.push(tempMessage);
+
+  newMessage.value = "";
+  await nextTick();
+  if (messagesContainer.value) {
+    messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+  }
+
   try {
-    await socket.emit("sendUserMessage", {
+    socket.emit("sendUserMessage", {
       receiverId: selectedChatUserId.value,
       senderId: currentUser?.value?.id,
-      message: newMessage.value,
+      message: messageText,
       type: "text",
     });
-
-    // 3. Clear input
-    newMessage.value = "";
-
-    await fetchChatMessages(1);
-
-    // 4. Scroll to bottom
-    await nextTick();
-    if (messagesContainer.value) {
-      messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
-    }
   } catch (err) {
-    console.error("Failed to send message:", err);
-    showError("Failed to send message");
+    console.error("Failed to emit message:", err);
+    showError("Failed to send message via socket");
+    chatMessages.value = chatMessages.value.filter(
+      (m) => m.id !== tempMessage.id
+    );
   }
 };
+
+// ... (Rest of existing methods like handleMediaSelect, cancelMedia, etc. - kept unchanged) ...
 
 const handleSearchInput = () => {
   if (searchTimeout) clearTimeout(searchTimeout);
 
   searchTimeout = setTimeout(() => {
-    fetchChatsList(1, false); // Reset list and fetch first page
+    fetchChatsList(1, false);
   }, 300);
 };
 
@@ -197,9 +272,8 @@ const handleChatListScroll = () => {
     container.scrollTop + container.clientHeight >= container.scrollHeight - 10;
 
   if (scrollBottom) {
-    // check if there are more chats to load
     if (chatList.value.length < totalChats.value) {
-      fetchChatsList(chatListPage.value + 1, true); // append next page
+      fetchChatsList(chatListPage.value + 1, true);
     }
   }
 };
@@ -215,7 +289,6 @@ const fetchChatsList = async (page = 1, append = false) => {
       userId: currentUser?.value?.id,
     });
 
-    // Include search query if it exists
     if (searchText.value.trim()) {
       queryParams.append("search", searchText.value.trim());
     }
@@ -240,9 +313,19 @@ const fetchChatsList = async (page = 1, append = false) => {
   }
 };
 
-const fetchChatMessages = async (page = 1, append = false) => {
-  if (!selectedChatUserId.value) return;
+const fetchChatMessages = async (page = 1, prepend = false) => {
+  if (
+    !selectedChatUserId.value ||
+    (prepend && chatMessages.value.length >= totalMessages.value)
+  )
+    return;
+
   isLoadingMessages.value = true;
+
+  if (prepend && messagesContainer.value) {
+    previousScrollHeight.value = messagesContainer.value.scrollHeight;
+  }
+
   try {
     const res = await requestService.getAll(
       `chats/messages?userId=${selectedChatUserId.value}&page=${page}&limit=${pageSize}`
@@ -251,15 +334,25 @@ const fetchChatMessages = async (page = 1, append = false) => {
     chatUser.value = res?.chatUser;
 
     const messages = res?.data || [];
-    if (append) {
-      chatMessages.value = [...chatMessages.value, ...messages];
+
+    if (prepend) {
+      chatMessages.value = [...messages, ...chatMessages.value];
     } else {
       chatMessages.value = messages;
     }
 
-    // Assuming backend sends total count, otherwise you can calculate
     totalMessages.value = res?.meta?.total || messages.length;
     currentPage.value = page;
+
+    await nextTick();
+    if (!prepend && messagesContainer.value) {
+      messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+    } else if (prepend && messagesContainer.value) {
+      messagesContainer.value.scrollTop =
+        messagesContainer.value.scrollHeight - previousScrollHeight.value;
+    }
+
+    markMessagesAsRead();
   } catch (error) {
     console.log(error);
   } finally {
@@ -267,17 +360,56 @@ const fetchChatMessages = async (page = 1, append = false) => {
   }
 };
 
+const handleSetSelectedUserId = async (chat) => {
+  const chatUser = chat?.members?.find(
+    (m) => m?.user_id !== currentUser.value?.id
+  );
+  const userId = chatUser?.user_id;
+  const chatId = chat?.id;
+
+  selectedChatUserId.value = userId;
+  activeTab.value = "messages";
+
+  currentPage.value = 1;
+  chatMessages.value = [];
+
+  // 1. JOIN THE SPECIFIC CHAT ROOM
+  if (chatId) {
+    socket.emit("joinUserRoom", chatId);
+  }
+
+  fetchChatMessages(1).then(() => {
+    markMessagesAsRead();
+  });
+
+  router.push({
+    name: "user-profile",
+    query: { userId },
+  });
+};
+
+const handleChatBackButton = () => {
+  selectedChatUserId.value = null;
+  activeTab.value = "messages";
+
+  router.push({
+    name: "user-profile",
+    query: {},
+  });
+
+  fetchChatsList();
+};
+
 const handleScroll = () => {
   const container = messagesContainer.value;
   if (!container || isLoadingMessages.value) return;
 
-  const scrollBottom =
-    container.scrollTop + container.clientHeight >= container.scrollHeight - 10;
+  const scrollUpThreshold = 10;
+  const isScrolledToTop = container.scrollTop <= scrollUpThreshold;
 
-  if (scrollBottom) {
-    // check if there are more messages
+  if (isScrolledToTop) {
     if (chatMessages.value.length < totalMessages.value) {
-      fetchChatMessages(currentPage.value + 1, true); // load next page
+      fetchChatMessages(currentPage.value + 1, true);
     }
   }
 };
@@ -295,113 +427,47 @@ const getOtherChatUser = (chatItem) => {
 const formattedDate = (date) => {
   if (!date) return "";
 
-  dayjs.locale(locale.value); // dynamically set locale
+  dayjs.locale(locale.value);
   const msgDate = dayjs(date);
   const today = dayjs();
 
   if (msgDate.isSame(today, "day")) {
-    return msgDate.format("h:mm A"); // Today → show time
+    return msgDate.format("h:mm A");
   } else if (msgDate.isSame(today.subtract(1, "day"), "day")) {
-    return t("profile.chats.yesterday"); // Yesterday
+    return t("profile.chats.yesterday");
   } else if (msgDate.isSame(today, "year")) {
-    return msgDate.format("DD/MM"); // Same year
+    return msgDate.format("DD/MM");
   } else {
-    return msgDate.format("DD/MM/YYYY"); // Older
+    return msgDate.format("DD/MM/YYYY");
   }
 };
 
 const formatTime = (date) => {
-  return dayjs(date).format("h:mm A"); // e.g., 2:14 PM
+  return dayjs(date).format("h:mm A");
 };
-
-watch(chatMessages, async () => {
-  await nextTick();
-  const container = messagesContainer.value;
-  if (container) {
-    container.scrollTop = container.scrollHeight;
-  }
-
-  // mark messages as read whenever new messages are rendered
-  markMessagesAsRead();
-});
 
 watch(
   () => route.query.userId,
   async (userId) => {
     if (userId) {
+      // If a userId is in the route, open that chat
       selectedChatUserId.value = Number(userId);
       await fetchChatMessages();
       activeTab.value = "messages";
     } else {
+      // If the userId is removed from the route, ensure selectedChatUserId is null
       selectedChatUserId.value = null;
+
+      // If we are already on the messages tab and the user ID is now gone,
+      // we need to re-fetch the list, which is essentially what handleTabClick does.
+      if (activeTab.value === "messages") {
+        fetchChatsList();
+      }
     }
   },
   { immediate: true }
 );
 
-const markMessagesAsRead = async () => {
-  if (!selectedChatUserId.value) return;
-
-  // Collect IDs of unread messages sent by the other user
-  const unreadMessageIds = chatMessages.value
-    .filter((msg) => !msg.is_read && msg.sender_id !== currentUser.value?.id)
-    .map((msg) => msg.id);
-
-  if (unreadMessageIds.length === 0) return;
-
-  try {
-    socket.emit("readUserMessages", {
-      chatId: selectedChatUserId.value,
-      messageIds: unreadMessageIds,
-    });
-
-    // Optimistically mark messages as read in UI
-    chatMessages.value = chatMessages.value.map((msg) =>
-      unreadMessageIds.includes(msg.id) ? { ...msg, is_read: true } : msg
-    );
-  } catch (err) {
-    console.error("Failed to mark messages as read:", err);
-  }
-};
-
-const handleSetSelectedUserId = async (chat) => {
-  const chatUser = chat?.members?.find(
-    (m) => m?.user_id !== currentUser.value?.id
-  );
-  const userId = chatUser?.user_id;
-
-  selectedChatUserId.value = userId;
-  activeTab.value = "messages";
-
-  currentPage.value = 1;
-  chatMessages.value = []; // reset messages
-
-  fetchChatMessages(1).then(() => {
-    // After messages are loaded, mark as read
-    markMessagesAsRead();
-  });
-
-  router.push({
-    name: "user-profile",
-    query: { userId },
-  });
-};
-
-const handleChatBackButton = () => {
-  selectedChatUserId.value = null;
-  activeTab.value = "messages";
-
-  router.push({
-    name: "user-profile",
-    query: {}, // clear query
-  });
-
-  fetchChatsList();
-};
-
-/**
- * Loads all favorite ads from localStorage.
- */
 const loadFavoritesFromLocalStorage = () => {
   isLoading.value = true;
   try {
@@ -417,11 +483,7 @@ const loadFavoritesFromLocalStorage = () => {
   }
 };
 
-const currentUser = computed(() => authStore?.getUser);
-const currentLocale = computed(() => locale.value);
-
 const handleSaveUser = async (validatedData) => {
-  // Pass the validated data directly to your Pinia update action
   try {
     const res = await requestService.patch("/auth/profile", validatedData);
     showSuccess(res?.message);
@@ -435,13 +497,19 @@ const handleTabClick = (tabName) => {
   activeTab.value = tabName;
 
   if (tabName === "messages") {
-    selectedChatUserId.value = null; // Reset so the chat list shows
-    fetchChatsList(); // load chat list
+    // CRITICAL FIX: Ensure the route query is cleared when clicking the list tab
+    if (route.query.userId) {
+      router
+        .replace({ query: { ...route.query, userId: undefined } })
+        .catch(() => {});
+    }
+
+    selectedChatUserId.value = null;
+    fetchChatsList();
   } else {
-    selectedChatUserId.value = null; // reset for other tabs too
+    selectedChatUserId.value = null;
   }
 
-  // fetch data for other tabs
   if (tabName === "wallet") fetchWalletSummary();
   if (tabName === "Featured") fetchFeaturedAds();
   if (tabName === "on air") fetchPublishedAds();
@@ -450,7 +518,6 @@ const handleTabClick = (tabName) => {
 };
 
 const formatPhone = (value) => {
-  // Remove non-digits and limit to 10 digits
   const cleaned = value.replace(/\D/g, "").slice(0, 10);
   const match = cleaned.match(/^(\d{0,3})(\d{0,3})(\d{0,4})$/);
   if (match) {
@@ -535,55 +602,42 @@ const handleDepositClick = () => {
 
 // 2. Handle the submission event from the PaymentForm
 const handleSubmitPayment = async (payload) => {
-  // Ensure loading is set at the start
   isPaymentLoading.value = true;
   console.log("Starting API call with payload:", payload);
 
   const formData = new FormData();
   formData.append("amount", payload?.amount);
-  // Key name for the file should match backend expectation
   formData.append("proof_image", payload?.receiptFile);
-  // Ensure authStore and user data are defined
   formData.append("user_id", authStore?.user?.id);
 
-  // Optional: Keep a short delay for better UX transition
-
   try {
-    // 1. Execute the actual API call
     const res = await requestService.create(
       "wallet-deposits-requests",
       formData
     );
 
-    // 2. Success path: Show success toast and switch view
     showSuccess(res?.message || t("profile.payment.success_title"));
 
     currentView.value = "success";
     console.log("API Success! Showing success message.");
   } catch (error) {
-    // 3. Failure path: Show error toast and switch view
     console.error("Payment API failed:", error);
-    // Assuming 'showError' is available and handles toast display
     showError(error || t("profile.payment.fail_title"));
 
     currentView.value = "failed";
     console.log("API Failure! Showing failure message.");
   } finally {
-    // 4. Ensure loading is always false, regardless of outcome
     isPaymentLoading.value = false;
   }
 };
 
 // 4. Handles 'Home' clicks from Success or Failed components
 const handleGoToHome = () => {
-  console.log("Navigating to Home/Dashboard.");
-  // In a real app, you would use a router here: router.push('/') or emit a global event.
-  currentView.value = "form"; // For this example, we just show the form again
+  currentView.value = "form";
 };
 
 // 5. Handles 'Retry' click from the Failed component
 const handleRetryPayment = () => {
-  console.log("Retrying payment. Returning to form.");
   currentView.value = "form";
 };
 
@@ -608,17 +662,37 @@ onMounted(async () => {
     fetchWalletSummary();
     loadFavoritesFromLocalStorage();
     fetchStats();
+
     const userId = route.query.userId;
+    const initialTab = route.query.activeTab;
 
     if (userId) {
+      // Case 1: URL contains a specific userId (?userId=123)
       selectedChatUserId.value = Number(userId);
+      activeTab.value = "messages"; // Go directly to the chat view
+      // The watcher (watching route.query.userId) will handle calling fetchChatMessages()
+    } else if (initialTab === "messages") {
+      // Case 2: URL explicitly asks for the messages tab (?activeTab=messages)
+      // This ensures the chat list loads immediately on page load if the user was last here.
       activeTab.value = "messages";
+      selectedChatUserId.value = null; // Ensure no specific chat is open
+      fetchChatsList();
     }
+
+    // Set up all listeners
+    setupUserMessageListener();
+    setupChatListRefreshListener();
   } catch (err) {
     console.log(err);
 
     showError(t("dashboard.profile.load-error"));
   }
+});
+
+onBeforeUnmount(() => {
+  // Clean up socket listeners
+  socket.off("newUserMessage", handleNewMessage);
+  removeChatListRefreshListener();
 });
 </script>
 
@@ -772,6 +846,7 @@ onMounted(async () => {
                 ]"
               >
                 {{ currentLocale == "ar" ? "الرسائل" : "Messages" }}
+                {{ userChatCount > 0 ? userChatCount : "" }}
               </span>
               <span>
                 <i

@@ -16,14 +16,6 @@ const routes = [
       requiresAuth: true,
       permissions: ["profile.read", "profile.write"],
     },
-    // children: [
-    //   {
-    //     name: "user-profile-messages",
-    //     path: "messages/:chatId?",
-    //     component: () => import("../components/Profile/MessagesSection.vue"),
-    //     props: true,
-    //   },
-    // ],
   },
   {
     name: "register",
@@ -182,6 +174,16 @@ const routes = [
         name: "support",
         path: "support",
         component: () => import("../dashboard/support/ChatPage.vue"),
+        meta: {
+          requiresAuth: true,
+          permissions: ["dashboard.support.read", "dashboard.support.write"],
+        },
+      },
+
+      {
+        name: "monitor-messages",
+        path: "monitor-messages",
+        component: () => import("../dashboard/CustomersChats/index.vue"),
         meta: {
           requiresAuth: true,
           permissions: ["dashboard.support.read", "dashboard.support.write"],

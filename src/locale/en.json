@@ -245,6 +245,7 @@
     "analytics": "Analytics",
     "profile": "Profile",
     "support": "Support",
+    "monitor_messages": "Monitor Messages",
     "categories": "Categories",
     "contact-list": "Contact List",
     "create-invitation": "Create New Invitation",
@@ -282,6 +283,12 @@
       "walletTotalBalance": "Wallet Total Balance",
       "chartPlaceholder": "Chart will be displayed here",
       "errorLoading": "Error loading statistics"
+    },
+    "monitor": {
+      "title": "Live Chat Monitor",
+      "search": "Search users...",
+      "select": "Select a conversation to monitor.",
+      "status": "Monitoring: Admin View (Read Only)"
     },
     "settings": {
       "adConfigTitle": "Ad Configuration",
@@ -718,7 +725,8 @@
     "submit-comment": "Submit Comment",
     "no-comments": "No comments yet. Be the first to comment!",
     "write-comment": "Write your comment here...",
-    "you": "You"
+    "you": "You",
+    "must-login-first": "You must login first"
   },
   "generic": {
     "403-title": "Unauthorized",

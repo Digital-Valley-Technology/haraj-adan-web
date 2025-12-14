@@ -42,7 +42,7 @@
 
                 <div class="flex items-center space-x-4">
                   <a
-                    @click="handleNavigation('special')"
+                    @click="handleNavigation()"
                     role="button"
                     class="text-[#146AAB] text-xs font-medium cursor-pointer"
                   >
@@ -95,7 +95,7 @@
 
               <div class="flex items-center space-x-4">
                 <a
-                  @click="handleNavigation('all')"
+                  @click="handleNavigation()"
                   role="button"
                   class="text-[#146AAB] text-xs font-medium cursor-pointer"
                 >
@@ -181,8 +181,11 @@ const fetchCategory = async () => {
   }
 };
 
-const handleNavigation = (type) => {
-  router.push({ name: "category-ads", params: { id: categoryId.value, type } });
+const handleNavigation = () => {
+  router.push({
+    name: "search",
+    query: { categoryId: categoryId.value },
+  });
 };
 
 // 🔹 Fetch special (featured) ads

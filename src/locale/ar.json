@@ -247,6 +247,7 @@
     "profile": "الملف الشخصي",
     "support": "الدعم",
     "categories": "الأصناف",
+    "monitor_messages": "مراقبة الرسائل",
     "contact-list": "جهات الإتصال",
     "create-invitation": "إنشاء دعوة جديدة",
     "customize-theme": "تخصيص قالب الدعوة",
@@ -283,6 +284,12 @@
       "walletTotalBalance": "إجمالي رصيد المحفظة",
       "chartPlaceholder": "سيتم عرض الرسم البياني هنا",
       "errorLoading": "حدث خطأ أثناء تحميل الإحصائيات"
+    },
+    "monitor": {
+      "title": "مراقبة الدردشة المباشرة",
+      "search": "ابحث عن المستخدمين...",
+      "select": "اختر محادثة للمراقبة.",
+      "status": "المراقبة: عرض المدير (للقراءة فقط)"
     },
     "settings": {
       "adConfigTitle": "إعدادات الإعلان",
@@ -724,7 +731,8 @@
     "submit-comment": "إرسال التعليق",
     "no-comments": "لا توجد تعليقات بعد. كن أول من يعلق!",
     "write-comment": "اكتب تعليقك هنا...",
-    "you": "أنت"
+    "you": "أنت",
+    "must-login-first": "يجب عليك تسجيل الدخول أولاً"
   },
   "generic": {
     "403-title": "غير مصرح",

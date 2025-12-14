@@ -135,36 +135,61 @@
               <AppProfileIcon class="w-full h-full" />
             </div>
 
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke-width="1.5"
-              stroke="currentColor"
-              class="ms-2 w-6 h-6 cursor-pointer hover:text-yellow-300 transition"
+            <RouterLink
+              v-if="isAuthenticated"
+              :to="{ name: 'user-profile', query: { activeTab: 'messages' } }"
+              class="relative ms-2 w-6 h-6 hover:text-yellow-300 transition"
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z"
-              />
-            </svg>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="w-full h-full cursor-pointer"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z"
+                />
+              </svg>
 
-            <svg
-              @click="handleNavigation('customer-support')"
-              role="button"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 90 90"
-              fill="currentColor"
-              class="ms-2 w-6 h-6 cursor-pointer hover:text-yellow-300 transition"
+              <span
+                v-if="userChatCount > 0"
+                class="absolute top-0 ltr:-right-1 rtl:-left-1 bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center p-1 leading-none"
+              >
+                {{ userChatCount }}
+              </span>
+            </RouterLink>
+
+            <RouterLink
+              v-if="isAuthenticated"
+              :to="{ name: 'customer-support' }"
+              class="relative ms-2 w-6 h-6 hover:text-yellow-300 transition"
             >
-              <path
-                d="M 41.046 86.144 c -3.486 0 -6.322 -2.837 -6.322 -6.322 S 37.56 73.5 41.046 73.5 c 3.487 0 6.323 2.837 6.323 6.322 S 44.532 86.144 41.046 86.144 z"
-              />
-              <path
-                d="M 80.581 33.518 C 77.501 16.67 62.724 3.856 45 3.856 c -17.724 0 -32.501 12.814 -35.581 29.662 C 4.103 34.283 0 38.855 0 44.379 v 11.321 c 0 5.038 3.413 9.285 8.045 10.575 c 7.408 8.931 16.898 13.801 28.252 14.542 v -2.971 c -9.529 -0.678 -17.627 -4.505 -24.15 -11.424 h 1.018 c 2.926 0 5.307 -2.381 5.307 -5.307 V 38.699 c 0 -2.926 -2.381 -5.306 -5.307 -5.306 h -0.877 C 15.548 18.252 28.961 6.823 45 6.823 c 16.039 0 29.452 11.43 32.539 26.57 h -0.878 c -2.925 0 -5.306 2.38 -5.306 5.306 v 22.681 c 0 2.926 2.381 5.307 5.306 5.307 h 2.352 C 85.071 66.688 90 61.759 90 55.701 V 44.379 C 90 38.855 85.897 34.283 80.581 33.518 z"
-              />
-            </svg>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 90 90"
+                fill="currentColor"
+                class="w-full h-full cursor-pointer"
+              >
+                <path
+                  d="M 41.046 86.144 c -3.486 0 -6.322 -2.837 -6.322 -6.322 S 37.56 73.5 41.046 73.5 c 3.487 0 6.323 2.837 6.323 6.322 S 44.532 86.144 41.046 86.144 z"
+                />
+
+                <path
+                  d="M 80.581 33.518 C 77.501 16.67 62.724 3.856 45 3.856 c -17.724 0 -32.501 12.814 -35.581 29.662 C 4.103 34.283 0 38.855 0 44.379 v 11.321 c 0 5.038 3.413 9.285 8.045 10.575 c 7.408 8.931 16.898 13.801 28.252 14.542 v -2.971 c -9.529 -0.678 -17.627 -4.505 -24.15 -11.424 h 1.018 c 2.926 0 5.307 -2.381 5.307 -5.307 V 38.699 c 0 -2.926 -2.381 -5.306 -5.307 -5.306 h -0.877 C 15.548 18.252 28.961 6.823 45 6.823 c 16.039 0 29.452 11.43 32.539 26.57 h -0.878 c -2.925 0 -5.306 2.38 -5.306 5.306 v 22.681 c 0 2.926 2.381 5.307 5.306 5.307 h 2.352 C 85.071 66.688 90 61.759 90 55.701 V 44.379 C 90 38.855 85.897 34.283 80.581 33.518 z"
+                />
+              </svg>
+
+              <span
+                v-if="supportChatCount > 0"
+                class="absolute top-0 ltr:-right-1 rtl:-left-1 bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center p-1 leading-none"
+              >
+                {{ supportChatCount }}
+              </span>
+            </RouterLink>
 
             <RouterLink
               to="/post-ad-categories"
@@ -188,6 +213,17 @@ import AppProfileIcon from "./AppProfileIcon.vue";
 import requestService from "../services/api/requestService";
 import { MEDIA_URL } from "../services/axios";
 import { useFiltersStore } from "../store/filters";
+import { useNotificationStore } from "../store/notifications";
+import { useAuthStore } from "../store/auth"; // Need to check if user is logged in
+
+const authStore = useAuthStore();
+const notificationStore = useNotificationStore();
+
+// Computed property to check if the user is authenticated (to show the icons)
+const isAuthenticated = computed(() => !!authStore.user);
+// Get the counts directly from the store
+const userChatCount = computed(() => notificationStore.userChatCount);
+const supportChatCount = computed(() => notificationStore.supportChatCount);
 
 const { locale } = useI18n();
 const router = useRouter();
