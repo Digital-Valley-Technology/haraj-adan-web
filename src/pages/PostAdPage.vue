@@ -497,7 +497,11 @@ const form = ref({
   descr: null,
 });
 
-const wallet = ref(currentUser.value?.user_wallet[0] || { balance: 0 });
+// const wallet = ref(currentUser.value?.user_wallet[0] || { balance: 0 });
+const wallet = computed(() => {
+  return authStore.user?.user_wallet?.[0] ?? { balance: 0 };
+});
+
 const discounts = ref([]);
 const is_featured = ref(false);
 const selectedDiscount = ref(null);
