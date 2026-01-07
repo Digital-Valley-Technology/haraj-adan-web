@@ -168,7 +168,7 @@ onMounted(async () => {
   window.addEventListener("resize", handleResize);
   chatStore.setActiveChat(null);
   await chatStore.fetchChats(); // initial load
-  chatStore.listenForMessages();
+  chatStore.listenForMessages(true);
 });
 
 onUnmounted(() => {

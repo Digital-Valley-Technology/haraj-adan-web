@@ -122,24 +122,34 @@ export const useChatStore = defineStore("chats", {
           }`
         );
         const chatData = response?.data ?? {};
-        const batch = Array.isArray(chatData.support_chat_messages)
+
+        // 1. استلام البيانات
+        let batch = Array.isArray(chatData.support_chat_messages)
           ? chatData.support_chat_messages
           : [];
 
+        // ============================================================
+        // 2. إصلاح الترتيب: ضمان أن الرسائل مرتبة زمنياً (الأقدم أولاً)
+        // ============================================================
+        // نقوم بترتيب المصفوفة بناءً على الـ ID أو تاريخ الإنشاء تصاعدياً
+        batch.sort((a, b) => a.id - b.id);
+        // أو إذا كنت تفضل التاريخ:
+        // batch.sort((a, b) => new Date(a.created) - new Date(b.created));
 
         if (!prepend) {
-          // initial load or refresh
+          // تحميل أولي أو تحديث
           this.activeChat = {
             ...(this.activeChat || {}),
             id: chatData.id,
             users: chatData.users ?? this.activeChat?.users,
-            messages: batch,
+            messages: batch, // الآن المصفوفة مرتبة بشكل صحيح
             _count: chatData._count ?? this.activeChat?._count,
           };
           this.messagePage = 1;
           this.hasMoreMessages = batch.length === this.messageLimit;
         } else {
-          // prepend older messages
+          // عند التمرير للأعلى (تحميل رسائل أقدم)
+          // نضع الرسائل القديمة (batch) قبل الرسائل الحالية
           this.activeChat.messages = [
             ...batch,
             ...(this.activeChat.messages || []),
@@ -237,7 +247,11 @@ export const useChatStore = defineStore("chats", {
 
       if (isAdmin) socket.emit("joinRoom", "admins");
 
+      console.log(isAdmin);
+
       socket.on("newSupportMessage", (msg) => {
+        console.log(msg);
+
         if (isAdmin || msg.support_chat_id === this.activeChatId) {
           this.addMessageToChat(msg);
         }

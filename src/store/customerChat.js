@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import requestService from "../services/api/requestService";
 import { socket } from "../services/SocketPlugin";
 import { useAuthStore } from "./auth";
+import { useNotificationStore } from "./notifications";
 
 export const useCustomerChatStore = defineStore("customerChat", {
   state: () => ({
@@ -11,6 +12,7 @@ export const useCustomerChatStore = defineStore("customerChat", {
     messageLimit: 20,
     hasMoreMessages: true,
     _listening: false,
+    activeChatId: null,
   }),
 
   getters: {
@@ -32,6 +34,11 @@ export const useCustomerChatStore = defineStore("customerChat", {
         );
 
         const batch = Array.isArray(res.data) ? res.data : [];
+
+        if (batch.length > 0 && batch[0].support_chat_id) {
+          this.activeChatId = batch[0].support_chat_id;
+        }
+
         // Sort messages ascending (oldest → newest)
         const orderedBatch = [...batch].sort(
           (a, b) => new Date(a.created) - new Date(b.created)
@@ -57,6 +64,27 @@ export const useCustomerChatStore = defineStore("customerChat", {
       } finally {
         this.loadingMessages = false;
       }
+    },
+
+    markMessagesAsRead(messageIds) {
+      // نتأكد أن لدينا معرف المحادثة ورسائل لقراءتها
+      if (!this.activeChatId && this.messages.length > 0) {
+        this.activeChatId = this.messages[0].support_chat_id;
+      }
+
+      if (!this.activeChatId || !messageIds || messageIds.length === 0) return;
+
+      socket.emit("readSupportMessages", {
+        chatId: this.activeChatId,
+        messageIds: messageIds,
+      });
+
+      // تحديث محلي فوري (Optimistic Update)
+      this.messages.forEach((msg) => {
+        if (messageIds.includes(msg.id)) {
+          msg.is_read = true;
+        }
+      });
     },
 
     /**
@@ -110,6 +138,8 @@ export const useCustomerChatStore = defineStore("customerChat", {
      * Socket listener for real-time updates
      */
     listenForMessages() {
+      console.log("joining ");
+
       if (this._listening) return;
       this._listening = true;
 
@@ -120,7 +150,33 @@ export const useCustomerChatStore = defineStore("customerChat", {
       socket.emit("joinRoom", `support_user_${currentUser.id}`);
 
       socket.on("sendSupportMessage:success", (data) => {
+        console.log("message sent:", data);
         this.addMessage(data?.message);
+
+        const notificationStore = useNotificationStore();
+        socket.emit(
+          "countUnreadMessages",
+          { userId: currentUser.id },
+          (data) => {
+            notificationStore.supportChatCount = data?.count ?? 0;
+          }
+        );
+      });
+
+      socket.on("newSupportMessage", (msg) => {
+        console.log("recieved message", msg);
+
+        this.addMessage(msg);
+      });
+      socket.on("supportMessagesRead", ({ chatId, messageIds }) => {
+        // إذا كان الحدث يخص محادثتي الحالية
+        if (this.activeChatId === chatId) {
+          this.messages.forEach((msg) => {
+            if (messageIds.includes(msg.id)) {
+              msg.is_read = true;
+            }
+          });
+        }
       });
     },
 

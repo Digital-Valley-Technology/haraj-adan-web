@@ -102,6 +102,32 @@ const getFileIcon = (filename) => {
       return "pi pi-file text-gray-400";
   }
 };
+
+const markVisibleMessagesAsRead = () => {
+  // 1. نحن العميل، لذا نريد قراءة رسائل "المشرف" (is_admin: true) التي لم تقرأ بعد (is_read: false)
+  const unreadAdminMessages = chatStore.getMessages
+    .filter((m) => m.is_admin && !m.is_read)
+    .map((m) => m.id);
+
+  if (unreadAdminMessages.length > 0) {
+    chatStore.markMessagesAsRead(unreadAdminMessages);
+  }
+};
+
+watch(
+  () => messages.value,
+  async (newMessages) => {
+    if (newMessages.length > 0) {
+      // ننتظر قليلاً حتى يتم عرض الرسائل (NextTick)
+      await nextTick();
+      markVisibleMessagesAsRead();
+
+      // السكرول للأسفل (موجود سابقاً في watch length ولكن نضعه هنا للتأكيد)
+      // scrollToBottom();
+    }
+  },
+  { deep: true, immediate: true }
+);
 </script>
 
 <template>
