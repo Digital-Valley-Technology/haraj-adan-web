@@ -1,85 +1,7 @@
-// // userStore.js
-// import { defineStore } from "pinia";
-// import requestService from "../services/api/requestService";
-// import { showSuccess, showWarning } from "../utils/notifications";
-
-// export const useAuthStore = defineStore("auth", {
-//   state: () => ({
-//     user: null,
-//     isAuthenticated: false,
-//   }),
-//   getters: {
-//     getUser: (state) => state.user,
-//     getAuthState: (state) => state.user,
-//   },
-//   actions: {
-//     grantAccess(user) {
-//       this.user = user;
-//       this.isAuthenticated = true;
-//     },
-//     revokeAccess() {
-//       this.user = null;
-//       this.isAuthenticated = false;
-//     },
-//     // In your auth store
-//     async getMe() {
-//       const token = localStorage.getItem("token");
-//       if (!token) {
-//         this.revokeAccess();
-//         return null;
-//       }
-
-//       try {
-//         const response = await requestService.getAll(`auth/me`, {
-//           headers: {
-//             Authorization: `Bearer ${token}`,
-//           },
-//         });
-//         this.grantAccess(response?.data);
-//         return response?.data;
-//       } catch (error) {
-//         this.revokeAccess();
-//         showWarning(error?.response?.message || "Authentication failed");
-//         return null;
-//       }
-//     },
-//     async logout() {
-//       const token = localStorage.getItem("token");
-
-//       if (!token) {
-//         this.revokeAccess();
-//         return null;
-//       }
-
-//       try {
-//         const response = await requestService.getAll("auth/logout", {
-//           headers: {
-//             Authorization: `Bearer ${token}`,
-//           },
-//         });
-
-//         localStorage.removeItem("token");
-//         this.revokeAccess();
-//         showSuccess(response?.message);
-//       } catch (error) {
-//         this.revokeAccess();
-//         showWarning(error?.response?.message || "Unable to logout");
-//         return null;
-//       }
-//     },
-//   },
-// });
-
-// userStore.js
 import { defineStore } from "pinia";
 import requestService from "../services/api/requestService";
 import { showSuccess, showWarning } from "../utils/notifications";
-
-// Import the Notification Store (lazy import to prevent circular dependency if possible)
-let useNotificationStore;
-import("../store/notifications.js").then((module) => {
-  useNotificationStore = module.useNotificationStore;
-});
+import { socket } from "../services/SocketPlugin";
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
@@ -91,55 +13,19 @@ export const useAuthStore = defineStore("auth", {
     getAuthState: (state) => state.user,
   },
   actions: {
-    // --- NEW HELPER FUNCTION ---
-    getSocketAndLogout(userId) {
-      if (!useNotificationStore) return;
-
-      const notificationStore = useNotificationStore();
-      // Assume you track the socket instance in the notification store or via injection
-      // Since we removed socket instance from NotificationStore, we need to inject it here or rely on the App.vue watcher.
-      // For socket events like 'offline', we rely on the SocketPlugin itself, which needs access to the user ID.
-
-      // We can access the global socket instance via a helper if the plugin makes it available,
-      // but the simplest way is to emit the 'offline' event if the socket plugin has access to the user ID.
-      // If your SocketPlugin exposes the socket globally (which it does via `export const socket`), we can use it:
-
-      // NOTE: If this import fails, remove it and trust the watcher.
-      try {
-        const { socket } = require("../services/SocketPlugin"); // Attempt to get global socket
-        if (socket && userId) {
-          socket.emit("offline", userId);
-          console.log(`Socket emitted 'offline' for user: ${userId}`);
-        }
-      } catch (e) {
-        console.warn("Could not access global socket for offline emit.");
-      }
-
-      // After managing the socket state, revoke access
-      this.revokeAccess();
-    },
-    // --- END NEW HELPER ---
-
     grantAccess(user) {
       this.user = user;
       this.isAuthenticated = true;
-
-      // IMPORTANT: After granting access, we MUST re-initialize the socket listeners
-      // immediately if the store is ready.
-      if (useNotificationStore) {
-        const notificationStore = useNotificationStore();
-        // Since we can't inject in a Pinia store, we rely on the App.vue WATCHER.
-        // Simply updating this.user is enough to trigger the watcher in App.vue.
-        // However, if the App.vue watcher is too slow, we can try to call the fetch logic directly:
-        // notificationStore.refreshCounts();
-      }
+      console.log("✅ [AUTH] Access granted for user:", user?.id);
     },
+
     revokeAccess() {
       this.user = null;
       this.isAuthenticated = false;
-      // When revoking, the App.vue watcher will detect user=null and should handle cleanup if needed.
+      console.log("🔒 [AUTH] Access revoked");
     },
-    // In your auth store
+
+    // Get current user from backend
     async getMe() {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -154,7 +40,6 @@ export const useAuthStore = defineStore("auth", {
           },
         });
 
-        // Trigger App.vue watcher
         this.grantAccess(response?.data);
         return response?.data;
       } catch (error) {
@@ -163,33 +48,114 @@ export const useAuthStore = defineStore("auth", {
         return null;
       }
     },
+
+    /**
+     * ⭐ IMPROVED LOGOUT WITH COMPLETE RESET
+     */
     async logout() {
+      console.log("👋 [AUTH] Starting logout process...");
+
       const userId = this.user?.id;
       const token = localStorage.getItem("token");
 
-      if (!token) {
-        this.getSocketAndLogout(userId); // Use helper for cleanup
-        return null;
-      }
-
       try {
-        const response = await requestService.getAll("auth/logout", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        // ============================================================
+        // STEP 1: Emit offline status BEFORE clearing user data
+        // ============================================================
+        if (socket && socket.connected && userId) {
+          socket.emit("offline", userId);
+          console.log("📡 [AUTH] Emitted offline status for user:", userId);
+        }
 
+        // ============================================================
+        // STEP 2: Reset all stores (dynamic imports to avoid circular deps)
+        // ============================================================
+        console.log("🔄 [AUTH] Resetting all stores...");
+
+        // Reset Notification Store
+        try {
+          const { useNotificationStore } = await import("./notifications.js");
+          const notificationStore = useNotificationStore();
+          if (notificationStore.reset) {
+            notificationStore.reset();
+            console.log("✅ [AUTH] Notification store reset");
+          }
+        } catch (error) {
+          console.warn("⚠️ [AUTH] Could not reset notification store:", error);
+        }
+
+        // Reset Admin Chat Store
+        try {
+          const { useChatStore } = await import("./chat.js");
+          const chatStore = useChatStore();
+          if (chatStore.reset) {
+            chatStore.reset();
+          } else if (chatStore.$reset) {
+            chatStore.$reset();
+          }
+          console.log("✅ [AUTH] Chat store reset");
+        } catch (error) {
+          console.warn("⚠️ [AUTH] Could not reset chat store:", error);
+        }
+
+        // Reset Customer Chat Store
+        try {
+          const { useCustomerChatStore } = await import("./customerChat.js");
+          const customerChatStore = useCustomerChatStore();
+          if (customerChatStore.reset) {
+            customerChatStore.reset();
+          } else if (customerChatStore.$reset) {
+            customerChatStore.$reset();
+          }
+          console.log("✅ [AUTH] Customer chat store reset");
+        } catch (error) {
+          console.warn("⚠️ [AUTH] Could not reset customer chat store:", error);
+        }
+
+        // ============================================================
+        // STEP 3: Call backend logout endpoint (if token exists)
+        // ============================================================
+        if (token) {
+          try {
+            const response = await requestService.getAll("auth/logout", {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+            showSuccess(response?.message || "Logged out successfully");
+          } catch (error) {
+            console.warn("⚠️ [AUTH] Backend logout failed:", error);
+            // Continue with local logout even if backend fails
+          }
+        }
+
+        // ============================================================
+        // STEP 4: Clear localStorage
+        // ============================================================
+        console.log("🗑️ [AUTH] Clearing localStorage...");
         localStorage.removeItem("token");
+        localStorage.removeItem("refresh_token");
+        localStorage.removeItem("user");
+        // Optional: Clear other app-specific data
+        // localStorage.removeItem("favorites");
+        // localStorage.removeItem("cart");
 
-        // Trigger App.vue watcher and socket 'offline' emit
-        this.getSocketAndLogout(userId);
+        // ============================================================
+        // STEP 5: Revoke access (sets user to null)
+        // ============================================================
+        this.revokeAccess();
 
-        showSuccess(response?.message);
+        console.log("✅ [AUTH] Logout complete!");
       } catch (error) {
-        // Even if logout fails on the server, we log out locally for security
-        this.getSocketAndLogout(userId);
-        showWarning(error?.response?.message || "Unable to logout");
-        return null;
+        console.error("❌ [AUTH] Error during logout:", error);
+
+        // Even if there's an error, still clear local data for security
+        localStorage.removeItem("token");
+        localStorage.removeItem("refresh_token");
+        localStorage.removeItem("user");
+        this.revokeAccess();
+
+        showWarning(error?.response?.message || "Error during logout");
       }
     },
   },

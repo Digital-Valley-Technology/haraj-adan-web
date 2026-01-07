@@ -1,126 +1,181 @@
 import { defineStore } from "pinia";
-import { useAuthStore } from "./auth";
-
-// Define the events used by the Socket Gateway (same as before)
-const USER_CHAT_EVENTS = {
-  COUNT_NOTIFICATIONS: "countChatNotifications",
-  NEW_MESSAGE: "newUserMessage", // Need to listen for new messages to refresh count
-};
-const SUPPORT_CHAT_EVENTS = {
-  COUNT_UNREAD_MESSAGES: "countUnreadMessages",
-};
-
-// Local variable to hold the socket instance once it's set
-let socketInstance = null;
 
 export const useNotificationStore = defineStore("notifications", {
   state: () => ({
-    userChatCount: 0,
-    supportChatCount: 0,
+    userChatCount: 0, // Customer-to-customer chat notifications
+    supportChatCount: 0, // Customer-to-admin chat notifications
+    _initialized: false,
+    _socket: null,
+    _userId: null,
   }),
 
   actions: {
     /**
-     * 1. Sets the socket instance and attaches ALL necessary listeners.
-     * This should be called once after the app is mounted and the user is known.
-     * @param {Object} socket - The global socket.io instance
-     * @param {number} userId - The ID of the authenticated user
+     * Initialize socket listeners for notification events
      */
     initializeSocketListeners(socket, userId) {
-      if (!socket || !userId || socketInstance) return;
+      if (!socket || !userId) {
+        console.warn(
+          "⚠️ [NOTIFICATIONS] Cannot initialize - missing socket or userId"
+        );
+        return;
+      }
 
-      socketInstance = socket;
+      this._socket = socket;
+      this._userId = userId;
 
-      this.fetchInitialCounts(userId);
+      // Prevent duplicate listeners
+      if (this._initialized) {
+        console.log(
+          "✅ [NOTIFICATIONS] Already initialized, refreshing counts"
+        );
+        this.refreshCounts();
+        return;
+      }
 
-      // --- NORMAL CHAT LISTENERS ---
-
-      // Listener 1: Update count when the server explicitly pushes a new count (after read/send)
-      socketInstance.on(USER_CHAT_EVENTS.COUNT_NOTIFICATIONS, (payload) => {
-        // The server might send a full count object { success: true, count: X }
-        if (typeof payload === "object" && payload.success) {
-          this.userChatCount = payload.count;
-        } else {
-          // Or the server might just signal a change (as implemented in NestJS gateway)
-          this.fetchInitialCounts(userId);
-        }
-      });
-
-      // Listener 2: When a NEW MESSAGE arrives, immediately refresh the notification count
-      // This event is emitted by the server to all users in the chat room.
-      // We listen to it globally to ensure the count badge updates instantly.
-      socketInstance.on(USER_CHAT_EVENTS.NEW_MESSAGE, (message) => {
-        const authStore = useAuthStore();
-        // Check if the current user is the RECEIVER of the message
-        // This logic depends on how your NEW_MESSAGE payload is structured.
-        // If the message is for the CURRENT CHAT, the local chat component handles it.
-        // If the message is for a DIFFERENT CHAT, we must update the global count.
-        if (message.sender_id !== authStore.user.id) {
-          this.userChatCount++; // Optimistic update, then refresh
-          this.fetchInitialCounts(userId);
-        }
-      });
-
-      // --- SUPPORT CHAT LISTENERS ---
-
-      // Listener for Support Chat Notifications (assuming support logic is also running)
-      socketInstance.on(
-        SUPPORT_CHAT_EVENTS.COUNT_UNREAD_MESSAGES,
-        (payload) => {
-          if (payload && payload.success) {
-            this.supportChatCount = payload.count;
-          }
-        }
+      console.log(
+        "🔔 [NOTIFICATIONS] Initializing notification listeners for user:",
+        userId
       );
 
-      console.log(`Socket listeners initialized for user: ${userId}`);
+      // ============================================================
+      // LISTENER 1: User Chat Notifications (customer-to-customer)
+      // ============================================================
+      socket.off("countChatNotifications"); // Remove old listeners
+      socket.on("countChatNotifications", (response) => {
+        console.log("📊 [NOTIFICATIONS] User chat count update:", response);
+
+        if (response?.success && typeof response.count === "number") {
+          this.userChatCount = response.count;
+          console.log(
+            "✅ [NOTIFICATIONS] User chat count set to:",
+            this.userChatCount
+          );
+        } else if (response?.changed) {
+          // Server notified of change, request fresh count
+          console.log(
+            "🔄 [NOTIFICATIONS] Change detected, refreshing user chat count"
+          );
+          this.fetchUserChatCount();
+        }
+      });
+
+      // ============================================================
+      // LISTENER 2: Support Chat Notifications (customer-to-admin)
+      // ============================================================
+      socket.off("countUnreadMessages"); // Remove old listeners
+      socket.on("countUnreadMessages", (response) => {
+        console.log("📊 [NOTIFICATIONS] Support chat count update:", response);
+
+        if (response?.success && typeof response.count === "number") {
+          this.supportChatCount = response.count;
+          console.log(
+            "✅ [NOTIFICATIONS] Support chat count set to:",
+            this.supportChatCount
+          );
+        }
+      });
+
+      // ============================================================
+      // LISTENER 3: Admin Support Chat Notifications (for admins)
+      // ============================================================
+      socket.off("countUnreadAdminMessages"); // Remove old listeners
+      socket.on("countUnreadAdminMessages", (response) => {
+        console.log("📊 [NOTIFICATIONS] Admin support count update:", response);
+
+        if (response?.success && typeof response.count === "number") {
+          this.supportChatCount = response.count;
+          console.log(
+            "✅ [NOTIFICATIONS] Admin support count set to:",
+            this.supportChatCount
+          );
+        }
+      });
+
+      this._initialized = true;
+
+      // Fetch initial counts immediately
+      this.refreshCounts();
     },
 
     /**
-     * 2. Emits the initial request to get the current unread counts from the server.
-     */
-    fetchInitialCounts(userId) {
-      if (socketInstance && userId) {
-        // Request count for Normal Chat (using the new event)
-        socketInstance.emit(
-          USER_CHAT_EVENTS.COUNT_NOTIFICATIONS,
-          userId,
-          (response) => {
-            if (response.success) {
-              this.userChatCount = response.count;
-            }
-          }
-        );
-
-        // Request count for Support Chat
-        socketInstance.emit(
-          SUPPORT_CHAT_EVENTS.COUNT_UNREAD_MESSAGES,
-          userId,
-          (response) => {
-            if (response.success) {
-              this.supportChatCount = response.count;
-            }
-          }
-        );
-      }
-    },
-
-    /**
-     * 3. Utility action to emit the 'read' event from any component (e.g., ChatPage)
-     */
-    emitReadMessages(payload) {
-      if (socketInstance) {
-        socketInstance.emit("readUserMessages", payload);
-      }
-    },
-
-    /**
-     * 4. Utility action to manually trigger a count refresh
+     * ⭐ KEY FIX: Request fresh counts from server
      */
     refreshCounts() {
-      const authStore = useAuthStore();
-      const userId = authStore.user?.id;
-      this.fetchInitialCounts(userId);
+      if (!this._socket || !this._userId) {
+        console.warn(
+          "⚠️ [NOTIFICATIONS] Cannot refresh - missing socket or userId"
+        );
+        return;
+      }
+
+      console.log(
+        "🔄 [NOTIFICATIONS] Refreshing all notification counts for user:",
+        this._userId
+      );
+
+      // Request user chat count (customer-to-customer) - THIS WAS MISSING!
+      this.fetchUserChatCount();
+
+      // Request support chat count (customer-to-admin)
+      this.fetchSupportChatCount();
+    },
+
+    /**
+     * ⭐ CRITICAL FIX: Explicitly request user chat notification count
+     * THIS METHOD WAS MISSING - IT'S THE MAIN FIX!
+     *
+     * NOTE: Backend uses emit (not callback), so response comes via socket listener
+     */
+    fetchUserChatCount() {
+      if (!this._socket || !this._userId) return;
+
+      console.log(
+        "📤 [NOTIFICATIONS] Requesting user chat count for:",
+        this._userId
+      );
+
+      // ⭐ FIX: Just emit the userId (no callback)
+      // Backend will emit back to "countChatNotifications" listener
+      this._socket.emit("countChatNotifications", this._userId);
+    },
+
+    /**
+     * Request support chat notification count
+     *
+     * NOTE: Backend uses emit (not callback), so response comes via socket listener
+     */
+    fetchSupportChatCount() {
+      if (!this._socket || !this._userId) return;
+
+      console.log(
+        "📤 [NOTIFICATIONS] Requesting support chat count for:",
+        this._userId
+      );
+
+      // ⭐ FIX: Backend expects { userId: number } payload
+      // Backend will emit back to "countUnreadMessages" listener
+      this._socket.emit("countUnreadMessages", { userId: this._userId });
+    },
+
+    /**
+     * Reset notification state (called on logout)
+     */
+    reset() {
+      console.log("🔄 [NOTIFICATIONS] Resetting notification store");
+
+      // Clean up listeners
+      if (this._socket) {
+        this._socket.off("countChatNotifications");
+        this._socket.off("countUnreadMessages");
+        this._socket.off("countUnreadAdminMessages");
+      }
+
+      this.userChatCount = 0;
+      this.supportChatCount = 0;
+      this._initialized = false;
+      this._socket = null;
+      this._userId = null;
     },
   },
 });

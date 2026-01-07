@@ -26,6 +26,9 @@ export const useChatStore = defineStore("chats", {
 
     onlineUsers: [], // list of online userIds
 
+    // ⭐ NEW: Admin notification count
+    unreadAdminCount: 0,
+
     _listening: false,
   }),
 
@@ -110,8 +113,15 @@ export const useChatStore = defineStore("chats", {
       this.messageTotal = 0;
       this.hasMoreMessages = true;
       this.loadingMessages = false;
+
+      // ⭐ FIXED: Join the chat room when setting active
+      socket.emit("joinRoom", `support_chat_${chatId}`);
     },
 
+    /**
+     * ⭐ FIXED: Messages are now correctly ordered
+     * Backend returns DESC, we reverse to ASC for display
+     */
     async fetchMessages(chatId, { prepend = false } = {}) {
       if (!chatId || this.loadingMessages) return null;
       this.loadingMessages = true;
@@ -123,33 +133,27 @@ export const useChatStore = defineStore("chats", {
         );
         const chatData = response?.data ?? {};
 
-        // 1. استلام البيانات
+        // Backend returns messages in DESC order (newest first)
         let batch = Array.isArray(chatData.support_chat_messages)
           ? chatData.support_chat_messages
           : [];
 
-        // ============================================================
-        // 2. إصلاح الترتيب: ضمان أن الرسائل مرتبة زمنياً (الأقدم أولاً)
-        // ============================================================
-        // نقوم بترتيب المصفوفة بناءً على الـ ID أو تاريخ الإنشاء تصاعدياً
-        batch.sort((a, b) => a.id - b.id);
-        // أو إذا كنت تفضل التاريخ:
-        // batch.sort((a, b) => new Date(a.created) - new Date(b.created));
+        // ⭐ FIXED: Reverse to get chronological order (oldest first)
+        batch = batch.reverse();
 
         if (!prepend) {
-          // تحميل أولي أو تحديث
+          // Initial load
           this.activeChat = {
             ...(this.activeChat || {}),
             id: chatData.id,
             users: chatData.users ?? this.activeChat?.users,
-            messages: batch, // الآن المصفوفة مرتبة بشكل صحيح
+            messages: batch,
             _count: chatData._count ?? this.activeChat?._count,
           };
           this.messagePage = 1;
           this.hasMoreMessages = batch.length === this.messageLimit;
         } else {
-          // عند التمرير للأعلى (تحميل رسائل أقدم)
-          // نضع الرسائل القديمة (batch) قبل الرسائل الحالية
+          // Load older messages - prepend them
           this.activeChat.messages = [
             ...batch,
             ...(this.activeChat.messages || []),
@@ -167,6 +171,7 @@ export const useChatStore = defineStore("chats", {
         this.loadingMessages = false;
       }
     },
+
     async sendSupportMessage(userId, text) {
       if (!userId || !this.activeChatId) return null;
       const authStore = useAuthStore();
@@ -210,7 +215,7 @@ export const useChatStore = defineStore("chats", {
     },
 
     async resetAndFetchChats() {
-      console.log("reseting");
+      console.log("resetting");
     },
 
     markMessagesAsReadSocket(chatId) {
@@ -229,34 +234,64 @@ export const useChatStore = defineStore("chats", {
         chatId,
         messageIds: unreadMessages.map((m) => m.id),
       });
+
+      // ⭐ FIXED: Refresh admin notification count after marking as read
+      this.fetchUnreadCount();
     },
 
+    /**
+     * ⭐ NEW: Fetch unread count for admin
+     */
+    async fetchUnreadCount() {
+      socket.emit("countUnreadAdminMessages", {}, (response) => {
+        if (response?.success) {
+          this.unreadAdminCount = response.count;
+        }
+      });
+    },
+
+    /**
+     * ⭐ FIXED: Better notification handling and reconnection support
+     */
     listenForMessages(isAdmin = false) {
       if (this._listening) return;
       this._listening = true;
 
-      // Join rooms
+      // Join rooms based on active chat
       watch(
         () => this.activeChatId,
         (chatId) => {
           if (!chatId) return;
           socket.emit("joinRoom", `support_chat_${chatId}`);
+          console.log(`Joined support_chat_${chatId}`);
         },
         { immediate: true }
       );
 
-      if (isAdmin) socket.emit("joinRoom", "admins");
+      // Admin joins admin room
+      if (isAdmin) {
+        socket.emit("joinRoom", "admins");
+        console.log("Joined admins room");
 
-      console.log(isAdmin);
+        // ⭐ NEW: Fetch initial admin unread count
+        this.fetchUnreadCount();
+      }
 
+      // Listen for new messages
       socket.on("newSupportMessage", (msg) => {
-        console.log(msg);
+        console.log("New support message:", msg);
 
         if (isAdmin || msg.support_chat_id === this.activeChatId) {
           this.addMessageToChat(msg);
         }
+
+        // ⭐ FIXED: Update admin notification count
+        if (isAdmin && !msg.is_admin) {
+          this.unreadAdminCount++;
+        }
       });
 
+      // Listen for read receipts
       socket.on("supportMessagesRead", ({ chatId, messageIds }) => {
         if (!this.activeChat || this.activeChat.id !== chatId) return;
         this.activeChat.messages.forEach((msg) => {
@@ -268,8 +303,20 @@ export const useChatStore = defineStore("chats", {
       socket.on("userOnline", ({ userId }) => {
         if (!this.onlineUsers.includes(userId)) this.onlineUsers.push(userId);
       });
+
       socket.on("userOffline", ({ userId }) => {
         this.onlineUsers = this.onlineUsers.filter((id) => id !== userId);
+      });
+
+      // ⭐ FIXED: Handle reconnection
+      window.addEventListener("socket-reconnected", () => {
+        console.log("Socket reconnected - rejoining admin rooms");
+        if (isAdmin) {
+          socket.emit("joinRoom", "admins");
+        }
+        if (this.activeChatId) {
+          socket.emit("joinRoom", `support_chat_${this.activeChatId}`);
+        }
       });
     },
   },

@@ -21,6 +21,7 @@ export const useCustomerChatStore = defineStore("customerChat", {
 
   actions: {
     /**
+     * ⭐ FIXED: Better chat ID tracking and room joining
      * Fetch paginated messages for the logged-in customer
      */
     async fetchUserChat({ append = false } = {}) {
@@ -35,6 +36,7 @@ export const useCustomerChatStore = defineStore("customerChat", {
 
         const batch = Array.isArray(res.data) ? res.data : [];
 
+        // ⭐ FIXED: Set activeChatId from first message
         if (batch.length > 0 && batch[0].support_chat_id) {
           this.activeChatId = batch[0].support_chat_id;
         }
@@ -59,6 +61,12 @@ export const useCustomerChatStore = defineStore("customerChat", {
 
         const total = res.meta?.total || 0;
         this.hasMoreMessages = this.messages.length < total;
+
+        // ⭐ FIXED: Join the support chat room after loading
+        if (this.activeChatId) {
+          socket.emit("joinRoom", `support_chat_${this.activeChatId}`);
+          console.log(`Joined support_chat_${this.activeChatId}`);
+        }
       } catch (err) {
         console.error("fetchUserChat error:", err);
       } finally {
@@ -66,8 +74,10 @@ export const useCustomerChatStore = defineStore("customerChat", {
       }
     },
 
+    /**
+     * ⭐ FIXED: Added proper notification refresh after marking as read
+     */
     markMessagesAsRead(messageIds) {
-      // نتأكد أن لدينا معرف المحادثة ورسائل لقراءتها
       if (!this.activeChatId && this.messages.length > 0) {
         this.activeChatId = this.messages[0].support_chat_id;
       }
@@ -79,20 +89,35 @@ export const useCustomerChatStore = defineStore("customerChat", {
         messageIds: messageIds,
       });
 
-      // تحديث محلي فوري (Optimistic Update)
+      // Optimistic local update
       this.messages.forEach((msg) => {
         if (messageIds.includes(msg.id)) {
           msg.is_read = true;
         }
       });
+
+      // ⭐ FIXED: Refresh notification count after marking as read
+      const authStore = useAuthStore();
+      const notificationStore = useNotificationStore();
+      socket.emit(
+        "countUnreadMessages",
+        { userId: authStore.getUser?.id },
+        (response) => {
+          if (response?.success) {
+            notificationStore.supportChatCount = response.count;
+          }
+        }
+      );
     },
 
     /**
+     * ⭐ FIXED: Added notification count refresh after sending
      * Send text message
      */
     async sendCustomerMessage(text) {
       if (!text) return;
       const authStore = useAuthStore();
+      const notificationStore = useNotificationStore();
       const currentUser = authStore.getUser;
       if (!currentUser?.id) throw new Error("User not authenticated");
 
@@ -105,6 +130,19 @@ export const useCustomerChatStore = defineStore("customerChat", {
           is_admin: false,
         },
       });
+
+      // ⭐ FIXED: Refresh notification count after sending (admins may have replied)
+      setTimeout(() => {
+        socket.emit(
+          "countUnreadMessages",
+          { userId: currentUser.id },
+          (response) => {
+            if (response?.success) {
+              notificationStore.supportChatCount = response.count;
+            }
+          }
+        );
+      }, 500);
     },
 
     /**
@@ -113,6 +151,7 @@ export const useCustomerChatStore = defineStore("customerChat", {
     async sendMediaMessage(file, type) {
       try {
         const authStore = useAuthStore();
+        const notificationStore = useNotificationStore();
         const currentUser = authStore.getUser;
         if (!currentUser?.id) throw new Error("User not authenticated");
 
@@ -128,48 +167,79 @@ export const useCustomerChatStore = defineStore("customerChat", {
             headers: { "Content-Type": "multipart/form-data" },
           }
         );
+        
         this.addMessage(res?.data);
+
+        // Refresh notification count
+        socket.emit(
+          "countUnreadMessages",
+          { userId: currentUser.id },
+          (response) => {
+            if (response?.success) {
+              notificationStore.supportChatCount = response.count;
+            }
+          }
+        );
       } catch (err) {
         console.error("sendMediaMessage error:", err);
       }
     },
 
     /**
+     * ⭐ FIXED: Better room joining and reconnection handling
      * Socket listener for real-time updates
      */
     listenForMessages() {
-      console.log("joining ");
-
       if (this._listening) return;
       this._listening = true;
 
       const authStore = useAuthStore();
+      const notificationStore = useNotificationStore();
       const currentUser = authStore.getUser;
       if (!currentUser?.id) return;
 
-      socket.emit("joinRoom", `support_user_${currentUser.id}`);
+      // Join personal room
+      socket.emit("joinRoom", `user_${currentUser.id}`);
+      console.log(`Joined personal room: user_${currentUser.id}`);
 
+      // Listen for send success
       socket.on("sendSupportMessage:success", (data) => {
-        console.log("message sent:", data);
+        console.log("Message sent successfully:", data);
         this.addMessage(data?.message);
 
-        const notificationStore = useNotificationStore();
+        // Refresh count
         socket.emit(
           "countUnreadMessages",
           { userId: currentUser.id },
-          (data) => {
-            notificationStore.supportChatCount = data?.count ?? 0;
+          (response) => {
+            if (response?.success) {
+              notificationStore.supportChatCount = response.count;
+            }
           }
         );
       });
 
+      // Listen for new messages
       socket.on("newSupportMessage", (msg) => {
-        console.log("recieved message", msg);
-
+        console.log("Received new support message:", msg);
         this.addMessage(msg);
+
+        // If message is from admin, refresh notification count
+        if (msg.is_admin) {
+          socket.emit(
+            "countUnreadMessages",
+            { userId: currentUser.id },
+            (response) => {
+              if (response?.success) {
+                notificationStore.supportChatCount = response.count;
+              }
+            }
+          );
+        }
       });
+
+      // Listen for read receipts
       socket.on("supportMessagesRead", ({ chatId, messageIds }) => {
-        // إذا كان الحدث يخص محادثتي الحالية
         if (this.activeChatId === chatId) {
           this.messages.forEach((msg) => {
             if (messageIds.includes(msg.id)) {
@@ -178,16 +248,36 @@ export const useCustomerChatStore = defineStore("customerChat", {
           });
         }
       });
+
+      // ⭐ FIXED: Handle reconnection - rejoin rooms
+      window.addEventListener("socket-reconnected", () => {
+        console.log("Socket reconnected - rejoining rooms");
+        socket.emit("joinRoom", `user_${currentUser.id}`);
+        if (this.activeChatId) {
+          socket.emit("joinRoom", `support_chat_${this.activeChatId}`);
+        }
+      });
     },
 
     /**
+     * ⭐ FIXED: Better duplicate handling and message updates
      * Add message locally (keeps chronological order)
      */
     addMessage(msg) {
-      const exists = this.messages.find((m) => m.id === msg.id);
-      if (!exists) {
+      if (!msg) return;
+      
+      const existingIndex = this.messages.findIndex((m) => m.id === msg.id);
+      
+      if (existingIndex === -1) {
+        // New message - add it
         this.messages.push(msg);
         this.messages.sort((a, b) => new Date(a.created) - new Date(b.created));
+      } else {
+        // Update existing message (for read status updates)
+        this.messages[existingIndex] = {
+          ...this.messages[existingIndex],
+          ...msg,
+        };
       }
     },
   },

@@ -136,7 +136,7 @@
             </div>
 
             <RouterLink
-              v-if="isAuthenticated"
+              v-if="isAuthenticated && isCustomer"
               :to="{ name: 'user-profile', query: { activeTab: 'messages' } }"
               class="relative ms-2 w-6 h-6 hover:text-yellow-300 transition"
             >
@@ -164,7 +164,7 @@
             </RouterLink>
 
             <RouterLink
-              v-if="isAuthenticated"
+              v-if="isAuthenticated && isCustomer"
               :to="{ name: 'customer-support' }"
               class="relative ms-2 w-6 h-6 hover:text-yellow-300 transition"
             >
@@ -221,6 +221,12 @@ const notificationStore = useNotificationStore();
 
 // Computed property to check if the user is authenticated (to show the icons)
 const isAuthenticated = computed(() => !!authStore.user);
+const isCustomer = computed(
+  () =>
+    !authStore?.user?.user_roles?.some((ur) =>
+      ["MANAGER", "ADMIN"].includes(ur.roles?.code)
+    )
+);
 // Get the counts directly from the store
 const userChatCount = computed(() => notificationStore.userChatCount);
 const supportChatCount = computed(() => notificationStore.supportChatCount);

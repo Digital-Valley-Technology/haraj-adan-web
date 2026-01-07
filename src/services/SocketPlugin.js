@@ -1,109 +1,112 @@
-// import { io } from "socket.io-client";
-// import { DEV_SOCKET_URL, MODE, PROD_SOCKET_URL } from "../utils/constants";
-// import { useAuthStore } from "../store/auth";
-
-// export const URL = MODE == "DEV" ? DEV_SOCKET_URL : PROD_SOCKET_URL;
-
-// export const socket =
-//   MODE == "DEV"
-//     ? io(`${URL}`, {
-//         withCredentials: true,
-//       })
-//     : io(`${URL}`, {
-//         withCredentials: true,
-//         path: "/haraj/socket.io/", // for production
-//         // path: "/socket.io/", // for development
-//         withCredentials: true,
-//       });
-
-// socket.on("connect_error", (err) => console.log(`connect_error due to ${err}`));
-
-// socket.on("connect", () => console.log("socket connected"));
-
-// socket.on("disconnect", () => console.log("socket disconnected"));
-
-// export default {
-//   install(app) {
-//     app.provide("socket", socket);
-
-//     const authStore = useAuthStore();
-
-//     window.addEventListener("beforeunload", () => {
-//       if (authStore.user) {
-//         socket.emit("offline", authStore.user.id || 0);
-//       }
-//     });
-
-//     socket.on("disconnect", () => {
-//       if (authStore.user) {
-//         socket.emit("offline", authStore.user.id || 0);
-//       }
-//     });
-
-//     socket.on("disconnecting", () => {
-//       if (authStore.user) {
-//         socket.emit("offline", authStore.user.id || 0);
-//       }
-//     });
-//   },
-// };
-
 import { io } from "socket.io-client";
 import { DEV_SOCKET_URL, MODE, PROD_SOCKET_URL } from "../utils/constants";
-import { useAuthStore } from "../store/auth"; // Adjusted path assumption
+import { useAuthStore } from "../store/auth";
 
 export const URL = MODE == "DEV" ? DEV_SOCKET_URL : PROD_SOCKET_URL;
+
+console.log("🔌 [SOCKET] Creating socket connection to:", URL);
 
 export const socket =
   MODE == "DEV"
     ? io(`${URL}`, {
         withCredentials: true,
+        autoConnect: true, // ⭐ Ensure auto-connect is enabled
       })
     : io(`${URL}`, {
         withCredentials: true,
-        path: "/haraj/socket.io/", // for production
-        withCredentials: true,
+        path: "/haraj/socket.io/",
+        autoConnect: true,
       });
 
-socket.on("connect_error", (err) => console.log(`connect_error due to ${err}`));
+// ============================================================================
+// SOCKET EVENT HANDLERS
+// ============================================================================
+
+socket.on("connect_error", (err) => {
+  console.error("❌ [SOCKET] Connection error:", err.message);
+});
 
 socket.on("connect", () => {
-  console.log("socket connected");
+  console.log("✅ [SOCKET] Connected - ID:", socket.id);
 
-  // 🔥 CRITICAL FIX: Rejoin the personal channel ('user_ID') on connect/reconnect
+  // ⭐ FIX: Join personal room on connect/reconnect
   const authStore = useAuthStore();
   const userId = authStore.user?.id;
 
   if (userId) {
-    // Use the generic room join event name ('joinRoom') for the personal channel
+    // Join personal room for receiving notifications
     socket.emit("joinRoom", `user_${userId}`);
-    console.log(`Rejoining personal room: user_${userId}`);
+    console.log(`✅ [SOCKET] Joined personal room: user_${userId}`);
+
+    // Check if user is admin
+    const userRoles = authStore.user?.user_roles || [];
+    const isAdmin = userRoles.some(
+      (role) => role.code === "MANAGER" || role.code === "ADMIN"
+    );
+
+    if (isAdmin) {
+      socket.emit("joinRoom", "admins");
+      console.log("✅ [SOCKET] Joined admins room");
+    }
+
+    // ⭐ NEW: Dispatch event for other components to react
+    window.dispatchEvent(
+      new CustomEvent("socket-reconnected", {
+        detail: { userId, isAdmin },
+      })
+    );
+  } else {
+    console.log("⏳ [SOCKET] No user logged in yet");
   }
 });
 
-socket.on("disconnect", () => console.log("socket disconnected"));
+socket.on("disconnect", (reason) => {
+  console.log("❌ [SOCKET] Disconnected:", reason);
+});
+
+// ⭐ NEW: Export helper to manually join rooms
+export function joinSocketRoom(roomName) {
+  if (socket.connected) {
+    socket.emit("joinRoom", roomName);
+    console.log(`✅ [SOCKET] Manually joined room: ${roomName}`);
+  } else {
+    console.warn(`⚠️ [SOCKET] Cannot join room ${roomName} - not connected`);
+  }
+}
+
+// ============================================================================
+// VUE PLUGIN
+// ============================================================================
 
 export default {
   install(app) {
+    console.log("🔌 [SOCKET] Installing socket plugin");
+
+    // Make socket available to all components
     app.provide("socket", socket);
+
+    // Make helper available globally
+    app.config.globalProperties.$joinSocketRoom = joinSocketRoom;
 
     const authStore = useAuthStore();
 
+    // Handle page unload
     window.addEventListener("beforeunload", () => {
-      if (authStore.user) {
-        socket.emit("offline", authStore.user.id || 0);
+      if (authStore.user?.id) {
+        socket.emit("offline", authStore.user.id);
       }
     });
 
+    // Handle disconnect events (emit offline)
     socket.on("disconnect", () => {
-      if (authStore.user) {
-        socket.emit("offline", authStore.user.id || 0);
+      if (authStore.user?.id) {
+        socket.emit("offline", authStore.user.id);
       }
     });
 
     socket.on("disconnecting", () => {
-      if (authStore.user) {
-        socket.emit("offline", authStore.user.id || 0);
+      if (authStore.user?.id) {
+        socket.emit("offline", authStore.user.id);
       }
     });
   },
