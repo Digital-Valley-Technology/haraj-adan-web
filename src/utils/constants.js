@@ -1,22 +1,20 @@
 export const MODE = "PROD";
 
-export const PROD_BASE_URL = "https://unityaid.net/haraj/api/v1";
+export const PROD_BASE_URL = "https://theresilience-group.com/haraj/api/v1";
 
 export const DEV_BASE_URL = "http://localhost:3059/api/v1";
 
 export const DEV_MEDIA_URL = "http://localhost:3059/uploads/";
 
-export const PROD_MEDIA_URL = "https://unityaid.net/haraj/uploads/";
+export const PROD_MEDIA_URL = "https://theresilience-group.com/haraj/uploads/";
 
 export const DEV_SOCKET_URL = "http://localhost:3059/";
 
-export const PROD_SOCKET_URL = "https://unityaid.net";
+export const PROD_SOCKET_URL = "https://theresilience-group.com";
 
 export const COMPANY_EAMIL = "contact@company.com";
 
-export const MAP_ACCESS_TOKEN =
-  "pk.eyJ1Ijoic2VlZGFtYXAiLCJhIjoiY2t4MjdmNWF6MTh6MjJvbnlmZnVjZGhocSJ9.302b3-yN28PeK2nnfpDb0g";
-
+export const MAP_ACCESS_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
 export const IP_INFO_TOKEN = "15f325f482f7d3";
 
 export const DashboardBreadCrumbBase = {
