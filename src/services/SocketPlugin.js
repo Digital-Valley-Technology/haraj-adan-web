@@ -14,7 +14,7 @@ export const socket =
       })
     : io(`${URL}`, {
         withCredentials: true,
-        path: "/haraj/socket.io/",
+        path: "/socket.io/",
         autoConnect: true,
       });
 
@@ -41,7 +41,7 @@ socket.on("connect", () => {
     // Check if user is admin
     const userRoles = authStore.user?.user_roles || [];
     const isAdmin = userRoles.some(
-      (role) => role.code === "MANAGER" || role.code === "ADMIN"
+      (role) => role.code === "MANAGER" || role.code === "ADMIN",
     );
 
     if (isAdmin) {
@@ -53,7 +53,7 @@ socket.on("connect", () => {
     window.dispatchEvent(
       new CustomEvent("socket-reconnected", {
         detail: { userId, isAdmin },
-      })
+      }),
     );
   } else {
     console.log("⏳ [SOCKET] No user logged in yet");
