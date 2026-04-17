@@ -1,11 +1,25 @@
 import { defineStore } from "pinia";
 import requestService from "../services/api/requestService";
 
+// Debounce utility
+let debounceTimer = null;
+const debounce = (fn, delay = 300) => {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(fn, delay);
+};
+
 export const useFiltersStore = defineStore("filters", {
   state: () => ({
+    // Parent categories with children
+    parentCategories: [],
+    selectedParentCategory: null,
+    selectedSubCategory: null,
+
+    // Legacy - flat categories list (for filter-page endpoint)
     categories: [],
-    currencies: [],
     selectedCategory: {},
+
+    currencies: [],
     page: 1,
     limit: 10,
     total: 0,
@@ -23,30 +37,54 @@ export const useFiltersStore = defineStore("filters", {
     maxPrice: null,
     sortBy: "",
 
-    // Attribute filters
-    selectedAttributes: {}, // { [attributeId]: valueId }
-    selectedCheckboxes: {}, // { [attributeId]: [valueIds] }
-    selectedCurrency: null,
+    // Attribute filters - ALL are now multi-select
+    selectedAttributes: {}, // { [attributeId]: [valueIds] } - Now array-based for multi-select
+    selectedCurrencies: [], // Array of currency IDs for multi-select
 
     // Ads results (fetched from API)
     ads: [],
+
+    // Track if auto-fetch is enabled
+    autoFetchEnabled: true,
   }),
 
   getters: {
     getCategories: (state) => state.categories,
+    getParentCategories: (state) => state.parentCategories,
+    getSelectedParentCategory: (state) => state.selectedParentCategory,
+    getSubCategories: (state) => {
+      if (!state.selectedParentCategory) return [];
+      // API returns children as 'other_categories'
+      return state.selectedParentCategory.other_categories || state.selectedParentCategory.children || [];
+    },
+    getSelectedSubCategory: (state) => state.selectedSubCategory,
     getSelectedCategory: (state) => state?.selectedCategory,
-    getSelectedCurrency: (state) => state?.selectedCurrency,
+    getSelectedCurrencies: (state) => state?.selectedCurrencies,
     getCurrencies: (state) => state?.currencies,
+    // The effective category for filtering (subcategory if selected, otherwise parent)
+    getEffectiveCategory: (state) => {
+      return state.selectedSubCategory || state.selectedParentCategory;
+    },
   },
 
   actions: {
-    // 🔹 Fetch filter categories
+    // 🔹 Fetch parent categories with children
+    async fetchParentCategories() {
+      if (this.parentCategories?.length > 0) return;
+      try {
+        const res = await requestService.getAll("/categories/parents?includes=children");
+        this.parentCategories = res?.data || [];
+      } catch (error) {
+        console.error("Error fetching parent categories:", error);
+      }
+    },
+
+    // 🔹 Fetch filter categories (flat list with attributes)
     async fetchCategories() {
       if (this.categories?.length > 0) return;
       try {
         const res = await requestService.getAll("/categories/filter-page");
         this.categories = res?.data;
-        // this.selectedCategory = res?.data?.[0] || {};
         if (
           !this.selectedCategory ||
           !Object.keys(this.selectedCategory).length
@@ -58,78 +96,140 @@ export const useFiltersStore = defineStore("filters", {
       }
     },
 
+    // 🔹 Select parent category
+    setSelectedParentCategory(parentCategory) {
+      this.selectedParentCategory = parentCategory;
+      this.selectedSubCategory = null;
+      this.selectedAttributes = {};
+      this.minPrice = null;
+      this.maxPrice = null;
+      this.selectedCurrencies = [];
+
+      // Also update the legacy selectedCategory to match
+      // Find in flat categories list if available
+      if (parentCategory) {
+        const found = this.categories.find((c) => c.id === parentCategory.id);
+        this.selectedCategory = found || parentCategory;
+      } else {
+        this.selectedCategory = {};
+      }
+
+      // Auto-fetch
+      this.debouncedFetch();
+    },
+
+    // 🔹 Select subcategory
+    setSelectedSubCategory(subCategory) {
+      this.selectedSubCategory = subCategory;
+      this.selectedAttributes = {};
+
+      // Also update the legacy selectedCategory to match
+      if (subCategory) {
+        const found = this.categories.find((c) => c.id === subCategory.id);
+        this.selectedCategory = found || subCategory;
+      } else if (this.selectedParentCategory) {
+        const found = this.categories.find((c) => c.id === this.selectedParentCategory.id);
+        this.selectedCategory = found || this.selectedParentCategory;
+      } else {
+        this.selectedCategory = {};
+      }
+
+      // Auto-fetch
+      this.debouncedFetch();
+    },
+
     setSelectedCategoryById(categoryId) {
       if (!categoryId) {
         this.selectedCategory = {};
+        this.selectedParentCategory = null;
+        this.selectedSubCategory = null;
         return;
       }
 
       const categoryIdNum = Number(categoryId);
+
+      // First try to find in flat categories
       const foundCategory = this.categories.find(
         (cat) => cat.id === categoryIdNum
       );
 
       if (foundCategory) {
-        // Use the existing action to apply full object and reset sub-filters
         this.setSelectedCategory(foundCategory);
-      } else {
-        console.warn(`Category ID ${categoryId} not found in store.`);
-        // Optionally, you might clear filters here if the ID is invalid
+      }
+
+      // Also try to set parent/sub categories
+      for (const parent of this.parentCategories) {
+        if (parent.id === categoryIdNum) {
+          this.selectedParentCategory = parent;
+          this.selectedSubCategory = null;
+          return;
+        }
+        // API returns children as 'other_categories'
+        const children = parent.other_categories || parent.children || [];
+        const child = children.find((c) => c.id === categoryIdNum);
+        if (child) {
+          this.selectedParentCategory = parent;
+          this.selectedSubCategory = child;
+          return;
+        }
       }
     },
-
-    // 🔹 Category select
-    // setSelectedCategory(category) {
-    //   this.selectedCategory = category;
-    //   this.selectedAttributes = {};
-    //   this.selectedCheckboxes = {};
-    //   this.minPrice = null;
-    //   this.maxPrice = null;
-    //   this.selectedCategory = null;
-    // },
 
     setSelectedCategory(category) {
       this.selectedCategory = category;
       this.selectedAttributes = {};
-      this.selectedCheckboxes = {};
       this.minPrice = null;
       this.maxPrice = null;
-      this.selectedCurrency = null; // Corrected: was accidentally resetting selectedCategory
+      this.selectedCurrencies = [];
+      // Auto-fetch with debounce
+      this.debouncedFetch();
     },
 
-    // 🔹 Attribute filters (radio style)
+    // 🔹 Attribute filters (multi-select)
     toggleAttributeValue(attributeId, valueId) {
-      if (this.selectedAttributes[attributeId] === valueId) {
-        delete this.selectedAttributes[attributeId];
-      } else {
-        this.selectedAttributes[attributeId] = valueId;
+      if (!this.selectedAttributes[attributeId]) {
+        this.selectedAttributes[attributeId] = [];
       }
-    },
-    toggleCurrencyValue(valueId) {
-      this.selectedCurrency = valueId;
-    },
-    isAttributeActive(attributeId, valueId) {
-      return this.selectedAttributes[attributeId] === valueId;
-    },
-    isCurrencyActive(valueId) {
-      return this.selectedCurrency === valueId;
-    },
-
-    // 🔹 Checkbox filters
-    toggleCheckboxValue(attributeId, valueId) {
-      if (!this.selectedCheckboxes[attributeId]) {
-        this.selectedCheckboxes[attributeId] = [];
-      }
-      const values = this.selectedCheckboxes[attributeId];
+      const values = this.selectedAttributes[attributeId];
       const index = values.indexOf(valueId);
       if (index !== -1) {
         values.splice(index, 1);
+        // Clean up empty arrays
+        if (values.length === 0) {
+          delete this.selectedAttributes[attributeId];
+        }
       } else {
         values.push(valueId);
       }
+      // Auto-fetch with debounce
+      this.debouncedFetch();
     },
-    isCheckboxActive(attributeId, valueId) {
-      return this.selectedCheckboxes[attributeId]?.includes(valueId);
+    isAttributeActive(attributeId, valueId) {
+      return this.selectedAttributes[attributeId]?.includes(valueId) || false;
+    },
+
+    // 🔹 Currency filters (multi-select)
+    toggleCurrencyValue(valueId) {
+      const index = this.selectedCurrencies.indexOf(valueId);
+      if (index !== -1) {
+        this.selectedCurrencies.splice(index, 1);
+      } else {
+        this.selectedCurrencies.push(valueId);
+      }
+      // Auto-fetch with debounce
+      this.debouncedFetch();
+    },
+    isCurrencyActive(valueId) {
+      return this.selectedCurrencies.includes(valueId);
+    },
+
+    // 🔹 Debounced fetch for auto-apply
+    debouncedFetch() {
+      if (!this.autoFetchEnabled) return;
+      this.page = 1; // Reset to first page when filters change
+      debounce(() => {
+        this.fetchAds(this.search);
+      }, 300);
     },
 
     // 🔹 Pagination handlers
@@ -142,13 +242,17 @@ export const useFiltersStore = defineStore("filters", {
 
     // 🔹 Clear all filters
     clearFilters() {
+      this.selectedParentCategory = null;
+      this.selectedSubCategory = null;
+      this.selectedCategory = {};
       this.minPrice = null;
       this.maxPrice = null;
-      this.selectedCurrency = null;
+      this.selectedCurrencies = [];
       this.sortBy = "";
       this.selectedAttributes = {};
-      this.selectedCheckboxes = {};
       this.page = 1; // reset to first page
+      // Auto-fetch
+      this.fetchAds(this.search);
     },
 
     // 🔹 Fetch ads with filters + pagination
@@ -156,19 +260,39 @@ export const useFiltersStore = defineStore("filters", {
       this.loading = true;
 
       try {
+        // Build category filter:
+        // - If subcategory is selected, use single category_id
+        // - If only parent is selected, send all subcategory IDs as category_ids
+        // - Otherwise use legacy selectedCategory
+        let categoryId = null;
+        let categoryIds = null;
+
+        if (this.selectedSubCategory?.id) {
+          // Subcategory selected - filter by that specific subcategory
+          categoryId = this.selectedSubCategory.id;
+        } else if (this.selectedParentCategory) {
+          // Only parent selected - get all subcategory IDs
+          const children = this.selectedParentCategory.other_categories || this.selectedParentCategory.children || [];
+          if (children.length > 0) {
+            categoryIds = children.map((c) => c.id);
+          } else {
+            // Parent has no children, use parent ID
+            categoryId = this.selectedParentCategory.id;
+          }
+        } else if (this.selectedCategory?.id) {
+          // Legacy fallback
+          categoryId = this.selectedCategory.id;
+        }
+
         const payload = {
-          category_id: this.selectedCategory?.id,
+          category_id: categoryId,
+          category_ids: categoryIds,
           min_price: this.minPrice,
           max_price: this.maxPrice,
-          currency_id: this.selectedCurrency,
+          currency_ids: this.selectedCurrencies.length > 0 ? this.selectedCurrencies : null,
           sort_by: this.sortBy,
-          attributes: Object.entries(this.selectedAttributes).map(
-            ([attributeId, valueId]) => ({
-              attributeId: Number(attributeId),
-              attributeValueId: Number(valueId),
-            })
-          ),
-          checkboxes: Object.entries(this.selectedCheckboxes).map(
+          // All attributes are now multi-select (sent as checkboxes)
+          checkboxes: Object.entries(this.selectedAttributes).map(
             ([attributeId, valueIds]) => ({
               attributeId: Number(attributeId),
               attributeValueIds: valueIds.map(Number),

@@ -49,21 +49,50 @@
               <h6 class="text-sm font-medium mb-2">
                 {{ currentLocale == "ar" ? "تصفية" : "Filter" }}
               </h6>
+
+              <!-- Parent Category -->
               <h6 class="text-xs font-medium mb-2">
-                {{ currentLocale == "ar" ? "الفئة" : "Category" }}
+                {{ currentLocale == "ar" ? "الفئة الرئيسية" : "Main Category" }}
               </h6>
               <select
                 class="border rounded-md p-2 w-full border-[#cdced1] mb-4"
-                v-model="filtersStore.selectedCategory"
+                :value="filtersStore.selectedParentCategory?.id || ''"
+                @change="handleParentCategoryChange($event)"
               >
+                <option value="">
+                  {{ currentLocale === "ar" ? "جميع الفئات" : "All Categories" }}
+                </option>
                 <option
-                  v-for="cat in categoriesFilter"
+                  v-for="cat in parentCategories"
                   :key="cat.id"
-                  :value="cat"
+                  :value="cat.id"
                 >
                   {{ currentLocale === "ar" ? cat?.name : cat?.name_en }}
                 </option>
               </select>
+
+              <!-- Subcategory (shown when parent is selected) -->
+              <template v-if="subCategories.length > 0">
+                <h6 class="text-xs font-medium mb-2">
+                  {{ currentLocale == "ar" ? "الفئة الفرعية" : "Subcategory" }}
+                </h6>
+                <select
+                  class="border rounded-md p-2 w-full border-[#cdced1] mb-4"
+                  :value="filtersStore.selectedSubCategory?.id || ''"
+                  @change="handleSubCategoryChange($event)"
+                >
+                  <option value="">
+                    {{ currentLocale === "ar" ? "جميع الفئات الفرعية" : "All Subcategories" }}
+                  </option>
+                  <option
+                    v-for="cat in subCategories"
+                    :key="cat.id"
+                    :value="cat.id"
+                  >
+                    {{ currentLocale === "ar" ? cat?.name : cat?.name_en }}
+                  </option>
+                </select>
+              </template>
 
               <!-- Price -->
               <h6 class="text-xs font-medium mb-2">
@@ -107,7 +136,7 @@
                 </button>
               </div>
 
-              <!-- Dynamic Filters (Radio Logic) -->
+              <!-- Dynamic Filters (Multi-Select) -->
               <div
                 v-for="item in selectedCategory?.category_attributes"
                 :key="item.id"
@@ -116,7 +145,6 @@
                   v-if="
                     item?.category_attributes_types?.code !== 'location' &&
                     item?.category_attributes_types?.code !== 'textarea' &&
-                    item?.category_attributes_types?.code !== 'checkbox' &&
                     item?.category_attributes_types?.code !== 'number'
                   "
                 >
@@ -138,42 +166,6 @@
                       ]"
                     >
                       {{ currentLocale === "ar" ? val.name : val.name_en }}
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Checkbox Filters -->
-              <div
-                v-for="item in selectedCategory?.category_attributes"
-                :key="item.id"
-              >
-                <div
-                  v-if="item?.category_attributes_types?.code === 'checkbox'"
-                >
-                  <h6 class="text-xs font-medium mb-2">
-                    {{ currentLocale == "ar" ? item?.name : item?.name_en }}
-                  </h6>
-                  <div
-                    v-for="val in item?.category_attributes_values"
-                    :key="val.id"
-                    class="flex justify-between items-center mb-2"
-                  >
-                    <p class="text-xs">
-                      {{ currentLocale == "ar" ? val.name : val.name_en }}
-                    </p>
-                    <button
-                      @click="filtersStore.toggleCheckboxValue(item.id, val.id)"
-                      class="cursor-pointer"
-                    >
-                      <i
-                        :class="[
-                          'pi',
-                          filtersStore.isCheckboxActive(item.id, val.id)
-                            ? 'pi-check-square'
-                            : 'pi-stop',
-                        ]"
-                      ></i>
                     </button>
                   </div>
                 </div>
@@ -209,21 +201,50 @@
                 <h6 class="text-sm font-medium mb-2">
                   {{ currentLocale == "ar" ? "تصفية" : "Filter" }}
                 </h6>
+
+                <!-- Parent Category -->
                 <h6 class="text-xs font-medium mb-2">
-                  {{ currentLocale == "ar" ? "الفئة" : "Category" }}
+                  {{ currentLocale == "ar" ? "الفئة الرئيسية" : "Main Category" }}
                 </h6>
                 <select
                   class="border rounded-md p-2 w-full border-[#cdced1] mb-4"
-                  v-model="filtersStore.selectedCategory"
+                  :value="filtersStore.selectedParentCategory?.id || ''"
+                  @change="handleParentCategoryChange($event)"
                 >
+                  <option value="">
+                    {{ currentLocale === "ar" ? "جميع الفئات" : "All Categories" }}
+                  </option>
                   <option
-                    v-for="cat in categoriesFilter"
+                    v-for="cat in parentCategories"
                     :key="cat.id"
-                    :value="cat"
+                    :value="cat.id"
                   >
                     {{ currentLocale === "ar" ? cat?.name : cat?.name_en }}
                   </option>
                 </select>
+
+                <!-- Subcategory (shown when parent is selected) -->
+                <template v-if="subCategories.length > 0">
+                  <h6 class="text-xs font-medium mb-2">
+                    {{ currentLocale == "ar" ? "الفئة الفرعية" : "Subcategory" }}
+                  </h6>
+                  <select
+                    class="border rounded-md p-2 w-full border-[#cdced1] mb-4"
+                    :value="filtersStore.selectedSubCategory?.id || ''"
+                    @change="handleSubCategoryChange($event)"
+                  >
+                    <option value="">
+                      {{ currentLocale === "ar" ? "جميع الفئات الفرعية" : "All Subcategories" }}
+                    </option>
+                    <option
+                      v-for="cat in subCategories"
+                      :key="cat.id"
+                      :value="cat.id"
+                    >
+                      {{ currentLocale === "ar" ? cat?.name : cat?.name_en }}
+                    </option>
+                  </select>
+                </template>
 
                 <!-- Price -->
                 <h6 class="text-xs font-medium mb-2">
@@ -268,7 +289,7 @@
                   </button>
                 </div>
 
-                <!-- Dynamic Filters (Radio Logic) -->
+                <!-- Dynamic Filters (Multi-Select) -->
                 <div
                   v-for="item in selectedCategory?.category_attributes"
                   :key="item.id"
@@ -277,7 +298,6 @@
                     v-if="
                       item?.category_attributes_types?.code !== 'location' &&
                       item?.category_attributes_types?.code !== 'textarea' &&
-                      item?.category_attributes_types?.code !== 'checkbox' &&
                       item?.category_attributes_types?.code !== 'number'
                     "
                   >
@@ -299,44 +319,6 @@
                         ]"
                       >
                         {{ currentLocale === "ar" ? val.name : val.name_en }}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Checkbox Filters -->
-                <div
-                  v-for="item in selectedCategory?.category_attributes"
-                  :key="item.id"
-                >
-                  <div
-                    v-if="item?.category_attributes_types?.code === 'checkbox'"
-                  >
-                    <h6 class="text-xs font-medium mb-2">
-                      {{ currentLocale == "ar" ? item?.name : item?.name_en }}
-                    </h6>
-                    <div
-                      v-for="val in item?.category_attributes_values"
-                      :key="val.id"
-                      class="flex justify-between items-center mb-2"
-                    >
-                      <p class="text-xs">
-                        {{ currentLocale == "ar" ? val.name : val.name_en }}
-                      </p>
-                      <button
-                        @click="
-                          filtersStore.toggleCheckboxValue(item.id, val.id)
-                        "
-                        class="cursor-pointer"
-                      >
-                        <i
-                          :class="[
-                            'pi',
-                            filtersStore.isCheckboxActive(item.id, val.id)
-                              ? 'pi-check-square'
-                              : 'pi-stop',
-                          ]"
-                        ></i>
                       </button>
                     </div>
                   </div>
@@ -729,6 +711,36 @@ const categoriesFilter = computed(() => filtersStore.getCategories);
 const selectedCategory = computed(() => filtersStore.getSelectedCategory);
 const currencies = computed(() => filtersStore.getCurrencies);
 
+// Parent/Subcategory computed properties
+const parentCategories = computed(() => filtersStore.getParentCategories);
+const subCategories = computed(() => filtersStore.getSubCategories);
+
+// Handler for parent category selection
+const handleParentCategoryChange = (event) => {
+  const selectedId = event.target.value;
+  if (!selectedId || selectedId === "") {
+    filtersStore.setSelectedParentCategory(null);
+  } else {
+    const parent = parentCategories.value.find((c) => c.id === Number(selectedId));
+    if (parent) {
+      filtersStore.setSelectedParentCategory(parent);
+    }
+  }
+};
+
+// Handler for subcategory selection
+const handleSubCategoryChange = (event) => {
+  const selectedId = event.target.value;
+  if (!selectedId || selectedId === "") {
+    filtersStore.setSelectedSubCategory(null);
+  } else {
+    const sub = subCategories.value.find((c) => c.id === Number(selectedId));
+    if (sub) {
+      filtersStore.setSelectedSubCategory(sub);
+    }
+  }
+};
+
 watch(
   categoriesFilter,
   (newCategories) => {
@@ -736,8 +748,11 @@ watch(
 
     // Check if ID exists, categories are loaded, and the category filter hasn't been set yet
     if (id && newCategories?.length > 0 && !filtersStore.selectedCategory?.id) {
+      // Temporarily disable auto-fetch to avoid double fetching
+      filtersStore.autoFetchEnabled = false;
       // Use the new store action to find and set the category object
       filtersStore.setSelectedCategoryById(id);
+      filtersStore.autoFetchEnabled = true;
 
       // After setting the category, fetch the ads immediately with the new filter
       filtersStore.fetchAds(routeQuery.value);
@@ -746,7 +761,42 @@ watch(
   { immediate: true }
 );
 
+// Watch for price changes with debounce (skip initial)
+let priceDebounce = null;
+let priceInitialized = false;
+watch(
+  () => [filtersStore.minPrice, filtersStore.maxPrice],
+  (newVal, oldVal) => {
+    // Skip first run to avoid fetching on mount
+    if (!priceInitialized) {
+      priceInitialized = true;
+      return;
+    }
+    clearTimeout(priceDebounce);
+    priceDebounce = setTimeout(() => {
+      filtersStore.page = 1;
+      filtersStore.fetchAds(routeQuery.value);
+    }, 500);
+  }
+);
+
+// Watch for sort changes (skip initial)
+let sortInitialized = false;
+watch(
+  () => filtersStore.sortBy,
+  (newVal, oldVal) => {
+    // Skip first run to avoid fetching on mount
+    if (!sortInitialized) {
+      sortInitialized = true;
+      return;
+    }
+    filtersStore.page = 1;
+    filtersStore.fetchAds(routeQuery.value);
+  }
+);
+
 onMounted(() => {
+  filtersStore.fetchParentCategories();
   filtersStore.fetchCategories();
   filtersStore.fetchCurrencies();
   filtersStore.fetchAds(routeQuery.value);
