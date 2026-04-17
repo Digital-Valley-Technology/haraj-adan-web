@@ -575,7 +575,7 @@
 import AppLayout from "../Layout/AppLayout.vue";
 import { useI18n } from "vue-i18n";
 import { ref, computed, onMounted, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
+import { useRoute, useRouter, onBeforeRouteUpdate } from "vue-router";
 import { useFiltersStore } from "../store/filters";
 import { MEDIA_URL } from "../services/axios";
 import dayjs from "dayjs";
@@ -741,25 +741,93 @@ const handleSubCategoryChange = (event) => {
   }
 };
 
-watch(
-  categoriesFilter,
-  (newCategories) => {
-    const id = initialCategoryId.value;
+// Helper function to apply category selection based on categoryId
+const applyCategorySelection = (categoryIdNum, parentCats) => {
+  if (!categoryIdNum || !parentCats?.length) return false;
 
-    // Check if ID exists, categories are loaded, and the category filter hasn't been set yet
-    if (id && newCategories?.length > 0 && !filtersStore.selectedCategory?.id) {
-      // Temporarily disable auto-fetch to avoid double fetching
-      filtersStore.autoFetchEnabled = false;
-      // Use the new store action to find and set the category object
-      filtersStore.setSelectedCategoryById(id);
-      filtersStore.autoFetchEnabled = true;
+  // Check if it's a parent category
+  const parentMatch = parentCats.find((p) => p.id === categoryIdNum);
+  if (parentMatch) {
+    filtersStore.selectedParentCategory = parentMatch;
+    filtersStore.selectedSubCategory = null;
+    filtersStore.selectedCategory = parentMatch;
+    return true;
+  }
 
-      // After setting the category, fetch the ads immediately with the new filter
-      filtersStore.fetchAds(routeQuery.value);
+  // Otherwise, find which parent contains this subcategory
+  for (const parent of parentCats) {
+    const children = parent.other_categories || parent.children || [];
+    const childMatch = children.find((c) => c.id === categoryIdNum);
+    if (childMatch) {
+      filtersStore.selectedParentCategory = parent;
+      filtersStore.selectedSubCategory = childMatch;
+      const foundInFlat = filtersStore.categories.find((c) => c.id === categoryIdNum);
+      filtersStore.selectedCategory = foundInFlat || childMatch;
+      return true;
     }
+  }
+  return false;
+};
+
+// Watch for parent categories to load, then pre-select based on URL categoryId
+watch(
+  () => parentCategories.value,
+  (newParentCategories) => {
+    const id = initialCategoryId.value;
+    if (!id || !newParentCategories?.length) return;
+
+    const categoryIdNum = Number(id);
+
+    // Get current effective category ID
+    const currentCategoryId = filtersStore.selectedSubCategory?.id || filtersStore.selectedParentCategory?.id;
+
+    // Skip if already showing the correct category
+    if (currentCategoryId === categoryIdNum) return;
+
+    // Temporarily disable auto-fetch to avoid double fetching
+    filtersStore.autoFetchEnabled = false;
+
+    applyCategorySelection(categoryIdNum, newParentCategories);
+
+    filtersStore.autoFetchEnabled = true;
+
+    // After setting the category, fetch the ads immediately with the new filter
+    filtersStore.fetchAds(routeQuery.value);
   },
   { immediate: true }
 );
+
+// Handle route updates when navigating to the same component with different categoryId
+onBeforeRouteUpdate((to, from) => {
+  const newCategoryId = to.query.categoryId;
+  const oldCategoryId = from.query.categoryId;
+
+  // Skip if no change
+  if (newCategoryId === oldCategoryId) return;
+
+  // If parentCategories aren't loaded yet, the other watch will handle it
+  if (!parentCategories.value?.length) return;
+
+  // Temporarily disable auto-fetch
+  filtersStore.autoFetchEnabled = false;
+
+  if (!newCategoryId) {
+    // Clear selection if no categoryId
+    filtersStore.selectedParentCategory = null;
+    filtersStore.selectedSubCategory = null;
+    filtersStore.selectedCategory = {};
+  } else {
+    applyCategorySelection(Number(newCategoryId), parentCategories.value);
+  }
+
+  filtersStore.autoFetchEnabled = true;
+  filtersStore.selectedAttributes = {};
+  filtersStore.minPrice = null;
+  filtersStore.maxPrice = null;
+  filtersStore.selectedCurrencies = [];
+  filtersStore.page = 1;
+  filtersStore.fetchAds(to.query.q || "");
+});
 
 // Watch for price changes with debounce (skip initial)
 let priceDebounce = null;
