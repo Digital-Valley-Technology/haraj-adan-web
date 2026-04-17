@@ -88,7 +88,7 @@ const fetchCategories = async () => {
     const response = await requestService.getAll("/categories/parents", {
       params: { includes: ["children"] },
     });
-    categories.value = response.data || [];
+    categories.value = (response.data || []).sort((a, b) => a.id - b.id);
   } catch (error) {
     console.error("Error fetching categories:", error);
   }
