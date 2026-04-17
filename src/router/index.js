@@ -122,6 +122,7 @@ const routes = [
     name: "post-ad",
     component: () => import("../pages/PostAdPage.vue"),
     props: true,
+    meta: { requiresAuth: true },
   },
   {
     path: "/post-featured-ad/:adId",
@@ -133,6 +134,7 @@ const routes = [
     name: "post-ad-categories",
     path: "/post-ad-categories",
     component: () => import("../pages/PostAdCategoriesPage.vue"),
+    meta: { requiresAuth: true },
   },
   {
     name: "dashboard",
