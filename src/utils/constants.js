@@ -14,7 +14,8 @@ export const PROD_SOCKET_URL = "https://haraj-api.harajaden.com";
 
 export const COMPANY_EAMIL = "info@harajaden.com";
 
-export const MAP_ACCESS_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
+// Mapbox access token - must be set in environment variable VITE_MAPBOX_TOKEN
+export const MAP_ACCESS_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || "";
 export const IP_INFO_TOKEN = "15f325f482f7d3";
 
 export const DashboardBreadCrumbBase = {

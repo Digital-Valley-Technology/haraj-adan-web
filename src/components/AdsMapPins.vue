@@ -10,43 +10,7 @@
 <script setup>
 import { ref, onMounted, nextTick, watch, computed } from "vue";
 import { useI18n } from "vue-i18n";
-// Ensure both MAP_ACCESS_TOKEN and MEDIA_URL are correctly imported
-import { MAP_ACCESS_TOKEN } from "../utils/constants";
-import { MEDIA_URL } from "../services/axios";
-
-// --- Helper functions for Ad Details (Copied from main page) ---
-
-const extractAndFormatCityAndCountry = (formattedAddress) => {
-  if (
-    !formattedAddress ||
-    typeof formattedAddress !== "string" ||
-    formattedAddress === "N/A"
-  ) {
-    return "N/A";
-  }
-  const parts = formattedAddress.split("،").map((part) => part.trim());
-  const non_empty_parts = parts.filter((part) => part.length > 0);
-  if (non_empty_parts.length < 2) {
-    if (non_empty_parts.length === 1) {
-      return non_empty_parts[0];
-    }
-    return "N/A";
-  }
-  const country = non_empty_parts[non_empty_parts.length - 1];
-  let cityAndZip = non_empty_parts[non_empty_parts.length - 2];
-  const city = cityAndZip.replace(/[0-9]/g, "").trim();
-  return `${city}، ${country}`;
-};
-
-const getAdAddress = (ad) => {
-  const fullAddress = ad?.address;
-  return fullAddress ? extractAndFormatCityAndCountry(fullAddress) : "N/A";
-};
-
-const mainImage = (img) => {
-  // Use a fallback image if the URL is not valid
-  return img ? `${MEDIA_URL}/${img}` : "fallback-image-url.jpg";
-};
+import { MAP_ACCESS_TOKEN, MODE, DEV_MEDIA_URL, PROD_MEDIA_URL } from "../utils/constants";
 
 // --- Component Props and Setup ---
 const props = defineProps({
@@ -62,10 +26,10 @@ const props = defineProps({
 const { t, locale } = useI18n();
 const map = ref(null);
 const markers = ref([]);
+const popups = ref([]);
 const noPins = computed(() => props.ads.length === 0);
+const MEDIA_URL = MODE === "DEV" ? DEV_MEDIA_URL : PROD_MEDIA_URL;
 
-// --- FIX: Declare a single, reusable popup instance ---
-const adPopup = ref(null);
 
 // --- Coordinate Extraction (Reused Logic) ---
 const getAdCoordinates = (ad) => {
@@ -122,53 +86,48 @@ function updateMapLanguage() {
 }
 
 /* ------------------------------
-    Marker Management with Popups
+    Popup Content Helper
+-------------------------------- */
+
+function createPopupContent(ad) {
+  // Get ad image - using ads_images array with image property
+  const imageUrl = ad.ads_images?.[0]?.image
+    ? `${MEDIA_URL}/${ad.ads_images[0].image}`
+    : "/images/placeholder.png";
+
+  // Get title based on locale
+  const title = locale.value === "ar" ? (ad.title || ad.title_en) : (ad.title_en || ad.title);
+
+  // Get price display
+  const price = ad.price ? `${ad.price} ${ad.currency?.code || ""}` : t("ads.price_not_set");
+
+  // Get address/location
+  const address = ad.address || t("ads.no_address");
+
+  // Create HTML content - using hash router link
+  return `
+    <a href="#/ad-details/${ad.id}" class="ad-popup-link" style="text-decoration: none; color: inherit; display: block;">
+      <div class="ad-popup" style="min-width: 200px; max-width: 280px; cursor: pointer;">
+        <img src="${imageUrl}" alt="${title}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 8px 8px 0 0;" onerror="this.src='/images/placeholder.png'"/>
+        <div style="padding: 10px;">
+          <h4 style="margin: 0 0 6px 0; font-size: 14px; font-weight: 600; color: #333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${title}</h4>
+          <p style="margin: 0 0 4px 0; font-size: 14px; font-weight: 700; color: #146AAB;">${price}</p>
+          <p style="margin: 0; font-size: 12px; color: #666; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">📍 ${address}</p>
+        </div>
+      </div>
+    </a>
+  `;
+}
+
+/* ------------------------------
+    Marker Management
 -------------------------------- */
 
 function clearMarkers() {
-  // Close the single popup before removing markers
-  if (adPopup.value && adPopup.value.isOpen()) {
-    adPopup.value.remove();
-  }
   markers.value.forEach((marker) => marker.remove());
+  popups.value.forEach((popup) => popup.remove());
   markers.value = [];
-}
-
-/**
- * Generates the HTML content for the Mapbox Popup.
- * @param {Object} ad The full ad object.
- * @returns {string} The HTML string for the popup.
- */
-function createPopupContent(ad) {
-  const adTitle = locale.value === "ar" ? ad.title : ad.title_en;
-  const adPrice =
-    locale.value === "ar"
-      ? `${ad.price} ${ad?.currencies?.name}`
-      : `${ad?.currencies?.name_en} ${ad.price}`;
-  const adImage = mainImage(ad?.ads_images?.[0]?.image);
-  const adLocation = getAdAddress(ad);
-  const rtl = locale.value === "ar" ? "rtl" : "ltr";
-
-  // Using a link to allow navigation to ad details
-  return `
-    <div style="direction: ${rtl}; max-width: 250px; padding: 5px; text-align: start;">
-      <a href="/ad-details/${ad.id}" target="_blank" style="text-decoration: none; color: inherit;">
-        <img 
-          src="${adImage}" 
-          alt="${adTitle}" 
-          style="width: 100%; height: 120px; object-fit: cover; border-radius: 4px; margin-bottom: 8px;"
-        />
-        <h3 style="font-size: 1rem; font-weight: 600; margin: 0 0 4px 0;">${adTitle}</h3>
-      </a>
-      <p style="font-size: 0.9rem; color: #146AAB; font-weight: bold; margin: 0 0 4px 0;">
-        ${adPrice}
-      </p>
-      <p style="font-size: 0.8rem; color: #555; margin: 0;">
-        <i class="pi pi-map-marker" style="font-size: 0.7rem; margin-inline-end: 4px;"></i>
-        ${adLocation}
-      </p>
-    </div>
-  `;
+  popups.value = [];
 }
 
 function addMarkers() {
@@ -188,33 +147,28 @@ function addMarkers() {
     const { lat, lng } = ad.coords;
     const lngLat = [lng, lat];
 
-    // 1. Create the Marker
+    // 1. Create the Popup with ad details
+    const popup = new window.mapboxgl.Popup({
+      offset: 25,
+      closeButton: true,
+      closeOnClick: false,
+      maxWidth: "300px",
+    }).setHTML(createPopupContent(ad));
+
+    // 2. Create the Marker and attach popup
     const newMarker = new window.mapboxgl.Marker({
       color: "#146AAB",
       scale: 0.7,
     })
       .setLngLat(lngLat)
-      // DO NOT use .setPopup() here, we manage it globally
+      .setPopup(popup)
       .addTo(map.value);
 
-    // 2. Add the Click Listener to the marker element
-    newMarker.getElement().addEventListener("click", () => {
-      // Update and open the SINGLE, reusable popup instance
-      adPopup.value
-        .setLngLat(lngLat)
-        .setHTML(createPopupContent(ad))
-        .addTo(map.value);
-
-      // Optional: Gently fly to the marker when clicked
-      map.value.flyTo({
-        center: lngLat,
-        zoom: map.value.getZoom(),
-        essential: true,
-        speed: 0.5,
-      });
-    });
+    // 3. Style the marker cursor to indicate it's clickable
+    newMarker.getElement().style.cursor = "pointer";
 
     markers.value.push(newMarker);
+    popups.value.push(popup);
     bounds.extend(lngLat);
   });
 
@@ -252,15 +206,6 @@ onMounted(() => {
       attributionControl: false,
     });
 
-    // --- FIX: Initialize the single popup instance after map creation ---
-    adPopup.value = new window.mapboxgl.Popup({
-      offset: 25,
-      closeButton: true,
-      // If true, clicking anywhere on the map closes it.
-      // Setting to false lets Mapbox handle internal close events (e.g., the 'x' button).
-      closeOnClick: false,
-    });
-
     map.value.on("style.load", () => {
       updateMapLanguage();
       addMarkers();
@@ -280,7 +225,6 @@ watch(
 
 watch(locale, () => {
   if (map.value) {
-    // Re-add markers to rebuild the popup HTML with the new locale text
     updateMapLanguage();
     addMarkers();
   }
@@ -317,5 +261,34 @@ watch(locale, () => {
 .map-container {
   border-radius: 12px;
   margin-bottom: 0;
+}
+</style>
+
+<style>
+/* Global popup styles - not scoped so they apply to Mapbox popups */
+.mapboxgl-popup-content {
+  padding: 0 !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.mapboxgl-popup-close-button {
+  font-size: 18px;
+  padding: 4px 8px;
+  color: #666;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  margin: 4px;
+}
+
+.mapboxgl-popup-close-button:hover {
+  color: #333;
+  background: #fff;
+}
+
+.ad-popup-link:hover .ad-popup {
+  background-color: #f9f9f9;
 }
 </style>

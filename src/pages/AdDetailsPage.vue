@@ -104,7 +104,7 @@ const fetchAdDetails = async () => {
         userId: currentUser?.value?.id || null,
       },
     });
-    ad.value = response.data;
+    ad.value = response?.data || response;
   } catch (error) {
     console.error(error);
   } finally {

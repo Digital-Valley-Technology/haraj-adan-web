@@ -410,10 +410,43 @@ const isLiked = computed(() => {
   );
 });
 
+const isAdminUser = computed(() => {
+  return currentUser.value?.user_roles?.some((ur) =>
+    ["MANAGER", "ADMIN"].includes(ur.roles?.code)
+  );
+});
+
 const handleNavigation = () => {
+  // Check if user is logged in
+  if (!currentUser.value?.id) {
+    showInfo(t("adDetails.must-login-first"));
+    router.push({ name: "login", query: { redirect: router.currentRoute.value.fullPath } });
+    return;
+  }
+
+  // Admin users cannot send messages
+  if (isAdminUser.value) {
+    showInfo(t("adDetails.admin-cannot-message"));
+    return;
+  }
+
+  // Check if ad owner user_id exists
+  const adOwnerId = adData?.value?.user_id;
+  if (!adOwnerId) {
+    showError(t("adDetails.cannot-message"));
+    return;
+  }
+
+  // Prevent messaging yourself
+  if (adOwnerId === currentUser.value.id) {
+    showInfo(t("adDetails.cannot-message-yourself"));
+    return;
+  }
+
+  // Navigate to profile page with userId to open chat
   router.push({
     name: "user-profile",
-    query: { userId: adData?.value?.user_id },
+    query: { userId: adOwnerId },
   });
 };
 

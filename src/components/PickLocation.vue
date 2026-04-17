@@ -40,6 +40,7 @@ const props = defineProps({
   },
   mapId: { type: String, default: "map" },
   zoom: { type: Number, default: 12 },
+  autoDetectGPS: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(["update:modelValue"]);
@@ -242,6 +243,29 @@ function useCurrentLocation() {
 //   });
 // });
 
+// Auto-detect GPS location using browser geolocation
+async function autoDetectGPSLocation() {
+  if (!navigator.geolocation) {
+    // Fallback to IP detection if geolocation not supported
+    await detectCountryByIP();
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      lat.value = pos.coords.latitude;
+      lng.value = pos.coords.longitude;
+      ensureMarker(lng.value, lat.value);
+      map.value?.flyTo({ center: [lng.value, lat.value], zoom: 13 });
+      await reverseGeocode(lng.value, lat.value);
+    },
+    async () => {
+      // Fallback to IP detection if user denies permission
+      await detectCountryByIP();
+    }
+  );
+}
+
 onMounted(async () => {
   nextTick(async () => {
     window.mapboxgl.accessToken = MAP_ACCESS_TOKEN;
@@ -258,7 +282,12 @@ onMounted(async () => {
 
     // FIX: Don't overwrite ad location when editing
     if (!props.modelValue.lat || !props.modelValue.lng) {
-      await detectCountryByIP();
+      // Use GPS auto-detection if prop is enabled, otherwise fall back to IP
+      if (props.autoDetectGPS) {
+        await autoDetectGPSLocation();
+      } else {
+        await detectCountryByIP();
+      }
     } else {
       ensureMarker(lng.value, lat.value);
       reverseGeocode(lng.value, lat.value);

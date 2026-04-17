@@ -118,7 +118,7 @@ const routes = [
     component: () => import("../pages/SearchPage.vue"),
   },
   {
-    path: "/post-add/:categoryId",
+    path: "/post-add/:categoryId/:adId?",
     name: "post-ad",
     component: () => import("../pages/PostAdPage.vue"),
     props: true,
