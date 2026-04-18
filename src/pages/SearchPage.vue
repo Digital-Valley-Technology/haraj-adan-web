@@ -136,6 +136,25 @@
                 </button>
               </div>
 
+              <!-- Nearby Filter -->
+              <h6 class="text-xs font-medium mb-2">
+                {{ currentLocale === "ar" ? "الموقع" : "Location" }}
+              </h6>
+              <div class="flex flex-wrap gap-2 mb-4">
+                <button
+                  @click="toggleNearbyFilter"
+                  :class="[
+                    'text-xs capitalize py-2 px-4 rounded-md cursor-pointer transition-colors flex items-center gap-2',
+                    nearbyOnly
+                      ? 'bg-[#146AAB] text-white'
+                      : 'bg-[#EDEFF2] text-black hover:bg-[#0f76c5] hover:text-white',
+                  ]"
+                >
+                  <i class="pi pi-map-marker"></i>
+                  {{ currentLocale === "ar" ? "إعلانات قريبة" : "Nearby Ads" }}
+                </button>
+              </div>
+
               <!-- Dynamic Filters (Multi-Select) -->
               <div
                 v-for="item in selectedCategory?.category_attributes"
@@ -286,6 +305,25 @@
                     ]"
                   >
                     {{ currentLocale === "ar" ? val.name : val.name_en }}
+                  </button>
+                </div>
+
+                <!-- Nearby Filter -->
+                <h6 class="text-xs font-medium mb-2">
+                  {{ currentLocale === "ar" ? "الموقع" : "Location" }}
+                </h6>
+                <div class="flex flex-wrap gap-2 mb-4">
+                  <button
+                    @click="toggleNearbyFilter"
+                    :class="[
+                      'text-xs capitalize py-2 px-4 rounded-md cursor-pointer transition-colors flex items-center gap-2',
+                      nearbyOnly
+                        ? 'bg-[#146AAB] text-white'
+                        : 'bg-[#EDEFF2] text-black hover:bg-[#0f76c5] hover:text-white',
+                    ]"
+                  >
+                    <i class="pi pi-map-marker"></i>
+                    {{ currentLocale === "ar" ? "إعلانات قريبة" : "Nearby Ads" }}
                   </button>
                 </div>
 
@@ -577,6 +615,7 @@ import { useI18n } from "vue-i18n";
 import { ref, computed, onMounted, watch } from "vue";
 import { useRoute, useRouter, onBeforeRouteUpdate } from "vue-router";
 import { useFiltersStore } from "../store/filters";
+import { useLocationStore } from "../store/location";
 import { MEDIA_URL } from "../services/axios";
 import dayjs from "dayjs";
 import AdsMapPins from "../components/AdsMapPins.vue";
@@ -586,8 +625,23 @@ const router = useRouter();
 const route = useRoute();
 
 const filtersStore = useFiltersStore();
+const locationStore = useLocationStore();
 
 const activeButtonList = ref("list");
+
+// Nearby filter
+const nearbyOnly = computed(() => filtersStore.nearbyOnly);
+
+const toggleNearbyFilter = () => {
+  if (!locationStore.locationLoaded) {
+    // Try to detect location first
+    locationStore.detectLocation();
+  }
+  filtersStore.toggleNearbyFilter(
+    locationStore.latitude,
+    locationStore.longitude
+  );
+};
 
 const currentLocale = computed(() => locale.value || "ar");
 const routeQuery = computed(() => router.currentRoute.value?.query?.q || "");
@@ -826,6 +880,18 @@ onBeforeRouteUpdate((to, from) => {
   filtersStore.maxPrice = null;
   filtersStore.selectedCurrencies = [];
   filtersStore.page = 1;
+
+  // Handle nearby query param
+  if (to.query.nearby === 'true') {
+    filtersStore.setNearbyFilter(
+      true,
+      locationStore.latitude,
+      locationStore.longitude
+    );
+  } else {
+    filtersStore.setNearbyFilter(false, null, null);
+  }
+
   filtersStore.fetchAds(to.query.q || "");
 });
 
@@ -863,10 +929,26 @@ watch(
   }
 );
 
-onMounted(() => {
+onMounted(async () => {
   filtersStore.fetchParentCategories();
   filtersStore.fetchCategories();
   filtersStore.fetchCurrencies();
+
+  // Check for nearby query param
+  const nearbyParam = route.query.nearby;
+  if (nearbyParam === 'true') {
+    // Ensure location is available
+    if (!locationStore.locationLoaded) {
+      await locationStore.detectLocation();
+    }
+    // Enable nearby filter with user's location
+    filtersStore.setNearbyFilter(
+      true,
+      locationStore.latitude,
+      locationStore.longitude
+    );
+  }
+
   filtersStore.fetchAds(routeQuery.value);
 });
 </script>

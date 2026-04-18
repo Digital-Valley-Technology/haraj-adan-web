@@ -38,8 +38,8 @@ const ads = computed(() => homeStore.ads);
 const currentLocale = computed(() => locale.value);
 const loading = computed(() => homeStore.adsLoading);
 
-const handleNavigation = (routeName) => {
-  router.push({ name: routeName });
+const handleNavigation = (routeName, query = {}) => {
+  router.push({ name: routeName, query });
 };
 
 onMounted(() => {
@@ -119,7 +119,7 @@ onMounted(() => {
               }}
             </span>
             <a
-              @click="handleNavigation('search')"
+              @click="handleNavigation('search', { nearby: 'true' })"
               role="button"
               class="text-[#146AAB] text-xs font-medium cursor-pointer"
               >{{ currentLocale === "ar" ? "رؤية الكل >" : "See All" }}</a

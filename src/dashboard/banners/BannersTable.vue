@@ -180,6 +180,9 @@ const resetModal = () => {
       :totalRecords="bannerStore.total"
       :first="(bannerStore.page - 1) * bannerStore.limit"
       :rowsPerPageOptions="[5, 10, 20, 50]"
+      :pageLinkSize="7"
+      template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown CurrentPageReport"
+      :currentPageReportTemplate="`{first} - {last} / {totalRecords}`"
       @page="
         (e) => {
           if (e.rows !== bannerStore.limit) {

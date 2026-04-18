@@ -37,6 +37,11 @@ export const useFiltersStore = defineStore("filters", {
     maxPrice: null,
     sortBy: "",
 
+    // Nearby filter
+    nearbyOnly: false,
+    latitude: null,
+    longitude: null,
+
     // Attribute filters - ALL are now multi-select
     selectedAttributes: {}, // { [attributeId]: [valueIds] } - Now array-based for multi-select
     selectedCurrencies: [], // Array of currency IDs for multi-select
@@ -61,6 +66,7 @@ export const useFiltersStore = defineStore("filters", {
     getSelectedCategory: (state) => state?.selectedCategory,
     getSelectedCurrencies: (state) => state?.selectedCurrencies,
     getCurrencies: (state) => state?.currencies,
+    getNearbyOnly: (state) => state.nearbyOnly,
     // The effective category for filtering (subcategory if selected, otherwise parent)
     getEffectiveCategory: (state) => {
       return state.selectedSubCategory || state.selectedParentCategory;
@@ -223,6 +229,28 @@ export const useFiltersStore = defineStore("filters", {
       return this.selectedCurrencies.includes(valueId);
     },
 
+    // 🔹 Nearby filter
+    setNearbyFilter(enabled, lat = null, lng = null) {
+      this.nearbyOnly = enabled;
+      this.latitude = lat;
+      this.longitude = lng;
+      // Auto-fetch with debounce
+      this.debouncedFetch();
+    },
+
+    toggleNearbyFilter(lat = null, lng = null) {
+      this.nearbyOnly = !this.nearbyOnly;
+      if (this.nearbyOnly) {
+        this.latitude = lat;
+        this.longitude = lng;
+      } else {
+        this.latitude = null;
+        this.longitude = null;
+      }
+      // Auto-fetch with debounce
+      this.debouncedFetch();
+    },
+
     // 🔹 Debounced fetch for auto-apply
     debouncedFetch() {
       if (!this.autoFetchEnabled) return;
@@ -250,6 +278,9 @@ export const useFiltersStore = defineStore("filters", {
       this.selectedCurrencies = [];
       this.sortBy = "";
       this.selectedAttributes = {};
+      this.nearbyOnly = false;
+      this.latitude = null;
+      this.longitude = null;
       this.page = 1; // reset to first page
       // Auto-fetch
       this.fetchAds(this.search);
@@ -284,26 +315,49 @@ export const useFiltersStore = defineStore("filters", {
           categoryId = this.selectedCategory.id;
         }
 
-        const payload = {
-          category_id: categoryId,
-          category_ids: categoryIds,
-          min_price: this.minPrice,
-          max_price: this.maxPrice,
-          currency_ids: this.selectedCurrencies.length > 0 ? this.selectedCurrencies : null,
-          sort_by: this.sortBy,
-          // All attributes are now multi-select (sent as checkboxes)
-          checkboxes: Object.entries(this.selectedAttributes).map(
-            ([attributeId, valueIds]) => ({
-              attributeId: Number(attributeId),
-              attributeValueIds: valueIds.map(Number),
-            })
-          ),
-          page: this.page,
-          limit: this.limit,
-          search: searchQuery || this.search,
-        };
+        let res;
 
-        const res = await requestService.create("/ads/filter", payload);
+        // Use nearby endpoint when nearbyOnly filter is active
+        if (this.nearbyOnly && this.latitude && this.longitude) {
+          const params = {
+            lat: this.latitude,
+            lng: this.longitude,
+            page: this.page,
+            limit: this.limit,
+          };
+
+          // Add optional filters if set
+          if (categoryId) params.category_id = categoryId;
+          if (categoryIds) params.category_ids = categoryIds.join(',');
+          if (this.minPrice) params.min_price = this.minPrice;
+          if (this.maxPrice) params.max_price = this.maxPrice;
+          if (this.selectedCurrencies.length > 0) params.currency_ids = this.selectedCurrencies.join(',');
+          if (searchQuery || this.search) params.search = searchQuery || this.search;
+
+          res = await requestService.getAll("/ads/nearby", { params });
+        } else {
+          // Use regular filter endpoint
+          const payload = {
+            category_id: categoryId,
+            category_ids: categoryIds,
+            min_price: this.minPrice,
+            max_price: this.maxPrice,
+            currency_ids: this.selectedCurrencies.length > 0 ? this.selectedCurrencies : null,
+            sort_by: this.sortBy,
+            // All attributes are now multi-select (sent as checkboxes)
+            checkboxes: Object.entries(this.selectedAttributes).map(
+              ([attributeId, valueIds]) => ({
+                attributeId: Number(attributeId),
+                attributeValueIds: valueIds.map(Number),
+              })
+            ),
+            page: this.page,
+            limit: this.limit,
+            search: searchQuery || this.search,
+          };
+
+          res = await requestService.create("/ads/filter", payload);
+        }
 
         this.ads = res?.data || [];
         this.total = res?.meta?.total || 0;

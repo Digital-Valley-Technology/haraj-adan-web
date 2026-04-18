@@ -115,6 +115,9 @@ const handleDelete = (user) => emit("delete", user);
     :rows="userStore.limit"
     :totalRecords="userStore.total"
     :first="(userStore.page - 1) * userStore.limit"
+    :pageLinkSize="7"
+    paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown CurrentPageReport"
+    :currentPageReportTemplate="`{first} - {last} / {totalRecords}`"
     @page="
       (e) => {
         if (e.rows !== userStore.limit) {

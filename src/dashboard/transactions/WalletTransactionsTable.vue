@@ -31,6 +31,9 @@ const handleViewDetails = (transaction) => {
     :rows="walletStore.limit"
     :totalRecords="walletStore.total"
     :first="(walletStore.page - 1) * walletStore.limit"
+    :pageLinkSize="7"
+    paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown CurrentPageReport"
+    :currentPageReportTemplate="`{first} - {last} / {totalRecords}`"
     @page="
       (e) => {
         if (e.rows !== walletStore.limit) {

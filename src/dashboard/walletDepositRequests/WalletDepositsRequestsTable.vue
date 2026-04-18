@@ -41,6 +41,9 @@ const handleNavigate = (walletDepositRequest, action) => {
     :first="
       (walletDepositsRequestsStore.page - 1) * walletDepositsRequestsStore.limit
     "
+    :pageLinkSize="7"
+    paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown CurrentPageReport"
+    :currentPageReportTemplate="`{first} - {last} / {totalRecords}`"
     @page="
       (e) => {
         if (e.rows !== walletDepositsRequestsStore.limit) {

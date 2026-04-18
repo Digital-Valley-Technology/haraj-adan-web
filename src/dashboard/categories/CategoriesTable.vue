@@ -31,6 +31,9 @@ const handleDelete = (category) => emit("delete", category);
     :rows="categoryStore.limit"
     :totalRecords="categoryStore.total"
     :first="(categoryStore.page - 1) * categoryStore.limit"
+    :pageLinkSize="7"
+    paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown CurrentPageReport"
+    :currentPageReportTemplate="`{first} - {last} / {totalRecords}`"
     @page="
       (e) => {
         if (e.rows !== categoryStore.limit) {

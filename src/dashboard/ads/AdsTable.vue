@@ -127,6 +127,9 @@ const isAlreadyRefunded = (ad) => {
     :rows="adsStore.limit"
     :totalRecords="adsStore.total"
     :first="(adsStore.page - 1) * adsStore.limit"
+    :pageLinkSize="7"
+    paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown CurrentPageReport"
+    :currentPageReportTemplate="`{first} - {last} / {totalRecords}`"
     @page="
       (e) => {
         if (e.rows !== adsStore.limit) {

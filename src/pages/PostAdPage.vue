@@ -653,9 +653,11 @@
             </button>
             <button
               @click="submitAd"
-              class="bg-[#FFE800] text-black font-medium py-2 px-6 rounded-md"
+              :disabled="isSubmitting"
+              class="bg-[#FFE800] text-black font-medium py-2 px-6 rounded-md flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {{ isEditMode ? $t("postAdd.update") : $t("postAdd.submit") }}
+              <i v-if="isSubmitting" class="pi pi-spinner pi-spin"></i>
+              {{ isSubmitting ? $t("postAdd.submitting") : (isEditMode ? $t("postAdd.update") : $t("postAdd.submit")) }}
             </button>
           </div>
         </div>
@@ -714,6 +716,9 @@ const categoryData = ref(null);
 // Existing images for edit mode
 const existingImages = ref([]);
 const removedImageIds = ref([]);
+
+// Submission loading state
+const isSubmitting = ref(false);
 
 // Helper to build image URL
 const imageUrl = (filename) => `${MEDIA_URL}/${filename}`;
@@ -1114,6 +1119,9 @@ const mapRealEstateSpecsToAttributes = () => {
 };
 
 const submitAd = async () => {
+  // Prevent double submission
+  if (isSubmitting.value) return;
+
   // For create mode, require at least one image
   // For edit mode, allow if there are existing images not all removed
   const hasNewImages = uploadedFiles.value.length > 0;
@@ -1143,6 +1151,8 @@ const submitAd = async () => {
     showWarning(t("postAdd.insufficientBalance"));
     return;
   }
+
+  isSubmitting.value = true;
 
   try {
     const formData = new FormData();
@@ -1264,6 +1274,8 @@ const submitAd = async () => {
   } catch (err) {
     console.error("Ad submission failed:", err);
     showError(err || t("postAdd.errorMessage"));
+  } finally {
+    isSubmitting.value = false;
   }
 };
 </script>

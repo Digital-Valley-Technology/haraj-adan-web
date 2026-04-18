@@ -9,6 +9,9 @@
     :first="(currentPage - 1) * rowsPerPage"
     @page="onPageChange"
     :rowsPerPageOptions="[2, 5, 10, 20]"
+    :pageLinkSize="7"
+    paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown CurrentPageReport"
+    :currentPageReportTemplate="`{first} - {last} / {totalRecords}`"
     tableStyle="min-width: 60rem"
     stripedRows
     emptyMessage="No attributes found"
