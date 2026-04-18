@@ -121,6 +121,7 @@ const isAlreadyRefunded = (ad) => {
   <DataTable
     :value="ads"
     paginator
+    lazy
     :rowsPerPageOptions="[5, 10, 20, 50]"
     tableStyle="min-width: 70rem"
     :rows="adsStore.limit"
