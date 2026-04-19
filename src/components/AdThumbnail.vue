@@ -141,6 +141,13 @@
               "
             ></i>
           </button>
+          <button
+            @click="emit('report')"
+            class="bg-gray-200 py-2 px-4 rounded-md hover:bg-red-100 transition flex items-center gap-1"
+            :title="t('report.title')"
+          >
+            <i class="cursor-pointer pi pi-flag text-gray-400 hover:text-red-500"></i>
+          </button>
         </div>
 
         <div class="card flex justify-center">
@@ -358,7 +365,7 @@ const props = defineProps({
   total: Number,
 });
 
-const emit = defineEmits(["paginate-comments", "toggle-like"]);
+const emit = defineEmits(["paginate-comments", "toggle-like", "report"]);
 const authStore = useAuthStore();
 const isDeleteDialogOpen = ref(false);
 const selectedCommentId = ref(null);

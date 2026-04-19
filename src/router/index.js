@@ -235,6 +235,15 @@ const routes = [
         },
       },
       {
+        name: "reports",
+        path: "reports",
+        component: () => import("../dashboard/reports/ReportsPage.vue"),
+        meta: {
+          requiresAuth: true,
+          permissions: ["dashboard.reports.read", "dashboard.reports.write"],
+        },
+      },
+      {
         name: "wallet-deposits-requests",
         path: "wallet-deposits-requests",
         component: () =>

@@ -260,11 +260,33 @@
     "admin-invitations": "Invitations List",
     "manage-invitations-permissions": "Manage Invitations Permissions",
     "ads": "Advertisements",
+    "reports": "Reports",
     "transactions": "Transactions",
     "users": "Users",
     "banners": "Banners",
     "wallet-deposits-requests": "Wallet Deposits Requests",
     "wallet-transactions": "Wallet Transactions"
+  },
+  "report": {
+    "title": "Report Ad",
+    "description": "Please select a reason for reporting this ad. Our team will review your report.",
+    "reason_label": "Reason for reporting",
+    "details_label": "Additional details",
+    "details_placeholder": "Provide more details about your report...",
+    "optional": "optional",
+    "submit": "Submit Report",
+    "submitting": "Submitting...",
+    "success": "Report submitted successfully. Thank you for helping keep our community safe.",
+    "error": "Failed to submit report. Please try again.",
+    "login_required": "Please login to report this ad.",
+    "reasons": {
+      "spam": "Spam or misleading",
+      "inappropriate": "Inappropriate content",
+      "fraud": "Fraud or scam",
+      "wrong_category": "Wrong category",
+      "duplicate": "Duplicate listing",
+      "other": "Other"
+    }
   },
   "dashboard": {
     "actions": {
@@ -491,6 +513,38 @@
         "ban": "Ban",
         "activate": "Activate",
         "delete": "Delete"
+      }
+    },
+    "reports": {
+      "title": "Ad Reports",
+      "total": "{count} reports",
+      "no_data": "No reports found",
+      "deleted_successfully": "Report deleted successfully",
+      "delete_failed": "Failed to delete report",
+      "status_updated": "Report status updated successfully",
+      "update_failed": "Failed to update report status",
+      "view_ad": "View Ad",
+      "table": {
+        "id": "ID",
+        "ad": "Reported Ad",
+        "reporter": "Reporter",
+        "reason": "Reason",
+        "description": "Description",
+        "status": "Status",
+        "date": "Date",
+        "actions": "Actions"
+      },
+      "status": {
+        "all": "All Status",
+        "pending": "Pending",
+        "reviewed": "Reviewed",
+        "resolved": "Resolved",
+        "dismissed": "Dismissed"
+      },
+      "filter": {
+        "reason": "Reason",
+        "ad_id": "Ad ID",
+        "user_id": "User ID"
       }
     },
     "profile": {

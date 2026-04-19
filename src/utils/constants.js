@@ -79,6 +79,12 @@ export const sidebarItems = [
         ],
       },
       {
+        label: "sidebar.reports",
+        icon: "pi pi-flag",
+        link: "/dashboard/reports",
+        permissions: ["dashboard.reports.read", "dashboard.reports.write"],
+      },
+      {
         label: "sidebar.wallet-deposits-requests",
         icon: "pi pi-wallet",
         link: "/dashboard/wallet-deposits-requests",

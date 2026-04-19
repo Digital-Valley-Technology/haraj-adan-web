@@ -261,11 +261,33 @@
     "admin-invitations": "سجل الدعوات",
     "manage-invitations-permissions": "إدارة الأذونات",
     "ads": "الإعلانات",
+    "reports": "البلاغات",
     "transactions": "المعاملات",
     "users": "المستخدمين",
     "banners": "اللافتات",
     "wallet-deposits-requests": "طلبات إيداع المحفظة",
     "wallet-transactions": "معاملات المحفظة"
+  },
+  "report": {
+    "title": "الإبلاغ عن الإعلان",
+    "description": "يرجى تحديد سبب الإبلاغ عن هذا الإعلان. سيقوم فريقنا بمراجعة بلاغك.",
+    "reason_label": "سبب الإبلاغ",
+    "details_label": "تفاصيل إضافية",
+    "details_placeholder": "قدم المزيد من التفاصيل حول بلاغك...",
+    "optional": "اختياري",
+    "submit": "إرسال البلاغ",
+    "submitting": "جاري الإرسال...",
+    "success": "تم إرسال البلاغ بنجاح. شكراً لمساعدتك في الحفاظ على مجتمعنا آمناً.",
+    "error": "فشل في إرسال البلاغ. يرجى المحاولة مرة أخرى.",
+    "login_required": "يرجى تسجيل الدخول للإبلاغ عن هذا الإعلان.",
+    "reasons": {
+      "spam": "محتوى مزعج أو مضلل",
+      "inappropriate": "محتوى غير لائق",
+      "fraud": "احتيال أو نصب",
+      "wrong_category": "تصنيف خاطئ",
+      "duplicate": "إعلان مكرر",
+      "other": "أخرى"
+    }
   },
   "dashboard": {
     "actions": {
@@ -492,6 +514,38 @@
         "ban": "حظر",
         "activate": "تفعيل",
         "delete": "حذف"
+      }
+    },
+    "reports": {
+      "title": "بلاغات الإعلانات",
+      "total": "{count} بلاغ",
+      "no_data": "لا توجد بلاغات",
+      "deleted_successfully": "تم حذف البلاغ بنجاح",
+      "delete_failed": "فشل في حذف البلاغ",
+      "status_updated": "تم تحديث حالة البلاغ بنجاح",
+      "update_failed": "فشل في تحديث حالة البلاغ",
+      "view_ad": "عرض الإعلان",
+      "table": {
+        "id": "الرقم",
+        "ad": "الإعلان المُبلغ عنه",
+        "reporter": "المُبلغ",
+        "reason": "السبب",
+        "description": "الوصف",
+        "status": "الحالة",
+        "date": "التاريخ",
+        "actions": "الإجراءات"
+      },
+      "status": {
+        "all": "جميع الحالات",
+        "pending": "قيد الانتظار",
+        "reviewed": "تمت المراجعة",
+        "resolved": "تم الحل",
+        "dismissed": "مرفوض"
+      },
+      "filter": {
+        "reason": "السبب",
+        "ad_id": "رقم الإعلان",
+        "user_id": "رقم المستخدم"
       }
     },
     "profile": {

@@ -10,8 +10,16 @@
         :first="(commentsPage - 1) * commentsLimit"
         :rows="commentsLimit"
         @toggle-like="toggleLike"
+        @report="handleReportClick"
       />
     </div>
+
+    <!-- Report Dialog -->
+    <ReportAdDialog
+      v-model="showReportDialog"
+      :adId="adId"
+      @reported="onReported"
+    />
   </app-layout>
 </template>
 
@@ -19,13 +27,17 @@
 import { onMounted, ref } from "vue";
 import AppLayout from "../Layout/AppLayout.vue";
 import AdThumbnail from "../components/AdThumbnail.vue";
-import { useRoute } from "vue-router";
+import ReportAdDialog from "../components/ReportAdDialog.vue";
+import { useRoute, useRouter } from "vue-router";
 import requestService from "../services/api/requestService";
 import { useAuthStore } from "../store/auth";
 import { computed } from "vue";
-import { showSuccess } from "../utils/notifications";
+import { showSuccess, showInfo } from "../utils/notifications";
+import { useI18n } from "vue-i18n";
 
 const route = useRoute();
+const router = useRouter();
+const { t } = useI18n();
 const adId = route.params.adId;
 const ad = ref(null);
 const comments = ref([]);
@@ -33,10 +45,28 @@ const commentsPage = ref(1);
 const commentsLimit = ref(10);
 const commentsTotal = ref(0);
 const loading = ref(false);
+const showReportDialog = ref(false);
 
 const authStore = useAuthStore();
 
 const currentUser = computed(() => authStore.user);
+
+// Handle report button click with auth check
+const handleReportClick = () => {
+  if (!currentUser.value) {
+    showInfo(t('report.login_required'));
+    router.push({
+      name: 'login',
+      query: { redirect: route.fullPath }
+    });
+    return;
+  }
+  showReportDialog.value = true;
+};
+
+const onReported = () => {
+  // Optional: refresh ad data or show additional feedback
+};
 
 function handlePaginate({ page, limit }) {
   fetchComments(page, limit);
