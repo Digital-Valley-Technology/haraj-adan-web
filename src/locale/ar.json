@@ -795,7 +795,13 @@
     "park": "حديقة",
     "editAd": "تعديل الإعلان",
     "createAd": "إنشاء إعلان",
-    "detectingLocation": "جاري تحديد موقعك..."
+    "detectingLocation": "جاري تحديد موقعك...",
+    "governorate": "المحافظة",
+    "directorate": "المديرية",
+    "selectGovernorate": "اختر المحافظة",
+    "selectDirectorate": "اختر المديرية",
+    "governorateRequired": "يرجى اختيار المحافظة",
+    "directorateRequired": "يرجى اختيار المديرية"
   },
   "wallet": {
     "balance": "رصيد المحفظة"

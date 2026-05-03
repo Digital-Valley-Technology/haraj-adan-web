@@ -149,11 +149,80 @@
               </div>
             </div>
 
+            <!-- Governorate -->
+            <div>
+              <label class="block mb-1 text-sm font-medium">
+                {{ $t("postAdd.governorate") }}
+                <span class="text-red-500">*</span>
+              </label>
+              <div class="relative">
+                <input
+                  type="text"
+                  v-model="governorateSearch"
+                  @focus="showGovernorateDropdown = true"
+                  @input="filterGovernorates"
+                  :placeholder="$t('postAdd.selectGovernorate')"
+                  class="w-full border border-gray-300 rounded-md p-2 text-sm"
+                />
+                <div
+                  v-if="showGovernorateDropdown && filteredGovernorates.length"
+                  class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto"
+                >
+                  <div
+                    v-for="gov in filteredGovernorates"
+                    :key="gov.id"
+                    @click="selectGovernorate(gov)"
+                    class="px-4 py-2 cursor-pointer hover:bg-blue-50"
+                    :class="{ 'bg-blue-100': form.governorate_id === gov.id }"
+                  >
+                    {{ isArabic ? gov.name : gov.name_en }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Directorate -->
+            <div>
+              <label class="block mb-1 text-sm font-medium">
+                {{ $t("postAdd.directorate") }}
+                <span class="text-red-500">*</span>
+              </label>
+              <div class="relative">
+                <input
+                  type="text"
+                  v-model="directorateSearch"
+                  @focus="showDirectorateDropdown = true"
+                  @input="filterDirectorates"
+                  :placeholder="$t('postAdd.selectDirectorate')"
+                  :disabled="!form.governorate_id || isLoadingDirectorates"
+                  class="w-full border border-gray-300 rounded-md p-2 text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
+                />
+                <div v-if="isLoadingDirectorates" class="absolute right-2 top-2">
+                  <i class="pi pi-spinner pi-spin text-gray-400"></i>
+                </div>
+                <div
+                  v-if="showDirectorateDropdown && filteredDirectorates.length"
+                  class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto"
+                >
+                  <div
+                    v-for="dir in filteredDirectorates"
+                    :key="dir.id"
+                    @click="selectDirectorate(dir)"
+                    class="px-4 py-2 cursor-pointer hover:bg-blue-50"
+                    :class="{ 'bg-blue-100': form.directorate_id === dir.id }"
+                  >
+                    {{ isArabic ? dir.name : dir.name_en }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div>
               <label class="block mb-1 text-sm font-medium">
                 {{ $t("postAdd.location") }}
+                <span class="text-gray-500 text-xs">({{ $t("postAdd.optional") }})</span>
               </label>
-              <!-- Location with auto GPS detection -->
+              <!-- Location with auto GPS detection (optional) -->
               <PickLocation
                 v-model="location"
                 :map-id="`ad-map-location`"
@@ -685,7 +754,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, onUnmounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
 import requestService from "../services/api/requestService";
@@ -728,7 +797,93 @@ const form = ref({
   title_en: "",
   price: "",
   descr: null,
+  governorate_id: null,
+  directorate_id: null,
 });
+
+// Governorate & Directorate
+const governorates = ref([]);
+const directorates = ref([]);
+const governorateSearch = ref('');
+const directorateSearch = ref('');
+const showGovernorateDropdown = ref(false);
+const showDirectorateDropdown = ref(false);
+const isLoadingDirectorates = ref(false);
+
+const filteredGovernorates = computed(() => {
+  if (!governorateSearch.value) return governorates.value;
+  const search = governorateSearch.value.toLowerCase();
+  return governorates.value.filter(g =>
+    g.name.toLowerCase().includes(search) ||
+    g.name_en.toLowerCase().includes(search)
+  );
+});
+
+const filteredDirectorates = computed(() => {
+  if (!directorateSearch.value) return directorates.value;
+  const search = directorateSearch.value.toLowerCase();
+  return directorates.value.filter(d =>
+    d.name.toLowerCase().includes(search) ||
+    d.name_en.toLowerCase().includes(search)
+  );
+});
+
+const filterGovernorates = () => {
+  showGovernorateDropdown.value = true;
+};
+
+const filterDirectorates = () => {
+  showDirectorateDropdown.value = true;
+};
+
+const selectGovernorate = async (gov) => {
+  form.value.governorate_id = gov.id;
+  governorateSearch.value = isArabic.value ? gov.name : gov.name_en;
+  showGovernorateDropdown.value = false;
+
+  // Reset directorate
+  form.value.directorate_id = null;
+  directorateSearch.value = '';
+  directorates.value = [];
+
+  // Fetch directorates for the selected governorate
+  await fetchDirectorates(gov.id);
+};
+
+const selectDirectorate = (dir) => {
+  form.value.directorate_id = dir.id;
+  directorateSearch.value = isArabic.value ? dir.name : dir.name_en;
+  showDirectorateDropdown.value = false;
+};
+
+const fetchGovernorates = async () => {
+  try {
+    const res = await requestService.getAll('/locations/governorates');
+    governorates.value = res.data || [];
+  } catch (err) {
+    console.error('Error fetching governorates:', err);
+  }
+};
+
+const fetchDirectorates = async (governorateId) => {
+  isLoadingDirectorates.value = true;
+  try {
+    const res = await requestService.getAll(`/locations/governorates/${governorateId}/directorates`);
+    directorates.value = res.data || [];
+  } catch (err) {
+    console.error('Error fetching directorates:', err);
+  } finally {
+    isLoadingDirectorates.value = false;
+  }
+};
+
+// Close dropdowns when clicking outside
+const closeDropdowns = (e) => {
+  if (!e.target.closest('.relative')) {
+    showGovernorateDropdown.value = false;
+    showDirectorateDropdown.value = false;
+  }
+};
 
 // Payment System
 const paySystem = ref('cash');
@@ -913,6 +1068,24 @@ const loadAdForEdit = async () => {
     location.value.lng = ad.lng;
     location.value.address = ad.address || '';
 
+    // Populate governorate and directorate
+    if (ad.governorate_id) {
+      form.value.governorate_id = ad.governorate_id;
+      const gov = governorates.value.find(g => g.id === ad.governorate_id);
+      if (gov) {
+        governorateSearch.value = isArabic.value ? gov.name : gov.name_en;
+      }
+      // Fetch directorates and set selected
+      await fetchDirectorates(ad.governorate_id);
+      if (ad.directorate_id) {
+        form.value.directorate_id = ad.directorate_id;
+        const dir = directorates.value.find(d => d.id === ad.directorate_id);
+        if (dir) {
+          directorateSearch.value = isArabic.value ? dir.name : dir.name_en;
+        }
+      }
+    }
+
     // Populate existing images
     existingImages.value = ad.ads_images || [];
 
@@ -968,11 +1141,19 @@ onMounted(async () => {
   fetchCurrencies();
   fetchDiscounts();
   fetchFeaturedSettings();
+  fetchGovernorates();
+
+  // Add click outside listener for dropdowns
+  document.addEventListener('click', closeDropdowns);
 
   // Load ad data if in edit mode
   if (isEditMode.value) {
     await loadAdForEdit();
   }
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', closeDropdowns);
 });
 
 const validateStepOne = () => {
@@ -983,6 +1164,18 @@ const validateStepOne = () => {
     !form.value?.currency_id
   ) {
     showWarning(t("validation.all_fields_required"));
+    return;
+  }
+
+  // Validate governorate
+  if (!form.value.governorate_id) {
+    showWarning(t("postAdd.governorateRequired"));
+    return;
+  }
+
+  // Validate directorate
+  if (!form.value.directorate_id) {
+    showWarning(t("postAdd.directorateRequired"));
     return;
   }
 
@@ -1137,15 +1330,6 @@ const submitAd = async () => {
     return;
   }
 
-  if (
-    !location.value?.lat ||
-    !location.value?.lng ||
-    !location.value?.address
-  ) {
-    showError(t("validation.location_required"));
-    return;
-  }
-
   // Featured ad balance check before submitting (only for create mode)
   if (!isEditMode.value && is_featured.value && wallet.balance < totalFeaturedPrice.value) {
     showWarning(t("postAdd.insufficientBalance"));
@@ -1162,9 +1346,19 @@ const submitAd = async () => {
     formData.append("currency_id", form.value.currency_id);
     formData.append("price", form.value.price);
     formData.append("descr", form.value.descr || '');
-    formData.append("lat", location.value?.lat);
-    formData.append("lng", location.value?.lng);
-    formData.append("address", location.value?.address);
+    formData.append("governorate_id", form.value.governorate_id);
+    formData.append("directorate_id", form.value.directorate_id);
+
+    // Location is now optional
+    if (location.value?.lat) {
+      formData.append("lat", location.value.lat);
+    }
+    if (location.value?.lng) {
+      formData.append("lng", location.value.lng);
+    }
+    if (location.value?.address) {
+      formData.append("address", location.value.address);
+    }
 
     // Add payment system
     formData.append("pay_system", paySystem.value);

@@ -789,7 +789,13 @@
     "park": "Park",
     "editAd": "Edit Ad",
     "createAd": "Create Ad",
-    "detectingLocation": "Detecting your location..."
+    "detectingLocation": "Detecting your location...",
+    "governorate": "Governorate",
+    "directorate": "Directorate",
+    "selectGovernorate": "Select Governorate",
+    "selectDirectorate": "Select Directorate",
+    "governorateRequired": "Please select a governorate",
+    "directorateRequired": "Please select a directorate"
   },
   "wallet": {
     "balance": "Wallet Balance"
