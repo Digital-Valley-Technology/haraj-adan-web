@@ -1,12 +1,12 @@
-export const MODE = "PROD";
+export const MODE = "DEV";
 
 export const PROD_BASE_URL = "https://haraj-api.harajaden.com/api/v1";
 
 export const DEV_BASE_URL = "http://localhost:3059/api/v1";
 
-export const DEV_MEDIA_URL = "http://localhost:3059/uploads/";
+export const DEV_MEDIA_URL = "http://localhost:3059/uploads";
 
-export const PROD_MEDIA_URL = "https://haraj-api.harajaden.com/uploads/";
+export const PROD_MEDIA_URL = "https://haraj-api.harajaden.com/uploads";
 
 export const DEV_SOCKET_URL = "http://localhost:3059/";
 

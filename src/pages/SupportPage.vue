@@ -13,9 +13,18 @@ const selectedFile = ref(null);
 const previewUrl = ref(null);
 const previewType = ref(null);
 const messagesRef = ref(null);
+const fullScreenImageUrl = ref(null);
 
 const messages = computed(() => chatStore.getMessages);
 const getMediaUrl = (path) => `${MEDIA_URL}/${path}`;
+
+const openImagePreview = (url) => {
+  fullScreenImageUrl.value = url;
+};
+
+const closeImagePreview = () => {
+  fullScreenImageUrl.value = null;
+};
 
 onMounted(async () => {
   await chatStore.fetchUserChat();
@@ -168,7 +177,8 @@ watch(
                 <template v-else-if="msg.type === 'image'">
                   <img
                     :src="getMediaUrl(msg.message)"
-                    class="w-40 h-40 rounded-md object-cover"
+                    class="w-40 h-40 rounded-md object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                    @click="openImagePreview(getMediaUrl(msg.message))"
                   />
                 </template>
 
@@ -210,7 +220,8 @@ watch(
                 <template v-else-if="msg.type === 'image'">
                   <img
                     :src="getMediaUrl(msg.message)"
-                    class="w-40 h-40 rounded-md object-cover"
+                    class="w-40 h-40 rounded-md object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                    @click="openImagePreview(getMediaUrl(msg.message))"
                   />
                 </template>
 
@@ -298,35 +309,15 @@ watch(
           <i
             class="pi pi-image text-[#c0c0c1] cursor-pointer"
             @click="$refs.imageInput.click()"
-          ></i>
-          <i
-            class="pi pi-folder text-[#c0c0c1] cursor-pointer"
-            @click="$refs.documentInput.click()"
-          ></i>
-          <i
-            class="pi pi-headphones text-[#c0c0c1] cursor-pointer"
-            @click="$refs.audioInput.click()"
+            :title="locale == 'ar' ? 'إرسال صورة' : 'Send image'"
           ></i>
 
-          <input
-            ref="documentInput"
-            type="file"
-            class="hidden"
-            @change="(e) => handleFileSelect(e.target.files[0], 'file')"
-          />
           <input
             ref="imageInput"
             type="file"
             class="hidden"
-            accept="image/*"
+            accept="image/jpeg,image/png,image/webp,image/gif,image/heic"
             @change="(e) => handleFileSelect(e.target.files[0], 'image')"
-          />
-          <input
-            ref="audioInput"
-            type="file"
-            class="hidden"
-            accept="audio/*"
-            @change="(e) => handleFileSelect(e.target.files[0], 'audio')"
           />
 
           <input
@@ -353,5 +344,24 @@ watch(
         </div>
       </div>
     </main>
+
+    <!-- Full Screen Image Preview -->
+    <div
+      v-if="fullScreenImageUrl"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
+      @click="closeImagePreview"
+    >
+      <button
+        class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-10"
+        @click.stop="closeImagePreview"
+      >
+        <i class="pi pi-times"></i>
+      </button>
+      <img
+        :src="fullScreenImageUrl"
+        class="max-w-[90vw] max-h-[90vh] object-contain"
+        @click.stop
+      />
+    </div>
   </app-layout>
 </template>

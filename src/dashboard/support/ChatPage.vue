@@ -27,10 +27,19 @@ const audioInput = ref(null);
 // scroll refs
 const chatListRef = ref(null);
 const messagesRef = ref(null);
+const fullScreenImageUrl = ref(null);
 
 const selectedFile = ref(null);
 const previewUrl = ref(null);
 const previewType = ref(null); // 'image', 'audio', 'document'
+
+const openImagePreview = (url) => {
+  fullScreenImageUrl.value = url;
+};
+
+const closeImagePreview = () => {
+  fullScreenImageUrl.value = null;
+};
 
 // Handle file selection with preview
 const handleFileSelect = (file, type) => {
@@ -382,12 +391,13 @@ onUnmounted(() => {
                 </p>
                 <div
                   v-else-if="msg.type === 'image'"
-                  class="w-40 h-40 overflow-hidden rounded-md"
+                  class="w-40 h-40 overflow-hidden rounded-md cursor-pointer"
+                  @click="openImagePreview(getMediaUrl(msg.message))"
                 >
                   <img
                     :src="getMediaUrl(msg.message)"
                     alt="image"
-                    class="w-full h-full object-cover"
+                    class="w-full h-full object-cover hover:opacity-90 transition-opacity"
                   />
                 </div>
                 <div
@@ -507,42 +517,17 @@ onUnmounted(() => {
                 >
                   <button
                     class="w-full text-start px-3 py-2 rounded-md hover:bg-gray-100 text-sm"
-                    @click="documentInput.click()"
-                  >
-                    {{ t("dashboard.support.document") }}
-                  </button>
-                  <button
-                    class="w-full text-start px-3 py-2 rounded-md hover:bg-gray-100 text-sm"
                     @click="imageInput.click()"
                   >
                     {{ t("dashboard.support.image") }}
                   </button>
-                  <button
-                    class="w-full text-start px-3 py-2 rounded-md hover:bg-gray-100 text-sm"
-                    @click="audioInput.click()"
-                  >
-                    {{ t("dashboard.support.audio") }}
-                  </button>
 
-                  <input
-                    type="file"
-                    ref="documentInput"
-                    class="hidden"
-                    @change="handleDocument"
-                  />
                   <input
                     type="file"
                     ref="imageInput"
                     class="hidden"
-                    accept="image/*"
+                    accept="image/jpeg,image/png,image/webp,image/gif,image/heic"
                     @change="handleImage"
-                  />
-                  <input
-                    type="file"
-                    ref="audioInput"
-                    class="hidden"
-                    accept="audio/*"
-                    @change="handleAudio"
                   />
                 </div>
               </transition>
@@ -564,6 +549,25 @@ onUnmounted(() => {
         </template>
       </section>
     </main>
+
+    <!-- Full Screen Image Preview -->
+    <div
+      v-if="fullScreenImageUrl"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
+      @click="closeImagePreview"
+    >
+      <button
+        class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-10"
+        @click.stop="closeImagePreview"
+      >
+        <i class="pi pi-times"></i>
+      </button>
+      <img
+        :src="fullScreenImageUrl"
+        class="max-w-[90vw] max-h-[90vh] object-contain"
+        @click.stop
+      />
+    </div>
   </DashboardLayout>
 </template>
 

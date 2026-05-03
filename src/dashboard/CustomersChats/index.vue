@@ -17,6 +17,15 @@ const showSidebar = ref(true);
 
 const chatListRef = ref(null);
 const messagesRef = ref(null);
+const fullScreenImageUrl = ref(null);
+
+const openImagePreview = (url) => {
+  fullScreenImageUrl.value = url;
+};
+
+const closeImagePreview = () => {
+  fullScreenImageUrl.value = null;
+};
 
 // --- Computed & Helper Properties ---
 
@@ -290,12 +299,13 @@ onUnmounted(() => {
                   </p>
                   <div
                     v-else-if="msg.type === 'image'"
-                    class="w-40 h-40 overflow-hidden rounded-md"
+                    class="w-40 h-40 overflow-hidden rounded-md cursor-pointer"
+                    @click="openImagePreview(getMediaUrl(msg.message))"
                   >
                     <img
                       :src="getMediaUrl(msg.message)"
                       alt="image"
-                      class="w-full h-full object-cover"
+                      class="w-full h-full object-cover hover:opacity-90 transition-opacity"
                     />
                   </div>
                   <div
@@ -363,6 +373,25 @@ onUnmounted(() => {
         </template>
       </section>
     </main>
+
+    <!-- Full Screen Image Preview -->
+    <div
+      v-if="fullScreenImageUrl"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
+      @click="closeImagePreview"
+    >
+      <button
+        class="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 z-10"
+        @click.stop="closeImagePreview"
+      >
+        <i class="pi pi-times"></i>
+      </button>
+      <img
+        :src="fullScreenImageUrl"
+        class="max-w-[90vw] max-h-[90vh] object-contain"
+        @click.stop
+      />
+    </div>
   </DashboardLayout>
 </template>
 
