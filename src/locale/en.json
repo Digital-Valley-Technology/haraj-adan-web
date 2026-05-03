@@ -497,12 +497,14 @@
       "no_data": "No data available",
       "ban_confirm": "Are you sure you want to ban this user?",
       "activate_confirm": "Are you sure you want to activate this user?",
+      "currency": "YER",
       "table": {
         "name": "Name",
         "email": "Email",
         "phone": "Phone",
         "role": "Role",
         "is_active": "Status",
+        "balance": "Balance",
         "actions": "Actions"
       },
       "status": {
@@ -512,7 +514,13 @@
       "actions": {
         "ban": "Ban",
         "activate": "Activate",
-        "delete": "Delete"
+        "delete": "Delete",
+        "zero_balance": "Zero Balance"
+      },
+      "zero_balance": {
+        "confirm": "Are you sure you want to zero the balance for {name}? Current balance: {balance} YER",
+        "success": "Wallet balance has been zeroed successfully",
+        "failed": "Failed to zero wallet balance"
       }
     },
     "reports": {

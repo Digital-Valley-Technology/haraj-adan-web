@@ -3,7 +3,7 @@ import { useUsersStore } from "../../store/user";
 import { useI18n } from "vue-i18n";
 
 defineProps(["users"]);
-const emit = defineEmits(["delete", "fetchUsers", "toggleBan"]);
+const emit = defineEmits(["delete", "fetchUsers", "toggleBan", "zeroBalance"]);
 
 const { t, locale } = useI18n();
 const userStore = useUsersStore();
@@ -103,6 +103,13 @@ const formatPhone = (phone) => {
 };
 
 const handleDelete = (user) => emit("delete", user);
+
+const handleZeroBalance = (user) => emit("zeroBalance", user);
+
+const getUserBalance = (user) => {
+  const balance = user?.user_wallet?.[0]?.balance;
+  return balance ? parseFloat(balance).toFixed(2) : "0.00";
+};
 </script>
 
 <template>
@@ -183,15 +190,32 @@ const handleDelete = (user) => emit("delete", user);
       </template>
     </Column>
 
+    <Column field="balance" :header="$t('dashboard.users.table.balance')">
+      <template #body="{ data }">
+        <span class="text-sm font-medium text-green-600">
+          {{ getUserBalance(data) }} {{ $t('dashboard.users.currency') }}
+        </span>
+      </template>
+    </Column>
+
     <Column :header="$t('dashboard.users.table.actions')">
       <template #body="{ data }">
-        <div class="flex gap-2">
+        <div class="flex gap-2 flex-wrap">
           <Button
             :disabled="isManager(data)"
             :icon="getToggleButtonInfo(data?.is_active).icon"
             :severity="getToggleButtonInfo(data?.is_active).severity"
             :label="getToggleButtonInfo(data?.is_active).label"
             @click="() => handleToggleBan(data)"
+            rounded
+            size="small"
+          />
+          <Button
+            :disabled="isManager(data) || parseFloat(getUserBalance(data)) <= 0"
+            icon="pi pi-wallet"
+            severity="info"
+            :label="$t('dashboard.users.actions.zero_balance')"
+            @click="() => handleZeroBalance(data)"
             rounded
             size="small"
           />

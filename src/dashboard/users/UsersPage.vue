@@ -25,6 +25,11 @@ const banLoading = ref(false);
 const isConfirmDialogOpen = ref(false);
 const confirmationMessageText = ref("");
 const selectedUser = ref({});
+
+// Zero balance state
+const zeroBalanceLoading = ref(false);
+const isZeroBalanceDialogOpen = ref(false);
+const zeroBalanceUser = ref(null);
 // Local search/filter state
 const searchText = ref("");
 const selectedFilter = ref({ name: "name" }); // Default filter set
@@ -105,6 +110,35 @@ const processBan = (user) => {
   else confirmationMessageText.value = t("dashboard.users.activate_confirm");
 };
 
+const processZeroBalance = (user) => {
+  zeroBalanceUser.value = user;
+  isZeroBalanceDialogOpen.value = true;
+};
+
+const handleZeroBalance = async () => {
+  if (!zeroBalanceUser.value?.id) return;
+
+  zeroBalanceLoading.value = true;
+
+  try {
+    const response = await requestService.create(
+      `/wallet-transactions/zero-balance/${zeroBalanceUser.value.id}`
+    );
+
+    showSuccess(
+      response?.message || t("dashboard.users.zero_balance.success")
+    );
+
+    fetchData(); // Refresh users list
+  } catch (error) {
+    console.log(error);
+    showError(error || t("dashboard.users.zero_balance.failed"));
+  } finally {
+    isZeroBalanceDialogOpen.value = false;
+    zeroBalanceLoading.value = false;
+  }
+};
+
 onMounted(fetchData);
 
 // Debounced fetch on search/filter change
@@ -138,6 +172,7 @@ const total = computed(() => userStore.getTotal);
           @delete="(user) => processDelete(user)"
           @fetch-users="fetchData()"
           @toggle-ban="(user) => processBan(user)"
+          @zero-balance="(user) => processZeroBalance(user)"
         />
         <no-data
           v-else
@@ -157,6 +192,16 @@ const total = computed(() => userStore.getTotal);
       v-model="isDeleteDialogOpen"
       :content="$t('generic.delete_confirmation')"
       @confirm="handleDelete"
+    />
+    <!-- Zero Balance Dialog -->
+    <CustomConfirmDialog
+      v-model="isZeroBalanceDialogOpen"
+      :content="$t('dashboard.users.zero_balance.confirm', {
+        name: zeroBalanceUser?.name || '',
+        balance: zeroBalanceUser?.user_wallet?.[0]?.balance || 0
+      })"
+      @confirm="handleZeroBalance"
+      :loading="zeroBalanceLoading"
     />
   </dashboard-layout>
 </template>
