@@ -60,7 +60,7 @@
     "wallet": {
       "balance_label": "Balance",
       "available_balance": "Available Balance",
-      "currency": "SAR",
+      "currency": "YER",
       "deposit_button": "Deposit",
       "history_title": "Transaction History",
       "no_transactions": "No recent transactions found.",

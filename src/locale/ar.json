@@ -60,7 +60,7 @@
     "wallet": {
       "balance_label": "الرصيد",
       "available_balance": "الرصيد المتاح",
-      "currency": "ريال سعودي",
+      "currency": "ريال يمني",
       "deposit_button": "إيداع",
       "history_title": "تاريخ المعاملات",
       "no_transactions": "لم يتم العثور على معاملات حديثة.",
