@@ -711,6 +711,7 @@
     "edit": "تعديل",
     "current": " الحالي",
     "refund_request": "طلب استرداد",
+    "refund_not_available": "الاسترداد غير متاح بعد مرور 3 ساعات",
     "featured": "مميز",
     "selectCategory": "اختر الصنف",
     "titleLabel": "عنوان الإعلان (عربي)",

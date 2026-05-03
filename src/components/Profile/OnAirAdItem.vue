@@ -61,6 +61,12 @@ const isFeatured = computed(() =>
 );
 
 const canRequestRefund = computed(() => {
+  // Use API's canRefund field if available
+  if (props.item?.canRefund !== undefined) {
+    return props.item.canRefund === true;
+  }
+
+  // Fallback to client-side calculation (3 hours rule)
   const featuredItem = props?.item?.ad_featured_history?.find(
     (h) => h?.status === true
   );
@@ -70,7 +76,7 @@ const canRequestRefund = computed(() => {
   const hoursPassed =
     (Date.now() - new Date(featuredItem.created).getTime()) / (1000 * 60 * 60);
 
-  return hoursPassed < 24; // refund allowed within 24 hours
+  return hoursPassed < 3; // refund allowed within 3 hours
 });
 
 const formattedPrice = computed(() => {

@@ -704,6 +704,7 @@
     "edit": "Edit",
     "current": "Current",
     "refund_request": "Refund Request",
+    "refund_not_available": "Refund not available after 3 hours",
     "featured": "Featured",
     "seselectCategory": "Select Category",
     "location": "Location",
