@@ -1377,33 +1377,45 @@ const submitAd = async () => {
       );
     }
 
-    // Build attributes payload
+    // Build attributes payload - only include attributes with actual values
     const attributesPayload = dynamicAttributes.value.flatMap((attr) => {
       const val = form.value[`attr_${attr.id}`];
       const type = attr.category_attributes_types?.code;
 
       if (["radio", "select", "checkbox"].includes(type)) {
+        // Skip if no value selected
         if (!val) return [];
         if (Array.isArray(val)) {
-          return val.map((v) => ({
-            category_attribute_id: attr.id,
-            category_attribute_value_id: Number(v),
-          }));
+          // Skip empty arrays (nothing selected)
+          if (val.length === 0) return [];
+          // Filter out invalid values (0, null, undefined, empty strings)
+          return val
+            .filter((v) => v && Number(v) > 0)
+            .map((v) => ({
+              category_attribute_id: attr.id,
+              category_attribute_value_id: Number(v),
+            }));
         }
+        // Skip if value is 0 or invalid
+        const numVal = Number(val);
+        if (!numVal || numVal <= 0) return [];
         return [
           {
             category_attribute_id: attr.id,
-            category_attribute_value_id: Number(val),
+            category_attribute_value_id: numVal,
           },
         ];
       }
 
       if (["text", "textarea", "number"].includes(type)) {
-        if (!val && val !== 0) return [];
+        // Skip if no value or empty string
+        if (val === null || val === undefined || val === '') return [];
+        const strVal = String(val).trim();
+        if (strVal === '') return [];
         return [
           {
             category_attribute_id: attr.id,
-            text: String(val),
+            text: strVal,
           },
         ];
       }
