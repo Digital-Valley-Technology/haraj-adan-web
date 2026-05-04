@@ -66,7 +66,7 @@
           </span>
         </div>
 
-        <div v-if="visibleAttributes.length" class="divide-y">
+        <div v-if="visibleAttributes.length || governorateName || directorateName" class="divide-y">
           <div
             v-for="(attr, index) in groupedAttributes"
             :key="index"
@@ -99,6 +99,16 @@
                 {{ attr.text || "_" }}
               </template>
             </span>
+          </div>
+          <!-- Governorate -->
+          <div v-if="governorateName" class="flex justify-between items-center py-3">
+            <span class="text-gray-600 text-sm">{{ t("adDetails.governorate") }}</span>
+            <span class="text-gray-800 text-sm font-medium">{{ governorateName }}</span>
+          </div>
+          <!-- Directorate -->
+          <div v-if="directorateName" class="flex justify-between items-center py-3">
+            <span class="text-gray-600 text-sm">{{ t("adDetails.directorate") }}</span>
+            <span class="text-gray-800 text-sm font-medium">{{ directorateName }}</span>
           </div>
         </div>
 
@@ -213,6 +223,18 @@
     </div>
 
     <div v-else-if="activeTab === 'location'">
+      <!-- Governorate and Directorate above map -->
+      <div v-if="governorateName || directorateName" class="mb-4 p-4 bg-gray-50 rounded-lg">
+        <div v-if="governorateName" class="flex items-center gap-2 mb-2">
+          <span class="text-gray-600 text-sm font-medium">{{ t("adDetails.governorate") }}:</span>
+          <span class="text-gray-800 text-sm">{{ governorateName }}</span>
+        </div>
+        <hr v-if="governorateName && directorateName" class="my-2 border-gray-200" />
+        <div v-if="directorateName" class="flex items-center gap-2">
+          <span class="text-gray-600 text-sm font-medium">{{ t("adDetails.directorate") }}:</span>
+          <span class="text-gray-800 text-sm">{{ directorateName }}</span>
+        </div>
+      </div>
       <iframe
         v-if="mapUrl"
         class="w-full h-96 rounded-md"
@@ -632,6 +654,22 @@ const images = computed(() => {
 const visibleAttributes = computed(() =>
   (adData.value?.ad_attributes ?? []).filter((a) => a.category_attributes)
 );
+
+const governorateName = computed(() => {
+  const gov = adData.value?.governorates;
+  if (!gov) return null;
+  return locale.value === "ar"
+    ? gov.name || gov.name_en
+    : gov.name_en || gov.name;
+});
+
+const directorateName = computed(() => {
+  const dir = adData.value?.directorates;
+  if (!dir) return null;
+  return locale.value === "ar"
+    ? dir.name || dir.name_en
+    : dir.name_en || dir.name;
+});
 
 const mapUrl = computed(() => {
   if (!adData.value?.lng || !adData.value.lat || !adData.value?.address)

@@ -836,7 +836,9 @@
     "must-login-first": "You must login first",
     "cannot-message": "Cannot send message to this user",
     "cannot-message-yourself": "You cannot message yourself",
-    "admin-cannot-message": "Admins cannot send messages to users"
+    "admin-cannot-message": "Admins cannot send messages to users",
+    "governorate": "Governorate",
+    "directorate": "Directorate"
   },
   "generic": {
     "403-title": "Unauthorized",

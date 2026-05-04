@@ -842,7 +842,9 @@
     "must-login-first": "يجب عليك تسجيل الدخول أولاً",
     "cannot-message": "لا يمكن إرسال رسالة لهذا المستخدم",
     "cannot-message-yourself": "لا يمكنك مراسلة نفسك",
-    "admin-cannot-message": "لا يمكن للمسؤولين إرسال رسائل للمستخدمين"
+    "admin-cannot-message": "لا يمكن للمسؤولين إرسال رسائل للمستخدمين",
+    "governorate": "المحافظة",
+    "directorate": "المديرية"
   },
   "generic": {
     "403-title": "غير مصرح",
