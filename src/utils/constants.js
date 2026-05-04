@@ -1,4 +1,4 @@
-export const MODE = "DEV";
+export const MODE = "PROD"; // Change to "DEV" for development mode
 
 export const PROD_BASE_URL = "https://haraj-api.harajaden.com/api/v1";
 
