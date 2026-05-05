@@ -46,6 +46,13 @@ export const useFiltersStore = defineStore("filters", {
     selectedAttributes: {}, // { [attributeId]: [valueIds] } - Now array-based for multi-select
     selectedCurrencies: [], // Array of currency IDs for multi-select
 
+    // Location filters
+    governorates: [],
+    directorates: [],
+    selectedGovernorateId: null,
+    selectedDirectorateId: null,
+    loadingDirectorates: false,
+
     // Ads results (fetched from API)
     ads: [],
 
@@ -67,6 +74,11 @@ export const useFiltersStore = defineStore("filters", {
     getSelectedCurrencies: (state) => state?.selectedCurrencies,
     getCurrencies: (state) => state?.currencies,
     getNearbyOnly: (state) => state.nearbyOnly,
+    getGovernorates: (state) => state.governorates,
+    getDirectorates: (state) => state.directorates,
+    getSelectedGovernorateId: (state) => state.selectedGovernorateId,
+    getSelectedDirectorateId: (state) => state.selectedDirectorateId,
+    getLoadingDirectorates: (state) => state.loadingDirectorates,
     // The effective category for filtering (subcategory if selected, otherwise parent)
     getEffectiveCategory: (state) => {
       return state.selectedSubCategory || state.selectedParentCategory;
@@ -281,6 +293,9 @@ export const useFiltersStore = defineStore("filters", {
       this.nearbyOnly = false;
       this.latitude = null;
       this.longitude = null;
+      this.selectedGovernorateId = null;
+      this.selectedDirectorateId = null;
+      this.directorates = [];
       this.page = 1; // reset to first page
       // Auto-fetch
       this.fetchAds(this.search);
@@ -351,6 +366,9 @@ export const useFiltersStore = defineStore("filters", {
                 attributeValueIds: valueIds.map(Number),
               })
             ),
+            // Location filters
+            governorate_id: this.selectedGovernorateId,
+            directorate_id: this.selectedDirectorateId,
             page: this.page,
             limit: this.limit,
             search: searchQuery || this.search,
@@ -385,6 +403,51 @@ export const useFiltersStore = defineStore("filters", {
       } finally {
         this.loading = false;
       }
+    },
+
+    // 🔹 Location filters
+    async fetchGovernorates() {
+      if (this.governorates?.length > 0) return;
+      try {
+        const res = await requestService.getAll("/locations/governorates");
+        this.governorates = res?.data || [];
+      } catch (error) {
+        console.error("Error fetching governorates:", error);
+      }
+    },
+
+    async fetchDirectorates(governorateId) {
+      if (!governorateId) {
+        this.directorates = [];
+        return;
+      }
+      this.loadingDirectorates = true;
+      try {
+        const res = await requestService.getAll(
+          `/locations/governorates/${governorateId}/directorates`
+        );
+        this.directorates = res?.data || [];
+      } catch (error) {
+        console.error("Error fetching directorates:", error);
+        this.directorates = [];
+      } finally {
+        this.loadingDirectorates = false;
+      }
+    },
+
+    setSelectedGovernorate(governorateId) {
+      this.selectedGovernorateId = governorateId;
+      this.selectedDirectorateId = null;
+      this.directorates = [];
+      if (governorateId) {
+        this.fetchDirectorates(governorateId);
+      }
+      this.debouncedFetch();
+    },
+
+    setSelectedDirectorate(directorateId) {
+      this.selectedDirectorateId = directorateId;
+      this.debouncedFetch();
     },
 
     async handleSearchChange(searchQuery) {

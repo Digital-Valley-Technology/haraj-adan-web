@@ -155,6 +155,56 @@
                 </button>
               </div>
 
+              <!-- Governorate Filter -->
+              <h6 class="text-xs font-medium mb-2">
+                {{ currentLocale === "ar" ? "المحافظة" : "Governorate" }}
+              </h6>
+              <select
+                class="border rounded-md p-2 w-full border-[#cdced1] mb-4"
+                :value="filtersStore.selectedGovernorateId"
+                @change="handleGovernorateChange($event)"
+              >
+                <option :value="null">
+                  {{ currentLocale === "ar" ? "الكل" : "All" }}
+                </option>
+                <option
+                  v-for="gov in filtersStore.governorates"
+                  :key="gov.id"
+                  :value="gov.id"
+                >
+                  {{ currentLocale === "ar" ? gov?.name : gov?.name_en }}
+                </option>
+              </select>
+
+              <!-- Directorate Filter -->
+              <template v-if="filtersStore.selectedGovernorateId">
+                <h6 class="text-xs font-medium mb-2">
+                  {{ currentLocale === "ar" ? "المديرية" : "Directorate" }}
+                </h6>
+                <select
+                  v-if="!filtersStore.loadingDirectorates"
+                  class="border rounded-md p-2 w-full border-[#cdced1] mb-4"
+                  :value="filtersStore.selectedDirectorateId"
+                  @change="handleDirectorateChange($event)"
+                >
+                  <option :value="null">
+                    {{ currentLocale === "ar" ? "الكل" : "All" }}
+                  </option>
+                  <option
+                    v-for="dir in filtersStore.directorates"
+                    :key="dir.id"
+                    :value="dir.id"
+                  >
+                    {{ currentLocale === "ar" ? dir?.name : dir?.name_en }}
+                  </option>
+                </select>
+                <div v-else class="flex justify-center mb-4">
+                  <span class="text-xs text-gray-500">
+                    {{ currentLocale === "ar" ? "جاري التحميل..." : "Loading..." }}
+                  </span>
+                </div>
+              </template>
+
               <!-- Dynamic Filters (Multi-Select) -->
               <div
                 v-for="item in selectedCategory?.category_attributes"
@@ -326,6 +376,56 @@
                     {{ currentLocale === "ar" ? "إعلانات قريبة" : "Nearby Ads" }}
                   </button>
                 </div>
+
+                <!-- Governorate Filter (Mobile) -->
+                <h6 class="text-xs font-medium mb-2">
+                  {{ currentLocale === "ar" ? "المحافظة" : "Governorate" }}
+                </h6>
+                <select
+                  class="border rounded-md p-2 w-full border-[#cdced1] mb-4"
+                  :value="filtersStore.selectedGovernorateId"
+                  @change="handleGovernorateChange($event)"
+                >
+                  <option :value="null">
+                    {{ currentLocale === "ar" ? "الكل" : "All" }}
+                  </option>
+                  <option
+                    v-for="gov in filtersStore.governorates"
+                    :key="gov.id"
+                    :value="gov.id"
+                  >
+                    {{ currentLocale === "ar" ? gov?.name : gov?.name_en }}
+                  </option>
+                </select>
+
+                <!-- Directorate Filter (Mobile) -->
+                <template v-if="filtersStore.selectedGovernorateId">
+                  <h6 class="text-xs font-medium mb-2">
+                    {{ currentLocale === "ar" ? "المديرية" : "Directorate" }}
+                  </h6>
+                  <select
+                    v-if="!filtersStore.loadingDirectorates"
+                    class="border rounded-md p-2 w-full border-[#cdced1] mb-4"
+                    :value="filtersStore.selectedDirectorateId"
+                    @change="handleDirectorateChange($event)"
+                  >
+                    <option :value="null">
+                      {{ currentLocale === "ar" ? "الكل" : "All" }}
+                    </option>
+                    <option
+                      v-for="dir in filtersStore.directorates"
+                      :key="dir.id"
+                      :value="dir.id"
+                    >
+                      {{ currentLocale === "ar" ? dir?.name : dir?.name_en }}
+                    </option>
+                  </select>
+                  <div v-else class="flex justify-center mb-4">
+                    <span class="text-xs text-gray-500">
+                      {{ currentLocale === "ar" ? "جاري التحميل..." : "Loading..." }}
+                    </span>
+                  </div>
+                </template>
 
                 <!-- Dynamic Filters (Multi-Select) -->
                 <div
@@ -795,6 +895,26 @@ const handleSubCategoryChange = (event) => {
   }
 };
 
+// Handler for governorate selection
+const handleGovernorateChange = (event) => {
+  const selectedId = event.target.value;
+  if (!selectedId || selectedId === "" || selectedId === "null") {
+    filtersStore.setSelectedGovernorate(null);
+  } else {
+    filtersStore.setSelectedGovernorate(Number(selectedId));
+  }
+};
+
+// Handler for directorate selection
+const handleDirectorateChange = (event) => {
+  const selectedId = event.target.value;
+  if (!selectedId || selectedId === "" || selectedId === "null") {
+    filtersStore.setSelectedDirectorate(null);
+  } else {
+    filtersStore.setSelectedDirectorate(Number(selectedId));
+  }
+};
+
 // Helper function to apply category selection based on categoryId
 const applyCategorySelection = (categoryIdNum, parentCats) => {
   if (!categoryIdNum || !parentCats?.length) return false;
@@ -879,6 +999,9 @@ onBeforeRouteUpdate((to, from) => {
   filtersStore.minPrice = null;
   filtersStore.maxPrice = null;
   filtersStore.selectedCurrencies = [];
+  filtersStore.selectedGovernorateId = null;
+  filtersStore.selectedDirectorateId = null;
+  filtersStore.directorates = [];
   filtersStore.page = 1;
 
   // Handle nearby query param
@@ -933,6 +1056,7 @@ onMounted(async () => {
   filtersStore.fetchParentCategories();
   filtersStore.fetchCategories();
   filtersStore.fetchCurrencies();
+  filtersStore.fetchGovernorates();
 
   // Check for nearby query param
   const nearbyParam = route.query.nearby;
