@@ -206,11 +206,11 @@ const isArabic = computed(() => locale.value === "ar");
             <div class="mt-4 p-4 bg-gray-50 rounded-lg">
               <p class="text-gray-700">
                 <strong>{{ isArabic ? "البريد الإلكتروني:" : "Email:" }}</strong>
-                support@harajaden.com
+                info@harajaden.com
               </p>
               <p class="text-gray-700 mt-2">
                 <strong>{{ isArabic ? "الهاتف:" : "Phone:" }}</strong>
-                +967 XXX XXX XXX
+                +967 783118008
               </p>
             </div>
           </section>

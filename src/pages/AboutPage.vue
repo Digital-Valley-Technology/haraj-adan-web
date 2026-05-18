@@ -477,7 +477,7 @@ const isArabic = computed(() => locale.value === "ar");
                   <div class="text-gray-500 text-sm">
                     {{ isArabic ? "البريد الإلكتروني" : "Email" }}
                   </div>
-                  <div class="font-medium">support@harajaden.com</div>
+                  <div class="font-medium">info@harajaden.com</div>
                 </div>
               </div>
               <div class="flex items-center gap-4">
@@ -503,7 +503,7 @@ const isArabic = computed(() => locale.value === "ar");
                   <div class="text-gray-500 text-sm">
                     {{ isArabic ? "الهاتف" : "Phone" }}
                   </div>
-                  <div class="font-medium">+967 XXX XXX XXX</div>
+                  <div class="font-medium">+967 783118008</div>
                 </div>
               </div>
               <div class="flex items-center gap-4">
