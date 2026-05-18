@@ -13,7 +13,7 @@ const isArabic = computed(() => locale.value === "ar");
       <div class="max-w-4xl mx-auto">
         <!-- Header -->
         <div
-          class="bg-gradient-to-r from-blue-600 to-blue-400 rounded-2xl p-8 mb-8 text-white"
+          class="bg-blue-600 rounded-2xl p-8 mb-8 text-white border-b-4 border-yellow-400"
         >
           <div class="flex items-center gap-4">
             <div class="bg-white/20 rounded-xl p-4">
