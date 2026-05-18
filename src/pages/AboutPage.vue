@@ -16,22 +16,9 @@ const isArabic = computed(() => locale.value === "ar");
           class="bg-blue-600 rounded-none p-8 mb-8 text-white text-center border-b-4 border-yellow-400 -mx-4 sm:-mx-6 lg:-mx-8"
         >
           <div
-            class="inline-flex items-center justify-center bg-white/20 rounded-full p-4 mb-4"
+            class="inline-flex items-center justify-center bg-white rounded-2xl p-2 mb-4"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-12 w-12"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-              />
-            </svg>
+            <img src="/logo.png" alt="Haraj Aden Logo" class="h-20 w-20 object-contain" />
           </div>
           <h1 class="text-3xl font-bold mb-2">
             {{ isArabic ? "حراج عدن" : "Haraj Aden" }}
