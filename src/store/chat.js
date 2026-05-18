@@ -273,6 +273,19 @@ export const useChatStore = defineStore("chats", {
         socket.emit("joinRoom", "admins");
         console.log("Joined admins room");
 
+        // Listen for admin unread count updates
+        socket.off("countUnreadAdminMessages"); // Remove old listener
+        socket.on("countUnreadAdminMessages", (response) => {
+          console.log("Admin unread count response:", response);
+          if (response?.success && typeof response.count === "number") {
+            this.unreadAdminCount = response.count;
+          } else if (typeof response?.count === "number") {
+            this.unreadAdminCount = response.count;
+          } else if (typeof response === "number") {
+            this.unreadAdminCount = response;
+          }
+        });
+
         // ⭐ NEW: Fetch initial admin unread count
         this.fetchUnreadCount();
       }

@@ -20,9 +20,16 @@
           :to="item.link"
           :active-class="`active`"
         >
-          <span class="block w-full py-2 px-3 mb-4 cursor-pointer">
+          <span class="block w-full py-2 px-3 mb-4 cursor-pointer relative">
             <span :class="item.icon" class="me-3" />
             <span>{{ $t(item.label) }}</span>
+            <!-- Support notification badge -->
+            <span
+              v-if="item.link === '/dashboard/support' && unreadSupportCount > 0"
+              class="absolute top-1 end-2 bg-red-500 text-white text-xs rounded-full min-w-[20px] h-5 flex items-center justify-center px-1"
+            >
+              {{ unreadSupportCount > 99 ? '99+' : unreadSupportCount }}
+            </span>
           </span>
         </router-link>
       </template>
@@ -31,16 +38,26 @@
 </template>
 
 <script setup>
-  import { ref, computed } from "vue";
+  import { ref, computed, onMounted } from "vue";
   import { RouterLink } from "vue-router";
   import { useRouter } from "vue-router";
   import { sidebarItems } from "../utils/constants";
   import { useGeneralStore } from "../store/general";
   import { useAuthStore } from "../store/auth";
+  import { useChatStore } from "../store/chat";
   import { hasPermission } from "../utils/permissions";
 
   const generalStore = useGeneralStore();
-  const authStore = useAuthStore()
+  const authStore = useAuthStore();
+  const chatStore = useChatStore();
+
+  // Fetch unread admin support count on mount
+  onMounted(() => {
+    chatStore.fetchUnreadCount();
+    chatStore.listenForMessages(true); // true = isAdmin
+  });
+
+  const unreadSupportCount = computed(() => chatStore.unreadAdminCount);
 
   const desktopSidebarVisible = computed(
     () => generalStore?.getDesktopSidebarVisible

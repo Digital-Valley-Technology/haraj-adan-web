@@ -27,9 +27,16 @@
             :active-class="`active`"
             @click="closeSidebar"
           >
-            <span class="block w-full py-2 px-3 mb-4 cursor-pointer">
+            <span class="block w-full py-2 px-3 mb-4 cursor-pointer relative">
               <span :class="item.icon" class="me-3" />
               <span>{{ $t(item.label) }}</span>
+              <!-- Support notification badge -->
+              <span
+                v-if="item.link === '/dashboard/support' && unreadSupportCount > 0"
+                class="absolute top-1 end-2 bg-red-500 text-white text-xs rounded-full min-w-[20px] h-5 flex items-center justify-center px-1"
+              >
+                {{ unreadSupportCount > 99 ? '99+' : unreadSupportCount }}
+              </span>
             </span>
           </router-link>
         </template>
@@ -39,19 +46,28 @@
 </template>
 
 <script setup>
-  import { computed, ref, watch } from "vue";
+  import { computed, ref, watch, onMounted } from "vue";
   import { RouterLink } from "vue-router";
   import { useRouter } from "vue-router";
   import { useI18n } from "vue-i18n";
   import { useGeneralStore } from "../store/general";
   import { sidebarItems } from "../utils/constants";
   import { useAuthStore } from "../store/auth";
+  import { useChatStore } from "../store/chat";
   import { hasPermission } from "../utils/permissions";
-  
-  
+
+
   const t = useI18n();
   const generalStore = useGeneralStore();
-  const authStore = useAuthStore()
+  const authStore = useAuthStore();
+  const chatStore = useChatStore();
+
+  // Fetch unread admin support count on mount
+  onMounted(() => {
+    chatStore.fetchUnreadCount();
+  });
+
+  const unreadSupportCount = computed(() => chatStore.unreadAdminCount);
 
   const visible = ref(generalStore?.getSidebarVisible);
 
