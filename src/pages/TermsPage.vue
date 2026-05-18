@@ -210,7 +210,7 @@ const isArabic = computed(() => locale.value === "ar");
               </p>
               <p class="text-gray-700 mt-2">
                 <strong>{{ isArabic ? "الهاتف:" : "Phone:" }}</strong>
-                +967 783118008
+                <span dir="ltr">+967 783118008</span>
               </p>
             </div>
           </section>
