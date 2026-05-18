@@ -196,6 +196,18 @@ const registerWithGoogle = () => {
             {{ $t("register.register_with_google") }}
           </span>
         </button>
+
+        <!-- Legal Links -->
+        <p class="text-center text-xs text-gray-500 mt-6">
+          {{ $t("register.by_continuing") }}
+          <RouterLink to="/terms" class="text-blue-600 hover:underline">
+            {{ $t("footer.terms") }}
+          </RouterLink>
+          {{ $t("generic.and") }}
+          <RouterLink to="/policy" class="text-blue-600 hover:underline">
+            {{ $t("footer.privacy") }}
+          </RouterLink>
+        </p>
       </div>
     </main>
   </app-layout>

@@ -241,7 +241,8 @@
     "login_failed": "Login failed. Please try again.",
     "email_or_phone": "Phone number",
     "registering": "Registering...",
-    "register_with_google": "Register with Google"
+    "register_with_google": "Register with Google",
+    "by_continuing": "By continuing, you agree to our"
   },
   "sidebar": {
     "analytics": "Analytics",
@@ -841,6 +842,8 @@
     "directorate": "Directorate"
   },
   "generic": {
+    "and": "and",
+    "or": "or",
     "403-title": "Unauthorized",
     "403-message": "You do not have permission to view this page.",
     "404-message": "Ooops! ... Page not found",

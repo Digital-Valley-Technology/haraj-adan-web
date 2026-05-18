@@ -242,7 +242,8 @@
     "login_failed": "فشل تسجيل الدخول. حاول مرة أخرى.",
     "email_or_phone": "رقم الهاتف",
     "registering": "جارٍ التسجيل...",
-    "register_with_google": "سجّل باستخدام جوجل"
+    "register_with_google": "سجّل باستخدام جوجل",
+    "by_continuing": "بمتابعتك، فإنك توافق على"
   },
   "sidebar": {
     "analytics": "الإحصائيات",
@@ -847,6 +848,8 @@
     "directorate": "المديرية"
   },
   "generic": {
+    "and": "و",
+    "or": "أو",
     "403-title": "غير مصرح",
     "403-message": "ليس لديك صلاحية للوصول إلى هذه الصفحة.",
     "404-message": "Ooops! ... الصفحة غير موجودة",
