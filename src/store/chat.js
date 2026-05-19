@@ -172,14 +172,24 @@ export const useChatStore = defineStore("chats", {
       }
     },
 
+    /**
+     * Send support message via socket
+     */
     async sendSupportMessage(userId, text) {
       if (!userId || !this.activeChatId) return null;
       const authStore = useAuthStore();
       const currentUser = authStore.getUser;
       if (!currentUser?.id) throw new Error("User not authenticated");
 
+      console.log('[ChatStore] Sending support message via socket', {
+        userId,
+        chatId: this.activeChatId,
+        text: text.substring(0, 50),
+      });
+
       socket.emit("sendSupportMessage", {
         userId,
+        chatId: this.activeChatId,
         message: {
           type: "text",
           message: text,
@@ -187,6 +197,8 @@ export const useChatStore = defineStore("chats", {
           is_admin: true,
         },
       });
+
+      return true;
     },
 
     async sendMediaMessage(file, type) {
