@@ -51,11 +51,30 @@
   const authStore = useAuthStore();
   const chatStore = useChatStore();
 
-  // Fetch unread admin support count on mount
+  // Fetch unread admin support count on mount and socket reconnect
   onMounted(() => {
-    chatStore.fetchUnreadCount();
+    // Fetch immediately if socket is connected
+    fetchCountIfConnected();
+
+    // Listen for socket reconnection to refresh count
+    window.addEventListener('socket-reconnected', handleSocketReconnected);
+
+    // Setup message listeners
     chatStore.listenForMessages(true); // true = isAdmin
   });
+
+  const fetchCountIfConnected = () => {
+    // Small delay to ensure socket is ready
+    setTimeout(() => {
+      console.log('[AppSidebar] Fetching unread count...');
+      chatStore.fetchUnreadCount();
+    }, 500);
+  };
+
+  const handleSocketReconnected = (event) => {
+    console.log('[AppSidebar] Socket reconnected, fetching count...', event.detail);
+    chatStore.fetchUnreadCount();
+  };
 
   const unreadSupportCount = computed(() => chatStore.unreadAdminCount);
 

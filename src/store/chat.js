@@ -243,9 +243,23 @@ export const useChatStore = defineStore("chats", {
      * ⭐ NEW: Fetch unread count for admin
      */
     async fetchUnreadCount() {
+      console.log('[ChatStore] Fetching admin unread count...');
+      console.log('[ChatStore] Socket connected:', socket.connected);
+
+      if (!socket.connected) {
+        console.warn('[ChatStore] Socket not connected, will retry on reconnect');
+        return;
+      }
+
+      // Try with acknowledgement callback
       socket.emit("countUnreadAdminMessages", {}, (response) => {
-        if (response?.success) {
+        console.log('[ChatStore] countUnreadAdminMessages ack response:', response);
+        if (response?.success && typeof response.count === 'number') {
           this.unreadAdminCount = response.count;
+          console.log('[ChatStore] Updated unreadAdminCount to:', this.unreadAdminCount);
+        } else if (typeof response?.count === 'number') {
+          this.unreadAdminCount = response.count;
+          console.log('[ChatStore] Updated unreadAdminCount to:', this.unreadAdminCount);
         }
       });
     },
