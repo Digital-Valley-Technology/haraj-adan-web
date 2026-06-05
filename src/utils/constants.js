@@ -16,7 +16,8 @@ export const COMPANY_EAMIL = "info@harajaden.com";
 
 // Mapbox access token - must be set in environment variable VITE_MAPBOX_TOKEN
 export const MAP_ACCESS_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || "";
-export const IP_INFO_TOKEN = "15f325f482f7d3";
+// ipinfo.io token - set VITE_IPINFO_TOKEN in the environment (do not hardcode).
+export const IP_INFO_TOKEN = import.meta.env.VITE_IPINFO_TOKEN || "";
 
 export const DashboardBreadCrumbBase = {
   icon: "pi pi-home",
