@@ -46,11 +46,11 @@ const processRefund = (adId) => {
 const handleRefund = async () => {
   try {
     const res = await requestService.patch(`ads/${selectedAdId.value}/refund`);
-    showSuccess(res?.message || "refund success");
+    showSuccess(res?.message || t("toasts.refund_confirmed"));
     emit("refreshAds");
   } catch (error) {
     console.log(error);
-    showError(error || "refund faild");
+    showError(error || t("toasts.refund_confirm_failed"));
   } finally {
     isDialogOpen.value = false;
   }

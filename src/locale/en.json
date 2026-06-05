@@ -95,15 +95,12 @@
   "empty": {
     "published_title": "No Published Ads",
     "published_message": "You don't have any published ads yet.",
-
     "unpublished_title": "No Unpublished Ads",
     "unpublished_message": "Your unpublished ads will appear here.",
-
     "rejected_title": "No Rejected Ads",
     "featured_title": "No Featured Ads",
     "rejected_message": "You currently have no rejected ads.",
     "featured_message": "You currently have no featured ads.",
-
     "default_title": "No Data",
     "default_message": "There are no items to display."
   },
@@ -843,7 +840,7 @@
   },
   "generic": {
     "and": "and",
-    "or": "or",
+    "or": "OR",
     "403-title": "Unauthorized",
     "403-message": "You do not have permission to view this page.",
     "404-message": "Ooops! ... Page not found",
@@ -869,7 +866,6 @@
     "add": "Add",
     "confirmation_message": "Are you sure you want to proceed?",
     "processing": "Processing...",
-    "or": "OR",
     "guest": "Guest"
   },
   "products": {
@@ -891,5 +887,18 @@
     "name_en": "Name - English",
     "image": "Image",
     "actions": "Actions"
+  },
+  "toasts": {
+    "message_send_failed": "Failed to send message",
+    "refund_confirmed": "Refund confirmed",
+    "refund_confirm_failed": "Unable to confirm this refund",
+    "banners_fetch_failed": "Failed to fetch banners",
+    "comment_deleted": "Comment deleted successfully",
+    "comment_delete_failed": "Failed to delete comment",
+    "like_removed": "Like removed",
+    "like_added": "Like added",
+    "auth_failed": "Authentication failed",
+    "logout_success": "Logged out successfully",
+    "logout_error": "Error during logout"
   }
 }

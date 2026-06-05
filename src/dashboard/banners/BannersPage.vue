@@ -37,7 +37,7 @@ const fetchData = async () => {
       limit: bannerStore.limit,
     });
   } catch (error) {
-    showError(error || "Failed to fetch banners.");
+    showError(error || t("toasts.banners_fetch_failed"));
   } finally {
     isFetching.value = false;
   }

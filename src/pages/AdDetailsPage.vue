@@ -89,7 +89,7 @@ const toggleLike = async ({ adId, isLiked }) => {
 
       const res = await requestService.delete(`/ads/likes`, existingLike?.id);
 
-      showSuccess(res?.message || "Like removed successfully");
+      showSuccess(res?.message || t("toasts.like_removed"));
       return;
     }
 
@@ -104,7 +104,7 @@ const toggleLike = async ({ adId, isLiked }) => {
     // Replace optimistic like with real DB entry
     ad.value.ad_likes = [res.data];
 
-    showSuccess(res?.message || "Like added successfully");
+    showSuccess(res?.message || t("toasts.like_added"));
   } catch (err) {
     console.error("Error toggling like:", err);
 

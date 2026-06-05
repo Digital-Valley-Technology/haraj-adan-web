@@ -61,11 +61,11 @@ const handleRefund = async () => {
     const res = await requestService.patch(
       `ads/${currentRefund?.id}/confirm-refund`
     );
-    showSuccess(res?.message || "refund confirmed");
+    showSuccess(res?.message || t("toasts.refund_confirmed"));
     fetchData();
   } catch (error) {
     console.log(error);
-    showError(error || "unable to confirm this refund");
+    showError(error || t("toasts.refund_confirm_failed"));
   } finally {
     showRefundDialog.value = false;
   }

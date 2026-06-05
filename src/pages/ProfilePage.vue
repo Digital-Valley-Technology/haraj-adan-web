@@ -247,7 +247,7 @@ const sendMessage = async () => {
     });
   } catch (err) {
     console.error("Failed to emit message:", err);
-    showError("Failed to send message via socket");
+    showError(t("toasts.message_send_failed"));
     chatMessages.value = chatMessages.value.filter(
       (m) => m.id !== tempMessage.id
     );

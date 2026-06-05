@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import requestService from "../services/api/requestService";
 import { showSuccess, showWarning } from "../utils/notifications";
 import { socket } from "../services/SocketPlugin";
+import { i18n } from "../locale/i18";
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
@@ -44,7 +45,7 @@ export const useAuthStore = defineStore("auth", {
         return response?.data;
       } catch (error) {
         this.revokeAccess();
-        showWarning(error?.response?.message || "Authentication failed");
+        showWarning(error?.response?.message || i18n.global.t("toasts.auth_failed"));
         return null;
       }
     },
@@ -122,7 +123,7 @@ export const useAuthStore = defineStore("auth", {
                 Authorization: `Bearer ${token}`,
               },
             });
-            showSuccess(response?.message || "Logged out successfully");
+            showSuccess(response?.message || i18n.global.t("toasts.logout_success"));
           } catch (error) {
             console.warn("⚠️ [AUTH] Backend logout failed:", error);
             // Continue with local logout even if backend fails
@@ -155,7 +156,7 @@ export const useAuthStore = defineStore("auth", {
         localStorage.removeItem("user");
         this.revokeAccess();
 
-        showWarning(error?.response?.message || "Error during logout");
+        showWarning(error?.response?.message || i18n.global.t("toasts.logout_error"));
       }
     },
   },

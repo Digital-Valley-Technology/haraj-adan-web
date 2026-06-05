@@ -95,16 +95,12 @@
   "empty": {
     "published_title": "لا توجد إعلانات منشورة",
     "published_message": "ليس لديك أي إعلانات منشورة حالياً.",
-
     "unpublished_title": "لا توجد إعلانات غير منشورة",
     "unpublished_message": "ستظهر إعلاناتك غير المنشورة هنا.",
-
     "rejected_title": "لا توجد إعلانات مرفوضة",
     "rejected_message": "ليس لديك أي إعلانات مرفوضة حالياً.",
-
     "featured_message": "ليس لديك حالياً أي إعلانات مميزة.",
     "featured_title": "لا توجد إعلانات مميزة",
-
     "default_title": "لا توجد بيانات",
     "default_message": "لا يوجد عناصر للعرض حالياً."
   },
@@ -875,7 +871,6 @@
     "add": "إضافة",
     "confirmation_message": "هل أنت متأكد أنك تريد المتابعة؟",
     "processing": "جارٍ المعالجة...",
-    "or": "أو",
     "guest": "ضيف"
   },
   "products": {
@@ -897,5 +892,18 @@
     "name_en": "الإسم - إنجليزي",
     "image": "الصورة",
     "actions": "الإجراءات"
+  },
+  "toasts": {
+    "message_send_failed": "فشل إرسال الرسالة",
+    "refund_confirmed": "تم تأكيد الاسترداد",
+    "refund_confirm_failed": "تعذّر تأكيد هذا الاسترداد",
+    "banners_fetch_failed": "تعذّر تحميل اللافتات",
+    "comment_deleted": "تم حذف التعليق بنجاح",
+    "comment_delete_failed": "تعذّر حذف التعليق",
+    "like_removed": "تمت إزالة الإعجاب",
+    "like_added": "تمت إضافة الإعجاب",
+    "auth_failed": "فشلت المصادقة",
+    "logout_success": "تم تسجيل الخروج بنجاح",
+    "logout_error": "حدث خطأ أثناء تسجيل الخروج"
   }
 }

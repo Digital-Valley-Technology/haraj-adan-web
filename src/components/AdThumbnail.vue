@@ -517,13 +517,13 @@ const handleDelete = async () => {
       `/ads/comments`,
       selectedCommentId.value
     );
-    showSuccess(res?.message || "Comment deleted successfully");
+    showSuccess(res?.message || t("toasts.comment_deleted"));
 
     emit("paginate-comments", { page: 1, limit: rows.value });
   } catch (err) {
     console.log(err);
 
-    showError(err || "Failed to delete comment");
+    showError(err || t("toasts.comment_delete_failed"));
   } finally {
     isDeleteDialogOpen.value = false;
   }
