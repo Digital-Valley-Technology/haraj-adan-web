@@ -6,17 +6,35 @@ export const URL = MODE == "DEV" ? DEV_SOCKET_URL : PROD_SOCKET_URL;
 
 console.log("🔌 [SOCKET] Creating socket connection to:", URL);
 
+// Re-evaluated on every (re)connection so the latest access token is sent.
+// The API authenticates the socket from this token (or the refresh_token cookie
+// delivered via withCredentials).
+const authProvider = (cb) => cb({ token: localStorage.getItem("token") || "" });
+
 export const socket =
   MODE == "DEV"
     ? io(`${URL}`, {
         withCredentials: true,
         autoConnect: true, // ⭐ Ensure auto-connect is enabled
+        auth: authProvider,
       })
     : io(`${URL}`, {
         withCredentials: true,
         path: "/socket.io/",
         autoConnect: true,
+        auth: authProvider,
       });
+
+// Force the handshake to re-run with the current credentials. Call after login
+// (and logout) so the server can (re)authenticate the socket.
+export function reauthenticateSocket() {
+  try {
+    socket.disconnect();
+  } catch (e) {
+    console.warn("⚠️ [SOCKET] disconnect before reauth failed", e);
+  }
+  socket.connect();
+}
 
 // ============================================================================
 // SOCKET EVENT HANDLERS

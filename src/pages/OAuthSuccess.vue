@@ -5,6 +5,7 @@ import { useAuthStore } from "../store/auth";
 import { useCustomToast } from "../composables/toast";
 import AppLayout from "../Layout/AppLayout.vue";
 import { showSuccess } from "../utils/notifications";
+import { reauthenticateSocket } from "../services/SocketPlugin";
 import { useI18n } from "vue-i18n";
 
 const router = useRouter();
@@ -21,6 +22,8 @@ onMounted(async () => {
       localStorage.setItem("token", token);
     }
     await authStore.getMe();
+    // Reconnect the socket so the server authenticates it with the new token.
+    reauthenticateSocket();
     router.replace("/");
     showSuccess(t("register.login_success"));
   } catch (err) {

@@ -3,6 +3,7 @@ import { useRouter, useRoute } from "vue-router";
 import { useCustomToast } from "../composables/toast";
 import { useAuthStore } from "../store/auth";
 import requestService from "../services/api/requestService";
+import { reauthenticateSocket } from "../services/SocketPlugin";
 import { useI18n } from "vue-i18n";
 import AppLayout from "../Layout/AppLayout.vue";
 import { ref, computed, onMounted, onUnmounted, nextTick } from "vue";
@@ -172,6 +173,9 @@ const onSubmit = async () => {
 
     // Properly set user and trigger socket initialization
     authStore.grantAccess(response?.data);
+
+    // Reconnect the socket so the server authenticates it with the new token.
+    reauthenticateSocket();
 
     showSuccess(response?.message || t("otp.verified"));
     router.push("/");
