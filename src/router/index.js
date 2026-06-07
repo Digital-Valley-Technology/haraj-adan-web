@@ -58,14 +58,17 @@ const routes = [
     component: () => import("../pages/LoginPage.vue"),
   },
   {
+    // Privacy Policy + Terms now live on a single page (tabbed).
     name: "policy",
     path: "/policy",
-    component: () => import("../pages/PolicyPage.vue"),
+    component: () => import("../pages/LegalPage.vue"),
+    props: { initialTab: "privacy" },
   },
   {
     name: "terms",
     path: "/terms",
-    component: () => import("../pages/TermsPage.vue"),
+    component: () => import("../pages/LegalPage.vue"),
+    props: { initialTab: "terms" },
   },
   {
     name: "customer-support",
