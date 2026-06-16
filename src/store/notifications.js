@@ -1,4 +1,10 @@
 import { defineStore } from "pinia";
+import { playMessageChime } from "../utils/notificationSound";
+
+// Module-level handler reference so we can attach/detach our own
+// `newSupportMessage` listener without clobbering other listeners (off by name
+// would remove everyone's).
+let newSupportMsgHandler = null;
 
 export const useNotificationStore = defineStore("notifications", {
   state: () => ({
@@ -46,6 +52,10 @@ export const useNotificationStore = defineStore("notifications", {
         console.log("📊 [NOTIFICATIONS] User chat count update:", response);
 
         if (response?.success && typeof response.count === "number") {
+          // A genuine new message raises the unread count — play a subtle chime.
+          // (Sending your own message leaves the count unchanged, so the sender
+          // doesn't hear it.)
+          if (response.count > this.userChatCount) playMessageChime();
           this.userChatCount = response.count;
           console.log(
             "✅ [NOTIFICATIONS] User chat count set to:",
@@ -68,6 +78,7 @@ export const useNotificationStore = defineStore("notifications", {
         console.log("📊 [NOTIFICATIONS] Support chat count update:", response);
 
         if (response?.success && typeof response.count === "number") {
+          if (response.count > this.supportChatCount) playMessageChime();
           this.supportChatCount = response.count;
           console.log(
             "✅ [NOTIFICATIONS] Support chat count set to:",
@@ -84,6 +95,7 @@ export const useNotificationStore = defineStore("notifications", {
         console.log("📊 [NOTIFICATIONS] Admin support count update:", response);
 
         if (response?.success && typeof response.count === "number") {
+          if (response.count > this.supportChatCount) playMessageChime();
           this.supportChatCount = response.count;
           console.log(
             "✅ [NOTIFICATIONS] Admin support count set to:",
@@ -91,6 +103,23 @@ export const useNotificationStore = defineStore("notifications", {
           );
         }
       });
+
+      // ============================================================
+      // LISTENER 4: New support message → refresh the support count.
+      // The server doesn't push a count nudge on a support message (unlike user
+      // chat's `changed` event), so without this the customer's support badge
+      // wouldn't update until a reconnect. Attached by reference so reset() can
+      // detach exactly our handler without disturbing other listeners.
+      // ============================================================
+      if (newSupportMsgHandler) socket.off("newSupportMessage", newSupportMsgHandler);
+      newSupportMsgHandler = (msg) => {
+        const sender =
+          msg?.sender_id ?? msg?.senderId ?? msg?.message?.sender_id;
+        // Ignore our own messages (no badge/sound for what we just sent).
+        if (sender != null && Number(sender) === Number(this._userId)) return;
+        this.fetchSupportChatCount();
+      };
+      socket.on("newSupportMessage", newSupportMsgHandler);
 
       this._initialized = true;
 
@@ -169,6 +198,10 @@ export const useNotificationStore = defineStore("notifications", {
         this._socket.off("countChatNotifications");
         this._socket.off("countUnreadMessages");
         this._socket.off("countUnreadAdminMessages");
+        if (newSupportMsgHandler) {
+          this._socket.off("newSupportMessage", newSupportMsgHandler);
+          newSupportMsgHandler = null;
+        }
       }
 
       this.userChatCount = 0;

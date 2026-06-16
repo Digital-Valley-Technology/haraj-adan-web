@@ -3,6 +3,7 @@ import { watch } from "vue";
 import requestService from "../services/api/requestService";
 import { socket } from "../services/SocketPlugin";
 import { useAuthStore } from "./auth";
+import { playMessageChime } from "../utils/notificationSound";
 
 export const useChatStore = defineStore("chats", {
   state: () => ({
@@ -47,14 +48,20 @@ export const useChatStore = defineStore("chats", {
       }
 
       const idx = this.chats.findIndex((c) => c.id === msg.support_chat_id);
-      if (idx !== -1) this.chats[idx].lastMessage = msg;
-      else
+      if (idx !== -1) {
+        // Update the last message AND move the chat to the top so the list
+        // reflects most-recent-activity order instantly on a new message.
+        const updated = { ...this.chats[idx], lastMessage: msg };
+        this.chats.splice(idx, 1);
+        this.chats.unshift(updated);
+      } else {
         this.chats.unshift({
           id: msg.support_chat_id,
           users: msg.users ?? null,
           lastMessage: msg,
           _count: {},
         });
+      }
     },
 
     async fetchChats({ append = false } = {}) {
@@ -327,6 +334,8 @@ export const useChatStore = defineStore("chats", {
         // ⭐ FIXED: Update admin notification count
         if (isAdmin && !msg.is_admin) {
           this.unreadAdminCount++;
+          // Audible cue for the admin when a customer sends a new message.
+          playMessageChime();
         }
       });
 
