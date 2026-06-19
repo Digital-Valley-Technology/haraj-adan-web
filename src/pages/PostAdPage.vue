@@ -222,11 +222,10 @@
                 {{ $t("postAdd.location") }}
                 <span class="text-gray-500 text-xs">({{ $t("postAdd.optional") }})</span>
               </label>
-              <!-- Location with auto GPS detection (optional) -->
+              <!-- Location picker (optional — no marker unless the user picks) -->
               <PickLocation
                 v-model="location"
                 :map-id="`ad-map-location`"
-                :auto-detect-g-p-s="!isEditMode"
               />
             </div>
 

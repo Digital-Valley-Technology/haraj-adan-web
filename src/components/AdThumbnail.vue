@@ -199,6 +199,7 @@
     </button>
 
     <button
+      v-if="hasMapLocation"
       @click="activeTab = 'location'"
       :class="[
         'py-2 px-7 rounded-md text-sm font-medium transition',
@@ -671,11 +672,18 @@ const directorateName = computed(() => {
     : dir.name_en || dir.name;
 });
 
-const mapUrl = computed(() => {
-  if (!adData.value?.lng || !adData.value.lat || !adData.value?.address)
-    return "";
+// True only when the ad has a real map location (the poster dropped a marker).
+// When false, the whole Location tab + map are hidden on the details page.
+const hasMapLocation = computed(() => {
+  const la = Number(adData.value?.lat);
+  const ln = Number(adData.value?.lng);
+  return Boolean(la) && Boolean(ln);
+});
 
-  // FIX: Correctly construct the Google Maps embed URL
+const mapUrl = computed(() => {
+  if (!hasMapLocation.value) return "";
+
+  // Google Maps embed URL (uses the coordinates directly).
   return `https://maps.google.com/maps?q=${adData.value.lat},${
     adData.value.lng
   }&hl=${locale.value === "ar" ? "ar" : "en"}&z=15&output=embed`;
