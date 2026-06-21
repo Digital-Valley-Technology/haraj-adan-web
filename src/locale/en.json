@@ -34,6 +34,13 @@
       "bank_alomqy": "Alomqy Bank",
       "bank_albosaery": "Albosaery Bank",
       "bank_kuraimimibank": "Kuraimi Microfinance Bank",
+      "haseb_point_number": "Haseb Point Number",
+      "al_kuraimi": "Al-Kuraimi App",
+      "charge_balance_via_kuraimi": "To charge your balance via Al-Kuraimi app:",
+      "kuraimi_step_1": "Open Al-Kuraimi app → Select Payment Services → Select Haseb",
+      "kuraimi_step_2": "Convert currency to Yemeni and enter the amount",
+      "kuraimi_step_3": "Enter Haseb point number {number} and press OK",
+      "kuraimi_step_4": "Take a screenshot of the receipt and upload it in Haraj Aden app to add your balance.",
       "download_receipt_label": "Upload Payment Receipt",
       "click_to_download": "Click here to upload your receipt",
       "amount": "Amount",
@@ -106,33 +113,27 @@
   },
   "footer": {
     "brand": "Haraj Aden",
-    "product": {
-      "title": "Product",
-      "features": "Features",
-      "pricing": "Pricing",
-      "caseStudies": "Case Studies"
+    "ads": {
+      "title": "Ads",
+      "all": "All ads",
+      "post": "Post an ad",
+      "cars": "Cars"
     },
-    "company": {
-      "title": "Company",
-      "about": "About",
-      "contact": "Contact Us",
-      "careers": "Careers"
+    "platform": {
+      "title": "Platform",
+      "about": "About us",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Use"
     },
     "support": {
       "title": "Support",
-      "gettingStarted": "Getting Started",
-      "helpCenter": "Help Center",
-      "serverStatus": "Server Status"
+      "contact": "Contact support"
     },
     "contacts": {
-      "title": "Contact Us",
       "email": "info@harajaden.com",
-      "phone": "+967 783118008",
-      "address": "Aden, Yemen"
+      "phone": "+967 783118008"
     },
-    "copy": "All rights reserved.",
-    "terms": "Terms and Conditions",
-    "privacy": "Privacy Policy"
+    "copy": "All rights reserved."
   },
   "home": {
     "best-seller": "Best Sellers",

@@ -2,127 +2,152 @@
   <footer
     class="bg-white text-gray-700 border-t border-gray-200 pt-10 pb-6 px-6 md:px-12"
   >
-    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-5 gap-10">
-      <!-- Brand + Social -->
+    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
+      <!-- Brand (logo only) -->
       <div class="space-y-4">
-        <!-- Logo + name -->
         <div class="flex items-center space-x-2">
-          <div
-            class="flex flex-col justify-center items-center space-y-1 text-yellow-400"
-          >
-            <RouterLink class="block p-2 rounded-sm" to="/">
-              <img
-                src="/logo.png"
-                alt="raheed logo"
-                class="w-[80px] object-contain"
-              />
+          <RouterLink class="block p-2 rounded-sm" to="/">
+            <img
+              src="/logo.png"
+              alt="haraj aden logo"
+              class="w-[80px] object-contain"
+            />
+          </RouterLink>
+          <span class="font-semibold text-lg text-black">
+            {{ $t("footer.brand") }}
+          </span>
+        </div>
+      </div>
+
+      <!-- 1) Ads -->
+      <div>
+        <h4 class="text-black font-semibold mb-3">
+          {{ $t("footer.ads.title") }}
+        </h4>
+        <ul class="space-y-2 text-sm text-gray-500">
+          <li>
+            <RouterLink to="/search" class="hover:text-blue-600">
+              {{ $t("footer.ads.all") }}
             </RouterLink>
-          </div>
-          <span class="font-semibold text-lg text-black">{{
-            $t("footer.brand")
-          }}</span>
-        </div>
-
-        <!-- Social Icons -->
-        <div class="flex space-x-4 text-blue-700 text-xl">
-          <i class="pi pi-twitter"></i>
-          <i class="pi pi-facebook"></i>
-          <i class="pi pi-instagram"></i>
-          <i class="pi pi-linkedin"></i>
-          <i class="pi pi-youtube"></i>
-        </div>
-      </div>
-
-      <!-- Product Links -->
-      <div>
-        <h4 class="text-black font-semibold mb-3">
-          {{ $t("footer.product.title") }}
-        </h4>
-        <ul class="space-y-2 text-sm text-gray-500">
-          <li>
-            <a href="#">{{ $t("footer.product.features") }}</a>
           </li>
           <li>
-            <a href="#">{{ $t("footer.product.pricing") }}</a>
+            <RouterLink to="/post-ad-categories" class="hover:text-blue-600">
+              {{ $t("footer.ads.post") }}
+            </RouterLink>
           </li>
           <li>
-            <a href="#">{{ $t("footer.product.caseStudies") }}</a>
+            <RouterLink :to="carsLink" class="hover:text-blue-600">
+              {{ $t("footer.ads.cars") }}
+            </RouterLink>
           </li>
         </ul>
       </div>
 
-      <!-- Company Links -->
+      <!-- 2) Platform -->
       <div>
         <h4 class="text-black font-semibold mb-3">
-          {{ $t("footer.company.title") }}
+          {{ $t("footer.platform.title") }}
         </h4>
         <ul class="space-y-2 text-sm text-gray-500">
           <li>
-            <a href="#">{{ $t("footer.company.about") }}</a>
+            <RouterLink to="/about" class="hover:text-blue-600">
+              {{ $t("footer.platform.about") }}
+            </RouterLink>
           </li>
           <li>
-            <a href="#">{{ $t("footer.company.contact") }}</a>
+            <RouterLink to="/policy" class="hover:text-blue-600">
+              {{ $t("footer.platform.privacy") }}
+            </RouterLink>
           </li>
           <li>
-            <a href="#">{{ $t("footer.company.careers") }}</a>
+            <RouterLink to="/terms" class="hover:text-blue-600">
+              {{ $t("footer.platform.terms") }}
+            </RouterLink>
           </li>
         </ul>
       </div>
 
-      <!-- Support Links -->
+      <!-- 3) Support -->
       <div>
         <h4 class="text-black font-semibold mb-3">
           {{ $t("footer.support.title") }}
         </h4>
-        <ul class="space-y-2 text-sm text-gray-500">
-          <li>
-            <a href="#">{{ $t("footer.support.gettingStarted") }}</a>
-          </li>
-          <li>
-            <a href="#">{{ $t("footer.support.helpCenter") }}</a>
-          </li>
-          <li>
-            <a href="#">{{ $t("footer.support.serverStatus") }}</a>
-          </li>
-        </ul>
-      </div>
-
-      <!-- Contacts -->
-      <div>
-        <h4 class="text-black font-semibold mb-3">
-          {{ $t("footer.contacts.title") }}
-        </h4>
         <ul class="space-y-3 text-sm text-gray-500">
-          <li class="flex items-center space-x-2">
-            <i class="pi pi-envelope text-blue-600"></i>
-            <span>{{ COMPANY_EAMIL }}</span>
+          <li>
+            <RouterLink
+              to="/customer-support"
+              class="flex items-center gap-2 hover:text-blue-600"
+            >
+              <i class="pi pi-comments text-blue-600"></i>
+              <span>{{ $t("footer.support.contact") }}</span>
+            </RouterLink>
           </li>
-          <li class="flex items-center space-x-2">
-            <i class="pi pi-phone text-blue-600"></i>
-            <span>{{ $t("footer.contacts.phone") }}</span>
+          <li>
+            <a
+              :href="`tel:${$t('footer.contacts.phone')}`"
+              class="flex items-center gap-2 hover:text-blue-600"
+            >
+              <i class="pi pi-phone text-blue-600"></i>
+              <span dir="ltr">{{ $t("footer.contacts.phone") }}</span>
+            </a>
           </li>
-          <li class="flex items-center space-x-2">
-            <i class="pi pi-map-marker text-blue-600"></i>
-            <span>{{ $t("footer.contacts.address") }}</span>
+          <li>
+            <a
+              :href="`mailto:${COMPANY_EAMIL}`"
+              class="flex items-center gap-2 hover:text-blue-600"
+            >
+              <i class="pi pi-envelope text-blue-600"></i>
+              <span dir="ltr">{{ COMPANY_EAMIL }}</span>
+            </a>
           </li>
         </ul>
       </div>
     </div>
 
-    <!-- Bottom Bar -->
+    <!-- Copyright bottom bar -->
     <div
-      class="border-t border-gray-200 mt-10 pt-4 text-sm flex flex-col md:flex-row items-center justify-between max-w-7xl mx-auto px-4"
+      class="border-t border-gray-200 mt-10 pt-4 text-sm max-w-7xl mx-auto px-4"
     >
-      <p class="text-gray-500">&copy; 2025 {{ $t("footer.copy") }}</p>
-      <div class="mt-2 md:mt-0 space-x-2 text-blue-600">
-        <a href="#" class="hover:underline">{{ $t("footer.terms") }}</a>
-        <span class="text-gray-300">|</span>
-        <a href="#" class="hover:underline">{{ $t("footer.privacy") }}</a>
-      </div>
+      <p class="text-gray-500 text-center md:text-start">
+        &copy; {{ currentYear }} {{ $t("footer.brand") }} —
+        {{ $t("footer.copy") }}
+      </p>
     </div>
   </footer>
 </template>
 
 <script setup>
+import { computed, onMounted } from "vue";
+import { useHomeStore } from "../store/home";
 import { COMPANY_EAMIL } from "../utils/constants";
+
+const homeStore = useHomeStore();
+const currentYear = new Date().getFullYear();
+
+// Categories are cached in the store; this is a no-op if already loaded.
+onMounted(() => homeStore.fetchSideMenuCategories());
+
+// Auto-detect the "Cars" category from the loaded menu (top-level or child),
+// matching the Arabic or English name. Falls back to the search page.
+const carsCategory = computed(() => {
+  const categories = homeStore.sidMenuCategories || [];
+  const isCars = (c) => {
+    const ar = (c?.name ?? "").toString();
+    const en = (c?.name_en ?? "").toString().toLowerCase();
+    return ar.includes("سيارات") || ar.includes("سيارة") || en.includes("car");
+  };
+  for (const category of categories) {
+    if (isCars(category)) return category;
+    for (const child of category?.children ?? []) {
+      if (isCars(child)) return child;
+    }
+  }
+  return null;
+});
+
+const carsLink = computed(() =>
+  carsCategory.value
+    ? { name: "category-listing", params: { id: carsCategory.value.id } }
+    : { name: "search" }
+);
 </script>

@@ -709,23 +709,16 @@ onBeforeUnmount(() => {
               <p class="text-lg font-bold">
                 {{
                   currentLocale == "ar"
-                    ? "اجعل إعلانك مميزًا"
-                    : "MAKE YOUR AD STAND OUT"
+                    ? "اجعل إعلانك مميز"
+                    : "Make your ad featured"
                 }}
               </p>
             </div>
-            <p class="text-xs font-normal uppercase">
+            <p class="text-xs font-normal">
               {{
                 currentLocale == "ar"
-                  ? "فيما يلي نص توضيحي حول كيفية صنع"
-                  : "here is an explanatory text on how to make the"
-              }}
-            </p>
-            <p class="text-xs font-normal uppercase">
-              {{
-                currentLocale == "ar"
-                  ? "فيما يلي نص توضيحي حول كيفية صنع"
-                  : "here is an explanatory text on how to make the"
+                  ? "كن في المقدمة، اختر التميز اليوم"
+                  : "Be at the front, choose to stand out today"
               }}
             </p>
             <button

@@ -34,6 +34,13 @@
       "bank_alomqy": "بنك العمقي",
       "bank_albosaery": "بنك البوصيري",
       "bank_kuraimimibank": "بنك الكريمي للتمويل الأصغر",
+      "haseb_point_number": "رقم نقطة حاسب",
+      "al_kuraimi": "تطبيق الكريمي",
+      "charge_balance_via_kuraimi": "لشحن رصيدك عبر تطبيق الكريمي:",
+      "kuraimi_step_1": "افتح تطبيق الكريمي ← اختر خدمات الدفع والسداد ← اختر حاسب",
+      "kuraimi_step_2": "حوّل العملة إلى يمني وأدخل المبلغ",
+      "kuraimi_step_3": "أدخل رقم نقطة حاسب {number} واضغط موافق",
+      "kuraimi_step_4": "صوّر الإشعار وارفعه في تطبيق حراج عدن ليتم إضافة الرصيد.",
       "download_receipt_label": "تحميل إيصال الدفع",
       "click_to_download": "اضغط هنا لتحميل الإيصال",
       "amount": "المبلغ",
@@ -106,33 +113,27 @@
   },
   "footer": {
     "brand": "حراج عدن",
-    "product": {
-      "title": "المنتج",
-      "features": "المميزات",
-      "pricing": "الأسعار",
-      "caseStudies": "دراسات حالة"
+    "ads": {
+      "title": "الاعلانات",
+      "all": "كل الاعلانات",
+      "post": "نشر اعلان",
+      "cars": "سيارات"
     },
-    "company": {
-      "title": "الشركة",
-      "about": "معلومات عنا",
-      "contact": "اتصل بنا",
-      "careers": "وظائف"
+    "platform": {
+      "title": "المنصة",
+      "about": "من نحن",
+      "privacy": "سياسة الخصوصية",
+      "terms": "شروط الاستخدام"
     },
     "support": {
       "title": "الدعم",
-      "gettingStarted": "البدء",
-      "helpCenter": "مركز المساعدة",
-      "serverStatus": "حالة الخادم"
+      "contact": "مراسلة الدعم"
     },
     "contacts": {
-      "title": "تواصل معنا",
       "email": "info@harajaden.com",
-      "phone": "+967 783118008",
-      "address": "عدن، اليمن"
+      "phone": "+967 783118008"
     },
-    "copy": "جميع الحقوق محفوظة.",
-    "terms": "الشروط والأحكام",
-    "privacy": "سياسة الخصوصية"
+    "copy": "جميع الحقوق محفوظة."
   },
   "home": {
     "best-seller": "المنتجات الأكثر مبيعًا",

@@ -6,6 +6,9 @@ import * as yup from "yup";
 
 const { t } = useI18n();
 
+// Al-Kuraimi "Haseb" point number to charge the wallet (matches the app).
+const hasebNumber = "2060750";
+
 // --- Component Setup ---
 // The component now only emits the data payload for the parent to handle the API call.
 const emit = defineEmits(["submitPayment"]);
@@ -103,37 +106,38 @@ const onSubmit = handleSubmit((values) => {
   <div class="bg-white p-4 rounded-lg">
     <!-- Payment Form View -->
     <div>
-      <p class="text-xs mb-2">
-        {{ t("profile.payment.account_transfer_label") }}
+      <!-- Haseb point number -->
+      <p class="text-sm font-semibold mb-2">
+        {{ t("profile.payment.haseb_point_number") }}
       </p>
 
-      <!-- Bank Accounts Section -->
-      <div class="bg-[#F5F6F7] py-4 px-2 rounded-lg mb-4">
-        <div
-          v-for="(account, index) in [
-            { name: 'bank_alomqy', number: '3453453435' },
-            { name: 'bank_albosaery', number: '3453453435' },
-            { name: 'bank_kuraimimibank', number: '3453453435' },
-          ]"
-          :key="index"
-          class="flex gap-2 items-center"
-          :class="{ 'mb-4': index < 2 }"
+      <!-- Al-Kuraimi account -->
+      <div
+        class="bg-[#F5F6F7] py-3 px-3 rounded-lg mb-4 flex items-center justify-between gap-2"
+      >
+        <p class="text-sm text-gray-800">
+          {{ t("profile.payment.al_kuraimi") }} :
+          <span class="font-mono" dir="ltr">{{ hasebNumber }}</span>
+        </p>
+        <span
+          class="cursor-pointer text-[#146AAB]"
+          @click="copyToClipboard(hasebNumber)"
+          title="Copy"
         >
-          <p class="text-sm text-gray-800">
-            {{ t(`profile.payment.${account.name}`) }}:
-            <span class="font-mono">{{ account.number }}</span>
-          </p>
-
-          <!-- Copy Button -->
-          <span
-            class="cursor-pointer text-[#146AAB]"
-            @click="copyToClipboard(account.number)"
-            title="Copy Account Number"
-          >
-            <i class="pi pi-clone"></i>
-          </span>
-        </div>
+          <i class="pi pi-clone"></i>
+        </span>
       </div>
+
+      <!-- Charging instructions -->
+      <p class="text-sm font-semibold text-[#146AAB] mb-2">
+        {{ t("profile.payment.charge_balance_via_kuraimi") }}
+      </p>
+      <ol class="list-decimal ms-5 space-y-1 text-xs text-gray-700 mb-4">
+        <li>{{ t("profile.payment.kuraimi_step_1") }}</li>
+        <li>{{ t("profile.payment.kuraimi_step_2") }}</li>
+        <li>{{ t("profile.payment.kuraimi_step_3", { number: hasebNumber }) }}</li>
+        <li>{{ t("profile.payment.kuraimi_step_4") }}</li>
+      </ol>
 
       <!-- Receipt Upload Section -->
       <p class="text-xs mb-2">

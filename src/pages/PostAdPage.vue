@@ -563,7 +563,7 @@
                       :value="d.id"
                       :disabled="
                         featuredAdPrice *
-                          (featuredAdDays + d.period) *
+                          d.period *
                           (1 - d.percentage / 100) >
                         wallet.balance
                       "
@@ -951,18 +951,16 @@ const featuredAdDays = ref(0);
 const computedFeaturedDays = computed(() => {
   if (!is_featured.value) return 0;
 
-  let days = featuredAdDays.value;
-
+  // A selected discount option's period IS the featured duration — it replaces
+  // the default days, it does not add to them (matches the API and the app).
   if (selectedDiscount.value) {
     const discount = discounts.value.find(
       (d) => d.id === selectedDiscount.value
     );
-    if (discount) {
-      days += discount.period;
-    }
+    if (discount) return discount.period;
   }
 
-  return days;
+  return featuredAdDays.value;
 });
 
 const totalFeaturedPrice = computed(() => {
@@ -1341,7 +1339,9 @@ const submitAd = async () => {
     const formData = new FormData();
     formData.append("user_id", currentUser?.value?.id);
     formData.append("title", form.value.title);
-    formData.append("title_en", form.value.title_en || '');
+    // English title is optional — fall back to the Arabic title when left blank.
+    const titleEn = (form.value.title_en || '').trim();
+    formData.append("title_en", titleEn !== '' ? titleEn : form.value.title);
     formData.append("currency_id", form.value.currency_id);
     formData.append("price", form.value.price);
     formData.append("descr", form.value.descr || '');
