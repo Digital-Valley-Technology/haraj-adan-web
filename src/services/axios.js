@@ -22,6 +22,7 @@ export const BASE_URL = MODE == "DEV" ? DEV_BASE_URL : PROD_BASE_URL;
 
 const redirectToLogin = () => {
   localStorage.removeItem("token");
+  localStorage.removeItem("refresh_token");
   // window.location.href = `${window.location.origin}/#/login`;
   router.push("/login");
 };
@@ -44,9 +45,20 @@ export const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(
   (request) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      request.headers["Authorization"] = `Bearer ${token}`;
+    // The refresh endpoint must be authenticated with the long-lived refresh
+    // token (Bearer), not the short-lived access token. Sending it explicitly
+    // renews the session even when the httpOnly cookie can't be sent (e.g. a
+    // cross-site origin), so the session lasts the full 7-day refresh window.
+    if (request.url?.includes("/auth/refresh")) {
+      const refreshToken = localStorage.getItem("refresh_token");
+      if (refreshToken) {
+        request.headers["Authorization"] = `Bearer ${refreshToken}`;
+      }
+    } else {
+      const token = localStorage.getItem("token");
+      if (token) {
+        request.headers["Authorization"] = `Bearer ${token}`;
+      }
     }
     request.headers["Accept-Language"] =
       localStorage.getItem("haraj_lang") || "en";
@@ -103,9 +115,14 @@ axiosInstance.interceptors.response.use(
 
       try {
         const { data } = await axiosInstance.get("/auth/refresh");
-        const { access_token } = data;
+        const { access_token, refresh_token } = data;
 
         localStorage.setItem("token", access_token);
+        // The API rotates the refresh token on every refresh — persist the new
+        // one so the next renewal (Bearer) keeps working for active sessions.
+        if (refresh_token) {
+          localStorage.setItem("refresh_token", refresh_token);
+        }
         axiosInstance.defaults.headers.common[
           "Authorization"
         ] = `Bearer ${access_token}`;

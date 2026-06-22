@@ -6,6 +6,11 @@ export default {
     try {
       const response = await api.post(`${apiEndpoint}/${signType}`, payload);
       localStorage.setItem("token", response?.data?.access_token);
+      // Persist the refresh token so the session can be renewed for the full
+      // 7-day window (Bearer refresh), not just the 60-minute access token.
+      if (response?.data?.refresh_token) {
+        localStorage.setItem("refresh_token", response.data.refresh_token);
+      }
       return response?.data;
     } catch (error) {
       if (

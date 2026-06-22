@@ -171,6 +171,12 @@ const onSubmit = async () => {
     const access = response?.tokens?.access_token ?? null;
     if (access) localStorage.setItem("token", access);
 
+    // Persist the refresh token so the session can be renewed for the full
+    // 7-day window (Bearer refresh), not just the 60-minute access token.
+    const refresh =
+      response?.tokens?.refresh_token ?? response?.refresh_token ?? null;
+    if (refresh) localStorage.setItem("refresh_token", refresh);
+
     // Properly set user and trigger socket initialization
     authStore.grantAccess(response?.data);
 
