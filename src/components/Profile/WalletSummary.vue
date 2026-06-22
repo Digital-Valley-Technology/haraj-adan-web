@@ -229,7 +229,11 @@ const processedTransactions = computed(() => {
 
       <!-- Loop through PROCESSED transactions -->
 
-      <div v-if="processedTransactions.length > 0">
+      <!-- Scrollable list: shows every transaction; scroll up/down to browse -->
+      <div
+        v-if="processedTransactions.length > 0"
+        class="max-h-80 overflow-y-auto pe-1"
+      >
         <div
           v-for="transaction in processedTransactions"
           :key="transaction.id"
