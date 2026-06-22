@@ -56,6 +56,27 @@ const handleRefund = async () => {
   }
 };
 
+// --- Delete ad ---
+const isDeleteDialogOpen = ref(false);
+
+const openDeleteDialog = (adId) => {
+  selectedAdId.value = adId;
+  isDeleteDialogOpen.value = true;
+};
+
+const handleDelete = async () => {
+  try {
+    const res = await requestService.delete("ads", selectedAdId.value);
+    showSuccess(res?.message || t("toasts.ad_deleted"));
+    emit("refreshAds");
+  } catch (error) {
+    console.log(error);
+    showError(error || t("toasts.ad_delete_failed"));
+  } finally {
+    isDeleteDialogOpen.value = false;
+  }
+};
+
 const isFeatured = computed(() =>
   props.item?.ad_featured_history?.some((f) => f.status === true)
 );
@@ -174,6 +195,12 @@ const goToEditAd = (adId, categoryId) => {
         >
           {{ t("postAdd.featured") }}
         </button>
+        <button
+          class="mt-1 text-xs text-red-600 hover:underline cursor-pointer"
+          @click.stop="openDeleteDialog(item.id)"
+        >
+          {{ t("postAdd.delete_ad") }}
+        </button>
       </div>
     </div>
   </div>
@@ -181,5 +208,10 @@ const goToEditAd = (adId, categoryId) => {
     v-model="isDialogOpen"
     :content="$t('postAdd.refund_confirmation')"
     @confirm="handleRefund"
+  />
+  <DeleteDialog
+    v-model="isDeleteDialogOpen"
+    :content="$t('postAdd.delete_ad_confirmation')"
+    @confirm="handleDelete"
   />
 </template>
