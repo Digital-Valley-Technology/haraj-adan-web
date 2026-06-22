@@ -539,25 +539,14 @@
                 <option disabled value="">
                   {{ currentLocale === "ar" ? "ترتيب حسب" : "Sort By" }}
                 </option>
-                <!-- <option value="newest">
-                {{ currentLocale === "ar" ? "الأحدث" : "Newest" }}
-              </option>
-              <option value="oldest">
-                {{ currentLocale === "ar" ? "الأقدم" : "Oldest" }}
-              </option> -->
-                <option value="price_asc">
-                  {{
-                    currentLocale === "ar"
-                      ? "السعر: من الأقل"
-                      : "Price: Low to High"
-                  }}
-                </option>
                 <option value="price_desc">
-                  {{
-                    currentLocale === "ar"
-                      ? "السعر: من الأعلى"
-                      : "Price: High to Low"
-                  }}
+                  {{ currentLocale === "ar" ? "أعلى سعر" : "Highest price" }}
+                </option>
+                <option value="price_asc">
+                  {{ currentLocale === "ar" ? "أدنى سعر" : "Lowest price" }}
+                </option>
+                <option value="newest">
+                  {{ currentLocale === "ar" ? "الأحدث" : "Newest" }}
                 </option>
               </select>
             </div>
