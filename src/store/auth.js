@@ -44,8 +44,12 @@ export const useAuthStore = defineStore("auth", {
         this.grantAccess(response?.data);
         return response?.data;
       } catch (error) {
+        // Background session-restore/validation failure (expired token, etc.).
+        // Fall back to the logged-out state silently — the route guard handles
+        // redirecting to login when a protected route needs auth. No user-facing
+        // toast: the visitor never initiated a login here.
         this.revokeAccess();
-        showWarning(error?.response?.message || i18n.global.t("toasts.auth_failed"));
+        console.warn("[AUTH] getMe failed:", error?.response?.message || error);
         return null;
       }
     },
