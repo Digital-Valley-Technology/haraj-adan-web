@@ -74,6 +74,7 @@ const routes = [
     name: "customer-support",
     path: "/customer-support",
     component: () => import("../pages/SupportPage.vue"),
+    meta: { requiresAuth: true },
   },
   {
     name: "faq",
