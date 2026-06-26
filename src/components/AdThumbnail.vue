@@ -66,7 +66,17 @@
           </span>
         </div>
 
-        <div v-if="visibleAttributes.length || governorateName || directorateName" class="divide-y">
+        <div v-if="adNumber || adData?.created || visibleAttributes.length || governorateName || directorateName" class="divide-y">
+          <!-- Ad number (unique reference code) -->
+          <div v-if="adNumber" class="flex justify-between items-center py-3">
+            <span class="text-gray-600 text-sm">{{ t("adDetails.ad_number") }}</span>
+            <span class="text-gray-800 text-sm font-medium force-ltr">{{ adNumber }}</span>
+          </div>
+          <!-- Date -->
+          <div v-if="adData?.created" class="flex justify-between items-center py-3">
+            <span class="text-gray-600 text-sm">{{ t("adDetails.date") }}</span>
+            <span class="text-gray-800 text-sm font-medium force-ltr">{{ formatedDate(adData.created) }}</span>
+          </div>
           <div
             v-for="(attr, index) in groupedAttributes"
             :key="index"
@@ -655,6 +665,13 @@ const images = computed(() => {
 const visibleAttributes = computed(() =>
   (adData.value?.ad_attributes ?? []).filter((a) => a.category_attributes)
 );
+
+// Public reference code ("ad number"), shown uppercase. Falls back to the
+// numeric id only for legacy ads that have no ref_code yet.
+const adNumber = computed(() => {
+  const code = adData.value?.ref_code || adData.value?.id;
+  return code ? String(code).toUpperCase() : "";
+});
 
 const governorateName = computed(() => {
   const gov = adData.value?.governorates;

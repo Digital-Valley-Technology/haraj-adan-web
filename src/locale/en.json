@@ -839,7 +839,9 @@
     "cannot-message-yourself": "You cannot message yourself",
     "admin-cannot-message": "Admins cannot send messages to users",
     "governorate": "Governorate",
-    "directorate": "Directorate"
+    "directorate": "Directorate",
+    "date": "Date",
+    "ad_number": "Ad number"
   },
   "generic": {
     "and": "and",

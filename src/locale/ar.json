@@ -844,7 +844,9 @@
     "cannot-message-yourself": "لا يمكنك مراسلة نفسك",
     "admin-cannot-message": "لا يمكن للمسؤولين إرسال رسائل للمستخدمين",
     "governorate": "المحافظة",
-    "directorate": "المديرية"
+    "directorate": "المديرية",
+    "date": "التاريخ",
+    "ad_number": "رقم الإعلان"
   },
   "generic": {
     "and": "و",
