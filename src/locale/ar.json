@@ -323,6 +323,8 @@
       "discountPeriod": "فترة الخصم (أيام)",
       "noDiscounts": "لا توجد خصومات متاحة.",
       "nearLocationsDistance": "مسافة المواقع القريبة (كم)",
+      "adLifetimeDays": "مدة بقاء الإعلان قبل الحذف (بالأيام)",
+      "adLifetimeDaysHint": "يتم حذف الإعلانات تلقائياً بعد هذا العدد من الأيام. اكتب 0 لتعطيل الحذف التلقائي.",
       "success": {
         "config_saved": "تم حفظ إعدادات الإعلان بنجاح.",
         "discounts_saved": "تم حفظ خصومات الإعلان بنجاح."
@@ -342,7 +344,10 @@
         "save_config_failed": "فشل في حفظ إعدادات الإعلان.",
         "save_discounts_failed": "فشل في حفظ خصومات الإعلان.",
         "distance_required": "المسافة مطلوبة.",
-        "distance_min": "يجب أن تكون المسافة 0 كم على الأقل."
+        "distance_min": "يجب أن تكون المسافة 0 كم على الأقل.",
+        "ad_lifetime_required": "مدة بقاء الإعلان مطلوبة.",
+        "ad_lifetime_integer": "مدة البقاء يجب أن تكون عددًا صحيحًا.",
+        "ad_lifetime_min": "مدة البقاء يجب أن تكون 0 على الأقل."
       }
     },
     "support": {

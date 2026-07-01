@@ -26,6 +26,11 @@ const adConfigSchema = yup.object({
     .number()
     .required(t("dashboard.settings.errors.distance_required"))
     .min(0, t("dashboard.settings.errors.distance_min")),
+  ad_lifetime_days: yup
+    .number()
+    .required(t("dashboard.settings.errors.ad_lifetime_required"))
+    .integer(t("dashboard.settings.errors.ad_lifetime_integer"))
+    .min(0, t("dashboard.settings.errors.ad_lifetime_min")),
 });
 
 const discountSchema = yup.object({
@@ -45,6 +50,7 @@ const adConfig = ref({
   featured_ad_price: 0,
   featured_ad_days_count: 1,
   show_discount_banner: false,
+  ad_lifetime_days: 365,
 });
 const originalAdConfig = ref({ ...adConfig.value });
 
@@ -89,6 +95,7 @@ const saveAdConfig = async () => {
       featured_ad_days_count: Number(adConfig.value.featured_ad_days_count),
       show_discount_banner: Boolean(adConfig.value.show_discount_banner),
       near_locations_distance: Number(adConfig.value.near_locations_distance),
+      ad_lifetime_days: Number(adConfig.value.ad_lifetime_days),
     };
 
     const res = await requestService.patch("/settings/config", payload);
@@ -270,6 +277,28 @@ onMounted(() => {
               {{ adConfigErrors.near_locations_distance }}
             </small>
           </FloatLabel>
+        </div>
+
+        <!-- Ad lifetime (days before auto-deletion) -->
+        <div class="flex flex-col md:flex-row gap-8 mt-8">
+          <FloatLabel class="flex-grow">
+            <InputText
+              id="ad_lifetime_days"
+              v-model="adConfig.ad_lifetime_days"
+              type="number"
+              :min="0"
+              class="!bg-slate-50 !rounded-lg !pb-4 w-full"
+            />
+            <label for="ad_lifetime_days">{{
+              $t("dashboard.settings.adLifetimeDays")
+            }}</label>
+            <small v-if="adConfigErrors.ad_lifetime_days" class="text-red-500">
+              {{ adConfigErrors.ad_lifetime_days }}
+            </small>
+          </FloatLabel>
+          <p class="text-xs text-gray-500 self-center md:max-w-xs">
+            {{ $t("dashboard.settings.adLifetimeDaysHint") }}
+          </p>
         </div>
 
         <!-- Show Discount Banner Toggle -->

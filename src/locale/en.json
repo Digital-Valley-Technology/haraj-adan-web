@@ -323,6 +323,8 @@
       "discountPeriod": "Discount Period (days)",
       "noDiscounts": "No discounts available.",
       "nearLocationsDistance": "Near Locations Distance (km)",
+      "adLifetimeDays": "Ad lifetime before deletion (days)",
+      "adLifetimeDaysHint": "Ads are automatically deleted after this many days. Enter 0 to disable auto-deletion.",
       "success": {
         "config_saved": "Ad configuration saved successfully.",
         "discounts_saved": "Ad discounts saved successfully."
@@ -342,7 +344,10 @@
         "save_config_failed": "Failed to save ad configuration.",
         "save_discounts_failed": "Failed to save ad discounts.",
         "distance_required": "Distance is required.",
-        "distance_min": "Distance must be at least 0 km."
+        "distance_min": "Distance must be at least 0 km.",
+        "ad_lifetime_required": "Ad lifetime is required.",
+        "ad_lifetime_integer": "Ad lifetime must be an integer.",
+        "ad_lifetime_min": "Ad lifetime must be at least 0."
       }
     },
     "support": {
