@@ -225,6 +225,10 @@ export const aboutContent = {
           "We're happy to hear from you anytime — whether you have a question, a suggestion, or a complaint:",
         ),
         list([
+          [
+            "الاسم القانوني للمنشأة: حراج عدن للتسويق الالكتروني",
+            "Registered legal name: حراج عدن للتسويق الالكتروني (Haraj Aden for Electronic Marketing)",
+          ],
           ["الموقع الإلكتروني: www.harajaden.com", "Website: www.harajaden.com"],
           [
             "البريد الإلكتروني: info@harajaden.com",

@@ -109,7 +109,7 @@
       class="border-t border-gray-200 mt-10 pt-4 text-sm max-w-7xl mx-auto px-4"
     >
       <p class="text-gray-500 text-center md:text-start">
-        &copy; {{ currentYear }} {{ $t("footer.brand") }} —
+        &copy; {{ currentYear }} {{ $t("footer.legalName") }} —
         {{ $t("footer.copy") }}
       </p>
     </div>
